@@ -295,6 +295,7 @@ pre {
   margin-bottom: -10px;
   text-align: left;
   min-height: 72px;
+  line-height: 1.5rem;
 }
   .author-box > .author-avatar {
     width: 72px;
