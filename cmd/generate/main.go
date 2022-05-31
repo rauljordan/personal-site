@@ -23,7 +23,7 @@ import (
 var (
 	configPath        = flag.String("config", "global.config.yaml", "")
 	markdownPostsPath = flag.String("markdown", "blog", "")
-	output            = flag.String("output", "static", "")
+	output            = flag.String("output", "docs", "")
 	templates         = flag.String("templates", "templates/*", "")
 	niceFormat        = "2006-01-02T15:04:05-0700"
 )
