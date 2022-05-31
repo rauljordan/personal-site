@@ -90,8 +90,8 @@
 body {
   font-size: 1rem;
   font-family: "Menlo";
-  color: #DAE4ED;
-  background-color: #15171A;
+  color: #f9f5d7;
+  background-color: #1d2021;
   display: flex;
   min-height: 100vh;
   flex-direction: column; }
@@ -123,7 +123,7 @@ figure {
   margin: 0; }
 
 h1, h2, h3, h4, h5, h6 {
-  color: #637AFE; }
+  color: #cdcd23; }
 
 /**
  * `main` element
@@ -167,6 +167,7 @@ video {
  */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 500;
+  line-height: 2rem;
   margin-top: 1em;
   margin-bottom: 0.4em;
   text-align: left; }
@@ -175,8 +176,10 @@ h1, h2, h3, h4, h5, h6 {
  * Links
  */
 a {
-  color: #F24784;
-  text-decoration: none; }
+  color: #ffa8ce;
+  border-color: #ffa8ce;
+  text-decoration: none;
+}
   a:hover {
     color: #DAE4ED;
     text-decoration: underline; }
@@ -249,7 +252,7 @@ pre {
     animation: blinker 1s none infinite;
     font-size: 20px; }
   .site-header .command_prompt {
-    color: #637AFE;
+    color: #cdcd23;
     font-size: 16px; }
     .site-header .command_prompt svg {
       width: 20px;
@@ -324,7 +327,7 @@ pre {
   animation: type 2s steps(60, end);
   margin-bottom: 1em; }
   .post-description > svg {
-    color: #637AFE;
+    color: #cdcd23;
     margin-right: 0.6em;
     margin-bottom: -1px; }
   .post-description:after {
@@ -443,13 +446,13 @@ pre {
     margin-bottom: 1em; }
 
 .tag, .tag-cloud > a {
-  color: #50BD6A;
-  background-color: #1E2227;
+  color: #fbf1c7;
+  background-color: #928374;
   padding: 0.3em 0.6em;
   border-radius: 0.3em; }
   .tag:hover, .tag-cloud > a:hover {
     text-decoration: none;
-    color: #9ad9a9;
+    color: #f9f5d7;
     background-color: #292f35; }
   .tag > svg, .tag-cloud > a > svg {
     margin-right: 0.4em; }
