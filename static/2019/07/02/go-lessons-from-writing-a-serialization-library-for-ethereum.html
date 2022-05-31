@@ -1,0 +1,795 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Raul Jordan | Go Lessons from Writing a Serialization Library for Ethereum</title>
+	<script defer src="https://use.fontawesome.com/releases/v5.8.1/js/all.js"
+		integrity="sha384-g5uSoOSBd7KkhAMlnQILrecXvzst9TdC09/VM+pjDTCM+1il8RHz5fKANTFFb+gQ"
+		crossorigin="anonymous"></script>
+	<meta property="og:title" content="Go Lessons from Writing a Serialization Library for Ethereum" />
+	<meta name="author" content="Raul Jordan" />
+	<meta property="og:locale" content="en_US" />
+	<meta name="description" content="" />
+	<meta property="og:description" content="" />
+	<meta property="og:site_name" content="rauljordan" />
+	<meta property="og:image" content="" />
+	<meta property="og:type" content="article" />
+	<meta property="article:published_time" content="2019-07-02T00:00:00&#43;0000" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta property="twitter:image" content="" />
+	<meta property="twitter:title" content="Go Lessons from Writing a Serialization Library for Ethereum" />
+	<meta name="twitter:site" content="" />
+	<meta name="twitter:creator" content="" />
+	
+	<link rel="stylesheet" href="/css/style.css">
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-53062950-12"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag() {dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-53062950-12');
+	</script>
+</head>
+
+
+<body>
+	
+<div class="site-header">
+	<div class="wrapper">
+		<a class="site-title" rel="author" href="/">
+			rauljordan
+			<b class="command_prompt"></b><b class="blinking_cursor">_</b>
+		</a>
+		<span class="social_links">
+			
+			<a class="color-purple-hover" href="https://github.com/rauljordan"><i class="fab fa-github-square"></i></a>
+			
+			<a class="color-cyan-hover" href="https://twitter.com/rauljordaneth"><i class="fab fa-twitter-square"></i></a>
+			
+			<a class="color-red-hover" href="https://medium.com/@rauljordan"><i class="fab fa-medium"></i></a>
+			
+		</span>
+	</div>
+</div>
+
+	<main class="page-content" aria-label="Content">
+		<div class="wrapper">
+			
+<div class="author-box">
+	<div class="flex-header">
+		<div class="flex-img">
+			<img src="https://gravatar.com/avatar/bbc15eb70de907e278d669fa0c1016fc?s=256" class="author-avatar" />
+		</div>
+		<div class="flex-content">
+			Hi, my name is Raul Jordan - I am a Go developer working on the Ethereum blockchain protocol. I write regulary about Go programming, technology, life, and ideas for how tech can create a less zero-sum world.
+		</div>
+	</div>
+
+	<div class="read-more">
+		Read more <a href="2017-01-01-about-me.html">about me</a> - contact me <a
+			href="mailto:rauljordan@alumni.harvard.edu">rauljordan@alumni.harvard.edu</a>
+	</div>
+</div>
+
+			
+<div class="post">
+	<h1 class="post-title">Go Lessons from Writing a Serialization Library for Ethereum</h1>
+	<div class="post-tags">
+		
+		<a class="tag" href="/tag/golang">golang</a>
+		
+	</div>
+	<div class="post-date">Published on 24/01/2020</div>
+	<div class="post-description"></div>
+	<h1>Background</h1>
+<p><a href="https://www.techopedia.com/definition/867/serialization-net">Techopedia</a> defines serialization as</p>
+<blockquote>
+<p>The process of converting the state information of an object instance into a binary or textual form to persist into storage medium or transported over a network.</p>
+</blockquote>
+<p>In simple words, it is the task of <strong>translating</strong> data using a common set of rules a standard system can understand, as well as the task of <strong>decoding</strong> translated data back into its original form using the same set of rules. All computers function around the notion of 1s and 0s, otherwise known as bits, which give us a convenient, common format we can serialize <em>into</em>.</p>
+<p>The process of serializing data is called <em>Marshaling</em>, and the process of recovering original data from some serialized bytes is known as <em>Unmarshaling</em>. We will be using the two terms extensively throughout this post.</p>
+<h2>Why Serialize at All?</h2>
+<p>Although all computers speak the same underlying language of 1s and 0s, data gathered from programs running on those computers might have different forms, such as when the username and password a user inputs on a website, or when you type in a Google search. Google needs to be able to take that information from your browser, and translate it into an efficient <em>format</em> its servers can understand to serve your request. Serialized data doesn't <em>have</em> to be in bytes, in fact, it simply needs to be in a format most efficient for the particular system the data will live in - bytes are just the most convenient format for computers to operate in.</p>
+<p><img src="https://imgur.com/hMEUb3S.png" alt="image"></p>
+<p>Back in WWII, we used to serialize data into morse code, as that was the most convenient, common format to transmit via voice radio systems <a href="http://radiomarine.org">between ships</a>!</p>
+<h2>Serialization in Current Software Systems</h2>
+<p>Serialization is the backbone of data transmission on the Internet. In HTTP, the most common serialization format is JSON (JavaScript Object Notation), making it easy to parse user input and is also incredibly supported by the core tools of JavaScript as a language. JSON's benefits come from readability, standardization, and support, although it is not the most compact nor the most efficient way for software systems to transport data. Another alternative is <a href="http://bsonspec.org/">BSON</a>, standing for Binary JSON, which has more efficient serialization rules than JSON and is more flexible for usage as a binary data transmission format.</p>
+<p>For real world, scalable systems, companies such as Google opt for the much more robust <a href="https://developers.google.com/protocol-buffers/">Protocol Buffer</a> specification, another type of serialization language. Protocol Buffers, or protobufs, are used for their powerful <strong>schema-like</strong> property, which allows projects to specify data structures in a common proto language, which can then be used generate data structures across all types of programming languages which are compliant with the protobuf serialization rules.</p>
+<p>A common use-case for protobufs is for <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">Remote Procedure Calls</a>, known as RPC calls, which are used data exchange between servers. Say that Google has their ads servers running Java code and they want to feed in data into some other server running Python code for some machine learning analysis on users' ad clicks. Google can specify a common protobuf schema:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span>message AdClick {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">string</span> url = <span style="color:#d0bf69">1</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">uint64</span> user_id = <span style="color:#d0bf69">2</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>message AdClickResponse {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">bool</span> ok = <span style="color:#d0bf69">1</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>service AdClickAnalyzer {
+</span></span><span style="display:flex;"><span>    rpc <span style="color:#41a1c0">SendClickData</span>(AdClick) <span style="color:#41a1c0">returns</span> (AdClickResponse)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>And generate the appropriate, compliant data structures in both Python and Java that implement the protobuf serialization format. Having this common language makes data transport simple and unambiguous. Imagine the alternative approach of every project at a company having different rules for how you should communicate with their servers - it would be a nightmare!</p>
+<h2>Rule #1 Of Serialization: Don't Reinvent the Wheel</h2>
+<p>To say serialization has been overdone is an understatement. Such a core aspect of today's Internet has been widely studied, implemented, and optimized to serve the needs of billions of people around the world - every second, any moment. JSON, protobufs, and other specifications are constantly being micro-optimized and maturing to better serve our highly connected world. Creating a <em>new</em> serialization library from scratch is, in general, a bad idea save for very select situations.</p>
+<p>Any new approach should leverage existing work and understand the limitations and learnings previous approaches have uncovered. Most of these libraries follow a few core tenets:</p>
+<h3>3 Tenets of Serialization</h3>
+<ul>
+<li>Serialization must be unambiguous</li>
+<li>Serialization must be agnostic</li>
+<li>Serialization must be efficient</li>
+</ul>
+<h3>Serialization Must Be Unambiguous</h3>
+<p>Imagine you look at a bunch of raw bytes - something like:</p>
+<pre><code>01010100100101000100101010101010
+</code></pre>
+<p>and imagine you have some serialization/deserialization rules that tell you how to decode this information into some readable, useful data. A serialization function would be completely broken if it were not <em>injective</em>. That is, two different object must never map into the same serialization, as this makes the algorithm ambiguous. If the rules tell us the data can decode into the value <code>[3, 4, 5]</code> but it turns out the list can also decode as <code>[5, 4, 3]</code>, we have no way of knowing which is the correct one! Serialization is stateless, as we have no access to determining the original value that was serialized into aside from using the inverse of the serialization rules to decode it. Serialization <em>must</em> be unambiguous.</p>
+<h3>Serialization Must Be Agnostic</h3>
+<p>From its earlier definition, serialization is simply a set of rules that allow us to encode and decode data into some common format a system can understand. It should <strong>not</strong> make assumptions about underlying data and it should not make explicit implementation decisions in its schema. An example of this is making design decisions around specific types that may not be available across different programming languages, preventing others wanting to use the serialization rules in an implementation from doing so due to language constraints. The <strong>goal</strong> of serialization is simply concerned with translation and definining an unambiguous set of rules for marshaling and unmarshaling data - nothing more, nothing less. Keep it abstract, make no assumptions for what the serialization will be used for, and keep it concise.</p>
+<h3>Serialization Must Be Efficient</h3>
+<p>The purpose of serialization is typically for transporting information from one place to another in a common format. Bits are the smallest type possible for computers to compactly represent information, and they translate well to data transmission protocols that exist today via the wires that power the Internet. It is still possible to create a set of serialization rules, however, that add unnecessary bloat to encoded data.</p>
+<p>The rules for marshaling data should <em>only include what's necessary</em> for a decoder to unambigiously unmarshal the bytes back to their original form - nothing more, nothing less. Think of it like the core axioms of mathematics - they are as concise and abstract as possible such that all of math can be derived from those simple rules we hold as true. We could, for example, say the pythagorean theorem is an axiom of math without needing to prove it. In fact, we could just say all theorems are axioms and are true by default - but that would defeat the purpose of math itself and its ruleset! Having more rules than necessary will simply add bloat to a system, possibly leading to massive inefficiencies when that data needs to be transported between machines.</p>
+<blockquote>
+<p>Keep the core rules simple, don't add more rules than you need to</p>
+</blockquote>
+<h1>The Task: Implement a New Serialization Algorithm in Go</h1>
+<p>Now that we've looked at what serialization is and why it matters, let's get into the core of this post. The goal at hand is to create a compliant, <a href="https://golang.org">Golang</a> implementation of the <a href="https://github.com/ethereum/eth2.0-specs/blob/dev/specs/simple-serialize.md">Simple Serialize</a> specification created by the official <a href="https://ethereum.org">Ethereum</a> research team. Ethereum is a global, distributed network of nodes that runs decentralized applications. That is, anyone can use it to write computers that are not ran by any individual, entity, or corporation in a permissionless fashion. Similar to Bitcoin, Ethereum uses a distributed ledger known as a <a href="https://en.wikipedia.org/wiki/Blockchain">blockchain</a> to maintain a state of the world and reach <a href="https://en.wikipedia.org/wiki/Consensus_(computer_science)">consensus</a>.</p>
+<p><img src="https://imgur.com/nwpmBLg.png" alt="image"></p>
+<p>The way nodes across the network communicate is by sending packets of byte encoded data via <a href="https://en.wikipedia.org/wiki/Peer-to-peer">peer-to-peer (p2p) networking</a> using some standard serialization algorithm. Ethereum is currently in the process of upgrading to its 2.0 version, which will contain radical improvements to its core protocol as well as its network architecture. Serialization for Ethereum 2.0 is being revamped, with the Simple Serialize algorithm, <strong>known as SSZ</strong>, having won as the <em>de facto</em> standard for marshaling consensus data into bytes.</p>
+<p>Ethereum 2.0 has various in-progress implementations in various languages, and my team, <a href="https://prysmaticlabs.com">Prysmatic Labs</a>, works on a Go implementation called <a href="https://github.com/prysmaticlabs/prysm">Prysm</a>.</p>
+<p>Our goal is to create a serialization library in Go so we can easily plug into Prysm that is conforms to standard tests handed to us by Ethereum researchers. This is part of a greater interoperability effort so different implementations can communicate between each other unambiguously.</p>
+<h2>Why a New Serialization Format? Why Not Protobuf, JSON, or Others?</h2>
+<p>Serialization plays a very important role in distributed systems, particularly blockchain-based protocols such as Bitcoin and Ethereum. The entire crux of the network depends on a distributed set of nodes around the world reaching <strong>consensus</strong> on a set of transactions, marking them as canonical based on a set of voting-majority rules. Imagine if you wanted 1000 different servers around the world agreeing on the following data structure between each other:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> State <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>    AccountBalancesByUserId <span style="color:#fc5fa3">map</span>[<span style="color:#fc5fa3">uint64</span>]<span style="color:#fc5fa3">uint64</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>Imagine this information is <em>so critical</em>, you can't possibly afford its internal data differing across server implementations. The rules for marshaling and unmarshaling this data <strong>must</strong> be unambiguous. Serialization schemas such as Protocol Buffers provide support for map data structures as seen above, but map support across languages differ underneat the hood. The problem with using protocol buffers for consensus specifically for map-based types is that they <strong>do not provide determinism</strong> between languages. That is, a Java protobuf for that data could marshal/unmarshal differently than a Go implementation, and that is unacceptable.</p>
+<p>Serialization for distributed systems operates under an extra constraint that there is zero room for error or non-determinism. For Ethereum, we decided not to use protobufs for serializing important consensus values, as we needed something a lot simpler. This is how simple serialize came to be.</p>
+<h2>How Simple Serialize Works</h2>
+<p>Every serialization specification begins by defining the basic, core types it can support. Basic types then serve as building blocks for more complex types which may have different serialization rules depending on their structure. Once again, a core tenet of serialization is to be <em>unambiguous</em>. That is, we need to the serialized bytes of some initial data give us enough information by themselves along with the serialization ruleset to successfully retrieve the original object if we wanted to. The official Simple Serialize specification as of the time of writing is located <a href="https://github.com/ethereum/eth2.0-specs/blob/v0.7.1/specs/simple-serialize.md">here</a> if you want to follow along.</p>
+<p>Simple serialize supports the following basic types:</p>
+<pre><code>uint8 or byte
+uint16
+uint32
+uint64
+bool
+</code></pre>
+<h3>Why Not More Basic Types!?</h3>
+<p>Notice the omission of ints and floats from the above, as they are not used for precision reasons in a consensus-critical system such as Ethereum, which demands absolute determinism. Instead, we keep it simple - using only unsigned integers and booleans.</p>
+<p>SSZ as a serialization tool should only be concerned with agnostic marshaling/unmarshaling of data - it should <em>not</em> be concerned with making assumptions about its use cases.</p>
+<p><a href="https://en.wikipedia.org/wiki/Robustness_principle">Postel's Law</a> holds true for SSZ in particular:</p>
+<blockquote>
+<p>Be conservative in what you do, be liberal in what you accept from others</p>
+<p>TCP/IP Protocol</p>
+</blockquote>
+<p>That is, our SSZ implementation should be able to handle all sorts of complex structures and fail gracefully if they are not serializable. At the same time, it should be conservative in its scope, only doing what it needs to do based on its specification without making assumptions about its inner data or use-cases.</p>
+<p>Additionally, adding other types such as BitLists or BitVectors as primitives to Simple Serialize is like adding more axioms to mathematics, it can make your life easier in the short term but makes your abstractions a lot weaker!</p>
+<h3>Composite Types</h3>
+<p>From these basic types, Simple Serialize defines <em>composite</em> types which are:</p>
+<ol>
+<li>Containers: heterogenous collections of values <code>{uint64, bool, uint8, uint16}</code></li>
+<li>Vectors: ordered, <em>fixed</em> size collections of the same type of value <code>[uint64, N]</code></li>
+<li>Lists: ordered, <em>variable</em> length collections of the same type of value <code>[uint64]</code></li>
+</ol>
+<p>Two other critical rules of Simple Serialize are the definition of element sizes. An element is said to be <em>variable size</em> if, recursively, it contains at least one element which is of <em>variable size</em>. Otherwise, an element is determined to be fixed-size.</p>
+<p>Let's look at some examples:</p>
+<ol>
+<li><code>[[uint64], N]</code> is variable-sized, as despite being a fixed-size vector, its inner element is an unbounded list type</li>
+<li><code>{field1: [uint64, N], field2: bool}</code> is a fixed-size container as it only contains fixed-size elements</li>
+<li><code>[{field1: uint64, field2: bool}, N]</code> is fixed-size, as it contains no variable-sized elements</li>
+</ol>
+<p>Easy - let's keep going. Now, we define the <em>marshaling</em> rules for each of these basic types, fixed-size types, and variable-size types.</p>
+<p>For <code>uint</code> types:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">assert</span> N in [<span style="color:#d0bf69">8</span>, <span style="color:#d0bf69">16</span>, <span style="color:#d0bf69">32</span>, <span style="color:#d0bf69">64</span>, <span style="color:#d0bf69">128</span>, <span style="color:#d0bf69">256</span>]
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">return</span> value.to_bytes(N // <span style="color:#d0bf69">8</span>, <span style="color:#fc6a5d">&#34;little&#34;</span>)
+</span></span></code></pre><p>For <code>bool</code> types:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">assert</span> value in (<span style="color:#fc5fa3">True</span>, <span style="color:#fc5fa3">False</span>)
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">return</span> <span style="color:#fc6a5d">b</span><span style="color:#fc6a5d">&#34;</span><span style="color:#fc6a5d">\x01</span><span style="color:#fc6a5d">&#34;</span> <span style="color:#fc5fa3">if</span> value is <span style="color:#fc5fa3">True</span> <span style="color:#fc5fa3">else</span> <span style="color:#fc6a5d">b</span><span style="color:#fc6a5d">&#34;</span><span style="color:#fc6a5d">\x00</span><span style="color:#fc6a5d">&#34;</span>
+</span></span></code></pre><p>For fixed-size type vectors, we simply serialize them element-wise based on their corresponding elements' marshaling rules.</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span>buffer = []
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">for</span> item in value:
+</span></span><span style="display:flex;"><span>    buffer.append(marshal(item))
+</span></span></code></pre><p>For byte-vectors, we simply leave them as they are as they already represent the format we are using for serialization, namely, a collection of bytes.</p>
+<p>When it comes to variable-sized items, however, that's when things get interesting. We have <strong>no way of knowing</strong> how big a variable-sized element will be unless we have some delimeters that tell us so in their encoded representation. Think of these values kind of like positional markers of when a variable-sized element begins in a collection of bytes. These values are referred to as <em>offsets</em> in the Simple Serialize specification.</p>
+<p>SSZ offsets are denoted by <code>uint32</code> values which serve as positional markers of where variable-sized items occur in a marshaled set of bytes. Take the container type denoted by:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> Example <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>    Field1 []<span style="color:#fc5fa3">byte</span>
+</span></span><span style="display:flex;"><span>    Field2 []<span style="color:#fc5fa3">byte</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>example := &amp;Example{
+</span></span><span style="display:flex;"><span>    Field1: []<span style="color:#fc5fa3">byte</span>{<span style="color:#d0bf69">1</span>, <span style="color:#d0bf69">2</span>},
+</span></span><span style="display:flex;"><span>    Field2: []<span style="color:#fc5fa3">byte</span>{<span style="color:#d0bf69">3</span>},
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>Its corresponding SSZ encoding will be:</p>
+<pre><code>[8 0 0 0 10 0 0 0 1 2 3]
+</code></pre>
+<p>Where <code>8 0 0 0</code> denotes a uint32 value of 8 which which tells us the first variable sized element begins at index 8 in the list. Similarly, the next offset, <code>10 0 0 0</code>, tells us there is another variable-sized element which begins at index 10. When we attempt to unmarshal the bytes into a new instance of type <code>&amp;Example</code>, we know exactly where the first field and the next field begin, giving us an unambiguous unmarshaling.</p>
+<p>In a complex SSZ type, however, variable-sized elements can be interwoven with fixed-size elements, and we similarly use the idea of offsets to denote where the variable ones occur. Let's see an example:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> Example2 <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>    Field1 []<span style="color:#fc5fa3">byte</span>
+</span></span><span style="display:flex;"><span>    Field2 <span style="color:#fc5fa3">uint16</span>
+</span></span><span style="display:flex;"><span>    Field3 []<span style="color:#fc5fa3">byte</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>example2 := &amp;Example2{
+</span></span><span style="display:flex;"><span>    Field1: []<span style="color:#fc5fa3">byte</span>{<span style="color:#d0bf69">1</span>, <span style="color:#d0bf69">2</span>},
+</span></span><span style="display:flex;"><span>    Field2: <span style="color:#d0bf69">7</span>,
+</span></span><span style="display:flex;"><span>    Field3: []<span style="color:#fc5fa3">byte</span>{<span style="color:#d0bf69">3</span>},
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>This new SSZ encoding, which has a fixed-size <code>uint16</code> field mixed in, will look like:</p>
+<pre><code>[10 0 0 0 7 0 12 0 0 0 1 2 3]
+</code></pre>
+<p>Once again telling us that there is a variable-sized element at index 10, one at index 12, and in the middle we have the fixed-size, <code>uint16</code> field unambiguously. That's pretty much it! Using these basic rules, one may derive even complex, nested types of fixed-size and variable-sized containers and lists.</p>
+<h2>The Limitations of Golang</h2>
+<p>Go in particular is an interesting language to build a serialization library in due to its lack of generics - a very common trait of other languages. The lack of generics makes it really difficult to write functions that work on general types in Go, and instead Go has to rely on tricky approaches such as inspecting the metadata of values, which can lead to massive inefficiencies. One of the only safe options Go has for writing generic libraries is the <a href="https://blog.golang.org/laws-of-reflection">&quot;reflect&quot;</a> package, which gives us a whole suite of utilities for doing <a href="https://en.wikipedia.org/wiki/Metaprogramming">metaprogramming</a> - the notion of a computer program inferring details about its own structure.</p>
+<p><img src="https://imgur.com/tBAyMjn.png" alt="image"></p>
+<p>The problem with using reflect in Go comes down to its speed. Go was not built in its current form to support generics underneath the hood, making it expensive to infer and operate on abstract types. The closest thing Go has to a generic type is the <code>interface{}</code> type, which is not <em>exactly</em> like the generic types in other languages. In Python, for example, which is a dynamically-typed language, the following code is perfectly valid:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">def</span> <span style="color:#41a1c0">add</span>(x, y):
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> x + y
+</span></span></code></pre><p>In Go, however, you can't just add two interfaces unless you coerce them into a concrete type that allows for addition, such as uint64. The following piece of Go code is invalid:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">add</span>(v1 <span style="color:#fc5fa3">interface</span>{}, v2 <span style="color:#fc5fa3">interface</span>{}) <span style="color:#fc5fa3">interface</span>{} {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> v1 + v2
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>Giving us the error <code>invalid operation: v1 + v2 (operator + not defined on interface)</code>, as expected. If we really want to be able to create a generic add function as above, we'll have to infer the concrete types of the function arguments using the reflect package and act accordingly. Let's use a switch statement to do so:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">import</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#fc6a5d">&#34;errors&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc6a5d">&#34;reflect&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">add</span>(v1 <span style="color:#fc5fa3">interface</span>{}, v2 <span style="color:#fc5fa3">interface</span>{}) (<span style="color:#fc5fa3">interface</span>{}, <span style="color:#fc5fa3">error</span>) {
+</span></span><span style="display:flex;"><span>    rval1 := reflect.<span style="color:#41a1c0">ValueOf</span>(v1)
+</span></span><span style="display:flex;"><span>    rval2 := reflect.<span style="color:#41a1c0">ValueOf</span>(v2)
+</span></span><span style="display:flex;"><span>    k1 := rval1.<span style="color:#41a1c0">Type</span>().<span style="color:#41a1c0">Kind</span>()
+</span></span><span style="display:flex;"><span>    k2 := rval2.<span style="color:#41a1c0">Type</span>().<span style="color:#41a1c0">Kind</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">switch</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">case</span> k1 == reflect.Uint64 &amp;&amp; k2 == reflect.Uint64:
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> rval1.<span style="color:#41a1c0">Interface</span>().(<span style="color:#fc5fa3">uint64</span>) + rval2.<span style="color:#41a1c0">Interface</span>().(<span style="color:#fc5fa3">uint64</span>), <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">case</span> k1 == reflect.Uint32 &amp;&amp; k2 == reflect.Uint32:
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> rval1.<span style="color:#41a1c0">Interface</span>().(<span style="color:#fc5fa3">uint32</span>) + rval2.<span style="color:#41a1c0">Interface</span>().(<span style="color:#fc5fa3">uint32</span>), <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">case</span> k1 == reflect.Uint16 &amp;&amp; k2 == reflect.Uint16:
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> rval1.<span style="color:#41a1c0">Interface</span>().(<span style="color:#fc5fa3">uint16</span>) + rval2.<span style="color:#41a1c0">Interface</span>().(<span style="color:#fc5fa3">uint16</span>), <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">case</span> k1 == reflect.Uint8 &amp;&amp; k2 == reflect.Uint8:
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> rval1.<span style="color:#41a1c0">Interface</span>().(<span style="color:#fc5fa3">uint8</span>) + rval2.<span style="color:#41a1c0">Interface</span>().(<span style="color:#fc5fa3">uint8</span>), <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">case</span> k1 == reflect.Int64 &amp;&amp; k2 == reflect.Int64:
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> rval1.<span style="color:#41a1c0">Interface</span>().(<span style="color:#fc5fa3">int64</span>) + rval2.<span style="color:#41a1c0">Interface</span>().(<span style="color:#fc5fa3">int64</span>), <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">case</span> k1 == reflect.Int32 &amp;&amp; k2 == reflect.Int32:
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> rval1.<span style="color:#41a1c0">Interface</span>().(<span style="color:#fc5fa3">int32</span>) + rval2.<span style="color:#41a1c0">Interface</span>().(<span style="color:#fc5fa3">int32</span>), <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">case</span> k1 == reflect.Int16 &amp;&amp; k2 == reflect.Int16:
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> rval1.<span style="color:#41a1c0">Interface</span>().(<span style="color:#fc5fa3">int16</span>) + rval2.<span style="color:#41a1c0">Interface</span>().(<span style="color:#fc5fa3">int16</span>), <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">default</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> <span style="color:#fc5fa3">nil</span>, errors.<span style="color:#41a1c0">New</span>(<span style="color:#fc6a5d">&#34;expected numeric values&#34;</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>Ouch - look at how painful that was! Even worse, let's see how slow it is against a function that just concretely takes in <code>uint64</code> values as arguments.</p>
+<pre><code>BenchmarkAddGeneric-4                   20000000                85.1 ns/op            24 B/op          3 allocs/op
+BenchmarkAddUint64-4                    2000000000               0.34 ns/op            0 B/op          0 allocs/op
+</code></pre>
+<p>Using reflect makes a big difference - imagine if we have to do the same thing but for more complex types such as nested structs! Let's see how we can tackle actually implementing SSZ in Go.</p>
+<h1>High Level Approach</h1>
+<p>Alright, so we do <em>not</em> have access to generics for our Simple Serialize implementation, and our approach must be generic enough to handle extremely complex data structures efficiently and correctly. Moreover, we need to be able to <strong>round trip, benchmark, and ensure correctness</strong> of our code as we go along. Where do we start? Let's first go back to the basics of how we made a generic <code>add</code> function in Go. It is not <em>truly</em> generic, as it actually does type assertions on a few, selected numeric types and applies their addition operations. Along the same vein, our SSZ implementation should only concern itself with supporting the types enumerated in its official <a href="https://github.com/ethereum/eth2.0-specs/blob/v0.7.1/specs/simple-serialize.md">specification</a>.</p>
+<p>The most naive approach would be to have a giant, recursive function that uses a huge switch statement to figure out how to handle every different type. Our approach will instead focus on creating specific marshaler and unmarshaler functions for the various types which satisfy a <em>common Go interface</em>.</p>
+<p>In general, we need a few things in our marshaler and unmarshaler functions.</p>
+<ul>
+<li>For Marshaling, we want to track the latest positional index we have written into some bytes buffer</li>
+<li>For Unmarshaling, we want to track the latest positional index we have read from some bytes buffer</li>
+<li>Inside both functions, we want to either write (Marshal) or read (Unmarshal) N bytes from a bytes buffer and return the positional index the next Marshaler/Unmarshaler should start from, i.e. the current index + N</li>
+</ul>
+<p>With that in mind, we can define the following two key interfaces that are enough for us to handle the entire SSZ spec in an abstract fashion:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> Marshaler <span style="color:#fc5fa3">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">MarshalType</span>(val reflect.Value, b []<span style="color:#fc5fa3">byte</span>, lastWrittenIdx <span style="color:#fc5fa3">uint64</span>) (nextIdx <span style="color:#fc5fa3">uint64</span>, <span style="color:#fc5fa3">error</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> Unmarshaler <span style="color:#fc5fa3">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">UnmarshalType</span>(target reflect.Value, b []<span style="color:#fc5fa3">byte</span>, lastReadIdx <span style="color:#fc5fa3">uint64</span>) (nextIdx <span style="color:#fc5fa3">uint64</span>, <span style="color:#fc5fa3">error</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>The <code>Marshaler</code> type specifies a function, <code>MarshalType</code>, which can take in an abstract value, a buffer we will write into, and the last index into the buffer we have written into.</p>
+<blockquote>
+<p>This last index is a positional marker that tells us where we are in the process of
+writing the serialized encoding of the input value</p>
+</blockquote>
+<p>Similarly, the <code>Unmarshaler</code> type specifies a function, <code>UnmarshalType</code>, which can take a buffer of SSZ-marshaled bytes, a target value we will deserialize <em>into</em>, and the last index we have read from the buffer. This last index is a positional marker that tells us where we are in the process of reading marshaled bytes from the serialized encoding.</p>
+<h2>Marshaling</h2>
+<p>The first thing we should do when Marshaling is to go back to our trusty switch statement to determine the type we're looking at before we decide how it should be handled.</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">Marshal</span>(data <span style="color:#fc5fa3">interface</span>{}) ([]<span style="color:#fc5fa3">byte</span>, <span style="color:#fc5fa3">error</span>) {
+</span></span><span style="display:flex;"><span>    val := reflect.<span style="color:#41a1c0">ValueOf</span>(data)
+</span></span><span style="display:flex;"><span>    m, err := <span style="color:#41a1c0">makeMarshaler</span>(val)
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> <span style="color:#fc5fa3">nil</span>, err
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    totalBufferSize := <span style="color:#41a1c0">determineSize</span>(val)
+</span></span><span style="display:flex;"><span>    buffer := <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">byte</span>, totalBufferSize)
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> _, err = m.<span style="color:#41a1c0">MarshalType</span>(rval, buf, <span style="color:#d0bf69">0</span> <span style="color:#6c7986">/* start index */</span>); err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> <span style="color:#fc5fa3">nil</span>, fmt.<span style="color:#41a1c0">Errorf</span>(<span style="color:#fc6a5d">&#34;failed to marshal for type: %v&#34;</span>, rval.<span style="color:#41a1c0">Type</span>())
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> buffer, <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">makeMarshaler</span>(val reflect.Value) (Marshaler, <span style="color:#fc5fa3">error</span>) {
+</span></span><span style="display:flex;"><span>    kind := val.<span style="color:#41a1c0">Type</span>().<span style="color:#41a1c0">Kind</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">switch</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">case</span> kind == reflect.Bool:
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Handle bool marshaling...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">case</span> kind == reflect.Uint8:
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Handle uint marshaling...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">case</span> kind == reflect.Uint16:
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Handle uint marshaling...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">case</span> kind == reflect.Uint32:
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Handle uint marshaling...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">case</span> kind == reflect.Uint64:
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Handle uint marshaling...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">case</span> kind == reflect.Slice &amp;&amp; typ.<span style="color:#41a1c0">Elem</span>().<span style="color:#41a1c0">Kind</span>() == reflect.Uint8:
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Handle byte slice marshaling...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">case</span> kind == reflect.Array &amp;&amp; typ.<span style="color:#41a1c0">Elem</span>().<span style="color:#41a1c0">Kind</span>() == reflect.Uint8:
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Handle byte array marshaling...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">case</span> <span style="color:#41a1c0">isBasicTypeSlice</span>(val.<span style="color:#41a1c0">Type</span>()) || <span style="color:#41a1c0">isBasicTypeArray</span>(val.<span style="color:#41a1c0">Type</span>()):
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Handle basic-type array/slice marshaling...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">case</span> kind == reflect.Array &amp;&amp; !<span style="color:#41a1c0">isVariableSizeType</span>(typ.<span style="color:#41a1c0">Elem</span>()):
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Handle fixed-size element array marshaling...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">case</span> kind == reflect.Slice &amp;&amp; !<span style="color:#41a1c0">isVariableSizeType</span>(typ.<span style="color:#41a1c0">Elem</span>()):
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Handle fixed-size element slice marshaling...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">case</span> kind == reflect.Slice || kind == reflect.Array:
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Handle variable-sized element slice/array marshaling...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">case</span> kind == reflect.Struct:
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Handle struct marshaling...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">case</span> kind == reflect.Ptr:
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Handle pointer marshaling...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">default</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> <span style="color:#fc5fa3">nil</span>, fmt.<span style="color:#41a1c0">Errorf</span>(<span style="color:#fc6a5d">&#34;type %v is not serializable&#34;</span>, typ)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6c7986">// determineSize figures out the total size of the SSZ-encoding in order
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986">// to preallocate a buffer before marshaling.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">determineSize</span>(val reflect.Value) <span style="color:#fc5fa3">uint64</span> {
+</span></span><span style="display:flex;"><span>    ...
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>On a case-by-case basis, we can return an abstract <code>Marshaler</code> interface for the different types we support for SSZ. Notice at the top, we have to also determine the <em>total size</em> of the serialized bytes before we begin writing to a buffer, otherwise we'll be getting nasty index out of range issues in Go. That is, if we want to encode the number <code>uint64(5)</code>, we need 8 bytes to do so, so we would need to preallocate some fixed-size buffer before we begin marshaling at all.</p>
+<p>The above gives us as generic and as flexible of a basic marshaling approach for SSZ. To proceed, we'd just need to fill in the blanks and create marshalers that work for the different types based on the SSZ specification. Here's what the <code>MarshalType</code> function for some of these basic types would look like:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">import</span> <span style="color:#fc6a5d">&#34;binary&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> BoolSSZ <span style="color:#fc5fa3">bool</span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> Uint64SSZ <span style="color:#fc5fa3">uint64</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6c7986">// Boolean basic type marshaling.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span><span style="color:#fc5fa3">func</span> (b BoolSSZ) <span style="color:#41a1c0">MarshalType</span>(val reflect.Value, b []<span style="color:#fc5fa3">byte</span>, lastWrittenIdx <span style="color:#fc5fa3">uint64</span>) (<span style="color:#fc5fa3">uint64</span>, <span style="color:#fc5fa3">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> val.<span style="color:#41a1c0">Bool</span>() {
+</span></span><span style="display:flex;"><span>        buf[lastWrittenIdx] = <span style="color:#d0a8ff">uint8</span>(<span style="color:#d0bf69">1</span>)
+</span></span><span style="display:flex;"><span>    } <span style="color:#fc5fa3">else</span> {
+</span></span><span style="display:flex;"><span>        buf[lastWrittenIdx] = <span style="color:#d0a8ff">uint8</span>(<span style="color:#d0bf69">0</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> lastWrittenIdx + <span style="color:#d0bf69">1</span>, <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6c7986">// Uint64 basic type marshaling.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span><span style="color:#fc5fa3">func</span> (b Uint64SSZ) <span style="color:#41a1c0">MarshalType</span>(val reflect.Value, b []<span style="color:#fc5fa3">byte</span>, lastWrittenIdx <span style="color:#fc5fa3">uint64</span>) (<span style="color:#fc5fa3">uint64</span>, <span style="color:#fc5fa3">error</span>) {
+</span></span><span style="display:flex;"><span>    v := val.<span style="color:#41a1c0">Uint</span>()
+</span></span><span style="display:flex;"><span>    encoded := <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">byte</span>, <span style="color:#d0bf69">8</span>)
+</span></span><span style="display:flex;"><span>    binary.LittleEndian.<span style="color:#41a1c0">PutUint64</span>(encoded, <span style="color:#d0a8ff">uint64</span>(v))
+</span></span><span style="display:flex;"><span>    <span style="color:#d0a8ff">copy</span>(buf[lastWrittenIdx:lastWrittenIdx+<span style="color:#d0bf69">8</span>], encoded)
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> lastWrittenIndex + <span style="color:#d0bf69">8</span>, <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>As long as we satisfy the Marshaler interface, we can rinse and repeat for all basic types! Go is indeed powerful, but let's take a look at the most complicated marshaling example.</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">var</span> BytesPerLengthOffset = <span style="color:#d0bf69">4</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> SliceMarshaler <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>    elementMarshaler Marshaler
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">NewSliceMarshaler</span>(val reflect.Value) (*SliceMarshaler, <span style="color:#fc5fa3">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#6c7986">// We attach the marshaler for the slice&#39;s particular element type
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#6c7986">// to the struct for usage later.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    elementMarshaler, err := <span style="color:#41a1c0">makeMarshaler</span>(val.<span style="color:#41a1c0">Elem</span>())
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> <span style="color:#fc5fa3">nil</span>, err
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> &amp;SliceMarshaler{elementMarshaler}
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (s *SliceMarshaler) <span style="color:#41a1c0">MarshalType</span>(val reflect.Value, b []<span style="color:#fc5fa3">byte</span>, lastWrittenIdx <span style="color:#fc5fa3">uint64</span>) (<span style="color:#fc5fa3">uint64</span>, <span style="color:#fc5fa3">error</span>) {
+</span></span><span style="display:flex;"><span>    currentIndex := lastWrittenIndex
+</span></span><span style="display:flex;"><span>    typ := val.<span style="color:#41a1c0">Type</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">var</span> err <span style="color:#fc5fa3">error</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> <span style="color:#41a1c0">isVariableSizeType</span>(typ) {
+</span></span><span style="display:flex;"><span>        currentIndex, err = s.<span style="color:#41a1c0">marshalVariableSize</span>(val, b, currentIndex)
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fc5fa3">return</span> <span style="color:#d0bf69">0</span>, err
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    } <span style="color:#fc5fa3">else</span> {
+</span></span><span style="display:flex;"><span>        currentIndex, err = s.<span style="color:#41a1c0">marshalFixedSize</span>(val, b, currentIndex)
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fc5fa3">return</span> <span style="color:#d0bf69">0</span>, err
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> index, <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6c7986">// If an element is variable sized, we need to also keep track of its 
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986">// offset indices and where they tell us to begin checking for its 
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986">// next variable-sized element in the input. Using these two positional
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986">// trackers, we can write the offsets at their respective positions
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986">// as well as write the actual values we are marshaling into the buffer
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986">// at the current index we are tracking.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span><span style="color:#fc5fa3">func</span> (s *SliceMarshaler) <span style="color:#41a1c0">marshalVariableSize</span>(val reflect.Val, b []<span style="color:#fc5fa3">byte</span>, idx <span style="color:#fc5fa3">uint64</span>) (<span style="color:#fc5fa3">uint64</span>, <span style="color:#fc5fa3">error</span>) {
+</span></span><span style="display:flex;"><span>    currentIndex := idx
+</span></span><span style="display:flex;"><span>    fixedElementIndex := currentIndex
+</span></span><span style="display:flex;"><span>    startOffset := lastWrittenIndex
+</span></span><span style="display:flex;"><span>    currentOffsetIndex := startOffset + val.<span style="color:#41a1c0">Len</span>()*BytesPerLengthOffset
+</span></span><span style="display:flex;"><span>    nextOffsetIndex := currentOffsetIndex
+</span></span><span style="display:flex;"><span>    <span style="color:#6c7986">// If the elements are variable size, we need to include offset indices
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#6c7986">// in the serialized output list.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">for</span> i := <span style="color:#d0bf69">0</span>; i &lt; val.<span style="color:#41a1c0">Len</span>(); i++ {
+</span></span><span style="display:flex;"><span>        nextOffsetIndex, err = s.elementMarshaler.<span style="color:#41a1c0">MarshalType</span>(val.<span style="color:#41a1c0">Index</span>(i), b, currentOffsetIndex)
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fc5fa3">return</span> <span style="color:#d0bf69">0</span>, err
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Write the variable-sized element offset.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        offsetBuf := <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">byte</span>, BytesPerLengthOffset)
+</span></span><span style="display:flex;"><span>        binary.LittleEndian.<span style="color:#41a1c0">PutUint32</span>(offsetBuf, <span style="color:#d0a8ff">uint32</span>(currentOffsetIndex-startOffset))
+</span></span><span style="display:flex;"><span>        <span style="color:#d0a8ff">copy</span>(b[fixedElementIndex:fixedElementIndex+BytesPerLengthOffset], offsetBuf)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// We increase the positional index tracker of the offsets accordingly.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        currentOffsetIndex = nextOffsetIndex
+</span></span><span style="display:flex;"><span>        fixedElementIndex += BytesPerLengthOffset
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> currentOffsetIndex
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6c7986">// If each element is not variable size, we simply encode sequentially and write
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986">// into the buffer at the last index we wrote at.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span><span style="color:#fc5fa3">func</span> (s *SliceMarshaler) <span style="color:#41a1c0">marshalFixedSize</span>(val reflect.Val, b []<span style="color:#fc5fa3">byte</span>, idx <span style="color:#fc5fa3">uint64</span>) (<span style="color:#fc5fa3">uint64</span>, <span style="color:#fc5fa3">error</span>) {
+</span></span><span style="display:flex;"><span>    currentIndex := idx
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">var</span> err <span style="color:#fc5fa3">error</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">for</span> i := <span style="color:#d0bf69">0</span>; i &lt; val.<span style="color:#41a1c0">Len</span>(); i++ {
+</span></span><span style="display:flex;"><span>        currentIndex, err = s.elementMarshaler.<span style="color:#41a1c0">MarshalType</span>(val.<span style="color:#41a1c0">Index</span>(i), b, currentIndex)
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fc5fa3">return</span> <span style="color:#d0bf69">0</span>, err
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> currentIndex, <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>Although it looks a bit intimidating, let's break it down into pieces. First, we create an instance of a slice marshaler that also contains a field which gives us access to a marshaler for that slice's individual elements. Then, we check if the slice has fixed-sized elements, for which we simply loop through the slice's length and call the element marshaler at each index of the slice.</p>
+<p>Otherwise, we perform a more complex, variable-sized element marshaling. As mentioned in how SSZ works, we need to keep track of particular <em>offset</em> values which tell us the positional indices where variable sized elements begin in the serialization. We also need to keep track of the current writing position into the buffer accordingly. We loop through the slice's length, determine any offsets, write those offsets to the buffer, and update the positional trackers respectively. Voilà, that's pretty much the hardest part of writing an SSZ marshaler :). For container types, such as structs, we have to keep track of the marshalers for each of their fields, and simply loop over the struct's fields and perform the same logic as above.</p>
+<p><img src="https://imgur.com/6dvh6Jl.png" alt="image"></p>
+<h2>Unmarshaling</h2>
+<p>Now for the hard part...unmarshaling. This part of SSZ is particularly tricky because there are no hard-and fast rules for doing so aside from &quot;doing the inverse of serialization&quot;. That is, we'll find ourselves in some hairy situations due to variable-size offsets that will massively increase the complexity of the implementation. Additionally, we'll hit some important gotchas of using Go's reflect package along the way.</p>
+<p>Unmarshaling follows the similar philosophy of creating different types that comply with the <code>Unmarshaler</code> interface and pattern matching types through a switch statement at the start. Compared to marshaling, however, we do not need to create a bytes buffer of a certain size beforehand, but we have to do something even more difficult. We have to <em>deeply hydrate</em> the value we are unmarshaling into, and that's where the Go gotchas come into play.</p>
+<p>We start with our top-level <code>Unmarshal</code> function:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">Unmarshal</span>(input []<span style="color:#fc5fa3">byte</span>, val <span style="color:#fc5fa3">interface</span>{}) <span style="color:#fc5fa3">error</span> {
+</span></span><span style="display:flex;"><span>    rval := reflect.<span style="color:#41a1c0">ValueOf</span>(val)
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> rval.<span style="color:#41a1c0">IsNil</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> errors.<span style="color:#41a1c0">New</span>(<span style="color:#fc6a5d">&#34;cannot unmarshal into untyped, nil value&#34;</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    rtyp := rval.<span style="color:#41a1c0">Type</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#6c7986">// val must be a pointer, otherwise we refuse to unmarshal.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">if</span> rtyp.<span style="color:#41a1c0">Kind</span>() != reflect.Ptr {
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> errors.<span style="color:#41a1c0">New</span>(<span style="color:#fc6a5d">&#34;can only unmarshal into a pointer target&#34;</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    m, err := <span style="color:#41a1c0">makeUnmarshaler</span>(val)
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> <span style="color:#fc5fa3">nil</span>, err
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> _, err = m.<span style="color:#41a1c0">UnmarshalType</span>(rval.<span style="color:#41a1c0">Elem</span>(), input, <span style="color:#d0bf69">0</span> <span style="color:#6c7986">/* last read idx */</span>); err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> fmt.<span style="color:#41a1c0">Errorf</span>(<span style="color:#fc6a5d">&#34;could not unmarshal input into type: %v, %v&#34;</span>, rval.<span style="color:#41a1c0">Elem</span>().<span style="color:#41a1c0">Type</span>(), err)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>Let's take a look at some basic type unmarshaling:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">import</span> <span style="color:#fc6a5d">&#34;binary&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> Uint32SSZ <span style="color:#fc5fa3">uint64</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (u Uint32SSZ) <span style="color:#41a1c0">UnmarshalBytes</span>(val reflect.Value, b []<span style="color:#fc5fa3">byte</span> lastReadIdx <span style="color:#fc5fa3">uint64</span>) (<span style="color:#fc5fa3">uint64</span>, <span style="color:#fc5fa3">error</span>) {
+</span></span><span style="display:flex;"><span>    nextReadIdx := lastReadIdx + <span style="color:#d0bf69">4</span>
+</span></span><span style="display:flex;"><span>    buf := <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">byte</span>, <span style="color:#d0bf69">4</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#d0a8ff">copy</span>(buf, b[lastReadIdx:nextReadIdxjj])
+</span></span><span style="display:flex;"><span>    val.<span style="color:#41a1c0">SetUint</span>(<span style="color:#d0a8ff">uint64</span>(binary.LittleEndian.<span style="color:#41a1c0">Uint32</span>(buf)))
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> nextReadIdx, <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>So what's the hard part? Let's check out how we would unmarshal the following:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> FixedSizeItem <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>    Field1 <span style="color:#fc5fa3">uint32</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>data := [<span style="color:#d0bf69">3</span>]*FixedSizeItem{
+</span></span><span style="display:flex;"><span>    &amp;FixedSizeItem{ Field1: <span style="color:#d0bf69">7</span> },
+</span></span><span style="display:flex;"><span>    &amp;FixedSizeItem{ Field1: <span style="color:#d0bf69">8</span> },
+</span></span><span style="display:flex;"><span>    &amp;FixedSizeItem{ Field1: <span style="color:#d0bf69">9</span> },
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>encoded, err := ssz.<span style="color:#41a1c0">Marshal</span>(data)
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#d0a8ff">panic</span>(err)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">var</span> decoded [<span style="color:#d0bf69">3</span>]*FixedSizeItem
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">if</span> err := ssz.<span style="color:#41a1c0">Unmarshal</span>(encoded, &amp;decoded); err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#d0a8ff">panic</span>(err)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>Given it's a simple array of fixed size elements, we <em>could</em> simply unmarshal element-wise as follows:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span>currentIndex := lastReadIdx
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">for</span> i := <span style="color:#d0bf69">0</span>; i &lt; val.<span style="color:#41a1c0">Len</span>(); i++ {
+</span></span><span style="display:flex;"><span>    <span style="color:#6c7986">// if val.Index(i).Kind() == reflect.Ptr {
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#6c7986">//     instantiateConcreteTypeForElement(val.Index(i), typ.Elem().Elem())
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#6c7986">// }
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    currentIndex, err = m.<span style="color:#41a1c0">UnmarshalType</span>(val.<span style="color:#41a1c0">Index</span>(i), b, currentIndex)
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> <span style="color:#d0bf69">0</span>, fmt.<span style="color:#41a1c0">Errorf</span>(<span style="color:#fc6a5d">&#34;failed to unmarshal element of array: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">return</span> currentIndex, <span style="color:#fc5fa3">nil</span>
+</span></span></code></pre><p>But if we run this, we get the the following error!</p>
+<pre><code>panic: cannot call Type() of nil value
+</code></pre>
+<p>What gives? When we initialize a variable which will be the target of the unmarshaling, it knows it has to be of type <code>[3]*FixedSizeItem</code>, however, we haven't <em>deeply</em> initialized the values of that array with the correct zero values we will unmarshal into. That is, once we're attempting to unmarshal each <code>&amp;FixedSizeItem</code> type contained in this array, that item has not been initialized, so what we are feeding the unmarshaler is an array of nil values</p>
+<pre><code>[nil, nil, nil]
+</code></pre>
+<p>Even though the array above has the correct type, we are not able to deduce the unmarshaler properly for each individual element, as they are all initialized to nil! Instead, we have to deeply <em>hydrate</em> the type if it is nil.</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">instantiateConcreteTypeForElement</span>(val reflect.Value, typ reflect.Type) {
+</span></span><span style="display:flex;"><span>    val.<span style="color:#41a1c0">Set</span>(reflect.<span style="color:#41a1c0">New</span>(typ))
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>currentIndex := lastReadIdx
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">for</span> i := <span style="color:#d0bf69">0</span>; i &lt; val.<span style="color:#41a1c0">Len</span>(); i++ {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> val.<span style="color:#41a1c0">Index</span>(i).<span style="color:#41a1c0">Kind</span>() == reflect.Ptr {
+</span></span><span style="display:flex;"><span>        <span style="color:#41a1c0">instantiateConcreteTypeForElement</span>(val.<span style="color:#41a1c0">Index</span>(i), typ.<span style="color:#41a1c0">Elem</span>().<span style="color:#41a1c0">Elem</span>())
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    currentIndex, err = m.<span style="color:#41a1c0">UnmarshalType</span>(val.<span style="color:#41a1c0">Index</span>(i), b, currentIndex)
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> <span style="color:#d0bf69">0</span>, fmt.<span style="color:#41a1c0">Errorf</span>(<span style="color:#fc6a5d">&#34;failed to unmarshal element of array: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">return</span> currentIndex, <span style="color:#fc5fa3">nil</span>
+</span></span></code></pre><p>This makes our unmarshaling logic at a tad bit obscure, but it gets even worse once we have to deal with slices, as slices have no fixed-size as part of their type definition, making it impossible to iterate over them and unmarshal pointwise like we can do with fixed-size arrays. Instead, on each iteration, we have to:</p>
+<ol>
+<li>Grow the slice's length by 1</li>
+<li>Deeply hydrate the element at the current index in the slice</li>
+</ol>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">growConcreteSliceValue</span>(val reflect.Value, typ reflect.Type, length <span style="color:#fc5fa3">int</span>) {
+</span></span><span style="display:flex;"><span>    newVal := reflect.<span style="color:#41a1c0">MakeSlice</span>(typ, length, length)
+</span></span><span style="display:flex;"><span>    reflect.<span style="color:#41a1c0">Copy</span>(newVal, val)
+</span></span><span style="display:flex;"><span>    val.<span style="color:#41a1c0">Set</span>(newVal)
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> val.<span style="color:#41a1c0">Index</span>(length-<span style="color:#d0bf69">1</span>).<span style="color:#41a1c0">Kind</span>() == reflect.Ptr {
+</span></span><span style="display:flex;"><span>        <span style="color:#41a1c0">instantiateConcreteTypeForElement</span>(val.<span style="color:#41a1c0">Index</span>(length-<span style="color:#d0bf69">1</span>), typ.<span style="color:#41a1c0">Elem</span>().<span style="color:#41a1c0">Elem</span>())
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>We can accomplish this using the helper above, but all we're doing once again is instantiating the correct <em>zero-values</em> of a type so we can successfully unmarshal without panics.</p>
+<p>Let's put this together and see how we can handle variable-sized slices:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">var</span> BytesPerLengthOffset = <span style="color:#d0bf69">4</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> SliceUnmarshaler <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>    elementUnmarshaler Unmarshaler
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">NewSliceUnmarshaler</span>(val reflect.Value) (*SliceUnmarshaler, <span style="color:#fc5fa3">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#6c7986">// We attach the marshaler for the slice&#39;s particular element type
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#6c7986">// to the struct for usage later.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    typ := val.<span style="color:#41a1c0">Type</span>()
+</span></span><span style="display:flex;"><span>    elementUnmarshaler, err := <span style="color:#41a1c0">makeUnmarshaler</span>(typ.<span style="color:#41a1c0">Elem</span>())
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> <span style="color:#fc5fa3">nil</span>, err
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> &amp;SliceUnmarshaler{elementUnmarshaler}
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (s *SliceUnmarshaler) <span style="color:#41a1c0">UnmarshalType</span>(val reflect.Value, b []<span style="color:#fc5fa3">byte</span>, lastReadIdx <span style="color:#fc5fa3">uint64</span>) (<span style="color:#fc5fa3">uint64</span>, <span style="color:#fc5fa3">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> <span style="color:#d0a8ff">len</span>(input) == <span style="color:#d0bf69">0</span> {
+</span></span><span style="display:flex;"><span>        newVal := reflect.<span style="color:#41a1c0">MakeSlice</span>(val.<span style="color:#41a1c0">Type</span>(), <span style="color:#d0bf69">0</span>, <span style="color:#d0bf69">0</span>)
+</span></span><span style="display:flex;"><span>        val.<span style="color:#41a1c0">Set</span>(newVal)
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> <span style="color:#d0bf69">0</span>, <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#41a1c0">growConcreteSliceType</span>(val, typ, <span style="color:#d0bf69">1</span>)
+</span></span><span style="display:flex;"><span>    endOffset := <span style="color:#d0a8ff">uint64</span>(<span style="color:#d0a8ff">len</span>(input))
+</span></span><span style="display:flex;"><span>    currentIndex := lastReadIdx
+</span></span><span style="display:flex;"><span>    nextIndex := currentIndex
+</span></span><span style="display:flex;"><span>    offsetVal := input[startOffset : startOffset+BytesPerLengthOffset]
+</span></span><span style="display:flex;"><span>    firstOffset := startOffset + <span style="color:#d0a8ff">uint64</span>(binary.LittleEndian.<span style="color:#41a1c0">Uint32</span>(offsetVal))
+</span></span><span style="display:flex;"><span>    currentOffset := firstOffset
+</span></span><span style="display:flex;"><span>    nextOffset := currentOffset
+</span></span><span style="display:flex;"><span>    i := <span style="color:#d0bf69">0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">for</span> currentIndex &lt; firstOffset {
+</span></span><span style="display:flex;"><span>        nextIndex = currentIndex + BytesPerLengthOffset
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// We have to keep track of the position of each offset we use for reading.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        <span style="color:#fc5fa3">if</span> nextIndex == firstOffset {
+</span></span><span style="display:flex;"><span>            nextOffset = endOffset
+</span></span><span style="display:flex;"><span>        } <span style="color:#fc5fa3">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#6c7986">// We then determine the next offset by reading 4 bytes (BytesPerLengthOffset).
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>            nextOffsetVal := input[nextIndex : nextIndex+BytesPerLengthOffset]
+</span></span><span style="display:flex;"><span>            nextOffset = startOffset + <span style="color:#d0a8ff">uint64</span>(binary.LittleEndian.<span style="color:#41a1c0">Uint32</span>(nextOffsetVal))
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// We grow the slice&#39;s size to accommodate a new element being unmarshaled.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        <span style="color:#41a1c0">growConcreteSliceType</span>(val, typ, i+<span style="color:#d0bf69">1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">if</span> _, err := s.elementUnmarshaler.<span style="color:#41a1c0">UnmarshalType</span>(val.<span style="color:#41a1c0">Index</span>(i), input[currentOffset:nextOffset], <span style="color:#d0bf69">0</span> <span style="color:#6c7986">/* last read element idx */</span>); err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fc5fa3">return</span> <span style="color:#d0bf69">0</span>, fmt.<span style="color:#41a1c0">Errorf</span>(<span style="color:#fc6a5d">&#34;failed to unmarshal element of slice: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        i++
+</span></span><span style="display:flex;"><span>        currentIndex = nextIndex
+</span></span><span style="display:flex;"><span>        currentOffset = nextOffset
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> currentIndex, <span style="color:#fc5fa3">nil</span>
+</span></span></code></pre><p>We have to add a special caveat that if we are unmarshaling a nil value, we simply create a slice of size 0 and return, otherwise we will encounter painful panics down the line! Phew, using Go and its lack of generics adds massive complexity when it comes to populating a raw pointer of a certain type, but that covers the basics.</p>
+<h3>Limitations of Go-SSZ</h3>
+<p>Unfortunately, there are still some inherent limitations in the rules of SSZ that prevent us from unambiguously unmarshal certain types of data. In particular, consider we run into a value that our unmarshaler determines is empty and is of slice type. We have no way to know if it should unmarshal as <code>nil</code> or as <code>[]</code></p>
+<blockquote>
+<p>SSZ unmarshaling is ambiguous when it comes to empty values in Go</p>
+</blockquote>
+<p>Say if you want to round-trip test the following:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">import</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#fc6a5d">&#34;reflect&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc6a5d">&#34;testing&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc6a5d">&#34;github.com/prysmaticlabs/go-ssz&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> AmbiguousItem <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>    Field1 []<span style="color:#fc5fa3">byte</span>
+</span></span><span style="display:flex;"><span>    Field2: <span style="color:#fc5fa3">uint64</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">TestRoundTrip</span>(t *testing.T) {
+</span></span><span style="display:flex;"><span>    item := &amp;AmbiguousItem{
+</span></span><span style="display:flex;"><span>        Field2: <span style="color:#d0bf69">5</span>,
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    encoded, err := ssz.<span style="color:#41a1c0">Marshal</span>(item)
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>        t.<span style="color:#41a1c0">Fatal</span>(err)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">var</span> decoded *AmbiguousItem
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> err := ssz.<span style="color:#41a1c0">Unmarshal</span>(encoded, decoded); err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>        t.<span style="color:#41a1c0">Fatal</span>(err)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> !reflect.<span style="color:#41a1c0">DeepEqual</span>(item, decoded) {
+</span></span><span style="display:flex;"><span>        t.<span style="color:#41a1c0">Errorf</span>(<span style="color:#fc6a5d">&#34;Expected %v, received %v&#34;</span>, item, decodedjj)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>You'll see the following error message pop-up:</p>
+<pre><code>Expected { Field1: nil, Field2: 5 }, received { Field1: []. Field2: 5}
+</code></pre>
+<p>Our unmarshal prefers to unmarshal into an empty slice despite the original being nil, how can we resolve this? Typically, serialization libraries in Go run into similar roadblocks, and they suggest checking equality of objects within their scope by using their own custom comparison function. For this purpose, we had to write our own <code>ssz.DeepEqual</code> to catch these little nuances of SSZ which <code>reflect.DeepEqual</code> would not be able to discern.</p>
+<p>No serialization specification is perfect in every language, but we can afford to make these compromises in Go for a better developer experience and to reduce ambiguity.</p>
+<h2>Testing</h2>
+<p>Writing tests for a generic serialization is tricky, as they must be exhaustive, however, there are infinite types you can try your marshaling/unmarshaling rules on. How can we measure <em>robustness</em>?</p>
+<p>The standard approach for establishing robustness in Go is to include the following:</p>
+<ul>
+<li>Edge case unit tests</li>
+<li>Comprehensive fuzz tests</li>
+</ul>
+<p>At a high level, the API for SSZ is quite simple and easy to understand. There are only 2 core functions needed for SSZ, which are <code>Marshal</code> and <code>Unmarshal</code>:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">Marshal</span>(val <span style="color:#fc5fa3">interface</span>{}) ([]<span style="color:#fc5fa3">byte</span>, <span style="color:#fc5fa3">error</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">Unmarshal</span>(encoded []<span style="color:#fc5fa3">byte</span>, val <span style="color:#fc5fa3">interface</span>{}) <span style="color:#fc5fa3">error</span>
+</span></span></code></pre><p>Their conciseness is no accident, as we designed this API to match the very popular <a href="https://golang.org/pkg/encoding/json/#Marshal">JSON marshaler/unmarshaler</a> from the Go standard library. Aside from hiding implementation details, the reason this was done was for powerful access to testing primitives in the form of <em>serialization fuzz testing</em>.</p>
+<p>From <a href="https://www.techopedia.com/definition/13625/fuzz-testing">Techopedia</a>:</p>
+<blockquote>
+<p>Fuzz testing is a means of stress test applications by feeding random data into them in order to spot any errors or hang-ups that may occur. The idea behind fuzz testing is that software applications and systems can have a lot of different bugs or glitches related to data input.</p>
+</blockquote>
+<p>Having fuzz tests can help us feed our round trip tests through all sorts of randomized data structures to ensure we catch those pesky panics and improve the robustness of our SSZ toolset.</p>
+<p><img src="https://imgur.com/N6HzyGm.png" alt="image"></p>
+<p>For basic edge case, sanity-focused unit tests, we can opt for simple table-driven tests in Go to get the job done. We'll be doing a simple, round-trip marshal/unmarshal test to ensure we can recover data in its original form after passing through SSZ.</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> item <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>    Field1 []<span style="color:#fc5fa3">byte</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> nestedItem <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>    Field1 []<span style="color:#fc5fa3">uint64</span>
+</span></span><span style="display:flex;"><span>    Field2 *item
+</span></span><span style="display:flex;"><span>    Field3 [<span style="color:#d0bf69">3</span>]<span style="color:#fc5fa3">byte</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">var</span> nestedItemExample = nestedItem{
+</span></span><span style="display:flex;"><span>    Field1: []<span style="color:#fc5fa3">uint64</span>{<span style="color:#d0bf69">2</span>, <span style="color:#d0bf69">3</span>, <span style="color:#d0bf69">4</span>},
+</span></span><span style="display:flex;"><span>    Field2: &amp;item{
+</span></span><span style="display:flex;"><span>        Field1: []<span style="color:#fc5fa3">byte</span>{<span style="color:#d0bf69">0</span>},
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    Field3: [<span style="color:#d0bf69">3</span>]<span style="color:#fc5fa3">byte</span>{<span style="color:#d0bf69">1</span>, <span style="color:#d0bf69">1</span>, <span style="color:#d0bf69">1</span>},
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">TestMarshalUnmarshal</span>(t *testing.T) {
+</span></span><span style="display:flex;"><span>    tests := []<span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>        input <span style="color:#fc5fa3">interface</span>{}
+</span></span><span style="display:flex;"><span>        ptr   <span style="color:#fc5fa3">interface</span>{}
+</span></span><span style="display:flex;"><span>    }{
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Bool test cases.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        {input: <span style="color:#fc5fa3">true</span>, ptr: <span style="color:#d0a8ff">new</span>(<span style="color:#fc5fa3">bool</span>)},
+</span></span><span style="display:flex;"><span>        {input: <span style="color:#fc5fa3">false</span>, ptr: <span style="color:#d0a8ff">new</span>(<span style="color:#fc5fa3">bool</span>)},
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Uint test cases.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        {input: <span style="color:#d0a8ff">byte</span>(<span style="color:#d0bf69">1</span>), ptr: <span style="color:#d0a8ff">new</span>(<span style="color:#fc5fa3">byte</span>)},
+</span></span><span style="display:flex;"><span>        {input: <span style="color:#d0a8ff">uint16</span>(<span style="color:#d0bf69">232</span>), ptr: <span style="color:#d0a8ff">new</span>(<span style="color:#fc5fa3">uint16</span>)},
+</span></span><span style="display:flex;"><span>        {input: <span style="color:#d0a8ff">uint32</span>(<span style="color:#d0bf69">1029391</span>), ptr: <span style="color:#d0a8ff">new</span>(<span style="color:#fc5fa3">uint32</span>)},
+</span></span><span style="display:flex;"><span>        {input: <span style="color:#d0a8ff">uint64</span>(<span style="color:#d0bf69">23929309</span>), ptr: <span style="color:#d0a8ff">new</span>(<span style="color:#fc5fa3">uint64</span>)},
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Byte slice, byte array test cases.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        {input: [<span style="color:#d0bf69">8</span>]<span style="color:#fc5fa3">byte</span>{<span style="color:#d0bf69">1</span>, <span style="color:#d0bf69">2</span>, <span style="color:#d0bf69">3</span>, <span style="color:#d0bf69">4</span>, <span style="color:#d0bf69">5</span>, <span style="color:#d0bf69">6</span>, <span style="color:#d0bf69">7</span>, <span style="color:#d0bf69">8</span>}, ptr: <span style="color:#d0a8ff">new</span>([<span style="color:#d0bf69">8</span>]<span style="color:#fc5fa3">byte</span>)},
+</span></span><span style="display:flex;"><span>        {input: []<span style="color:#fc5fa3">byte</span>{<span style="color:#d0bf69">9</span>, <span style="color:#d0bf69">8</span>, <span style="color:#d0bf69">9</span>, <span style="color:#d0bf69">8</span>}, ptr: <span style="color:#d0a8ff">new</span>([]<span style="color:#fc5fa3">byte</span>)},
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Basic type array test cases.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        {input: [<span style="color:#d0bf69">12</span>]<span style="color:#fc5fa3">uint64</span>{<span style="color:#d0bf69">1</span>, <span style="color:#d0bf69">2</span>, <span style="color:#d0bf69">3</span>, <span style="color:#d0bf69">4</span>, <span style="color:#d0bf69">5</span>, <span style="color:#d0bf69">6</span>, <span style="color:#d0bf69">7</span>, <span style="color:#d0bf69">8</span>, <span style="color:#d0bf69">9</span>, <span style="color:#d0bf69">10</span>, <span style="color:#d0bf69">11</span>, <span style="color:#d0bf69">12</span>}, ptr: <span style="color:#d0a8ff">new</span>([<span style="color:#d0bf69">12</span>]<span style="color:#fc5fa3">uint64</span>)},
+</span></span><span style="display:flex;"><span>        {input: [<span style="color:#d0bf69">100</span>]<span style="color:#fc5fa3">bool</span>{<span style="color:#fc5fa3">true</span>, <span style="color:#fc5fa3">false</span>, <span style="color:#fc5fa3">true</span>, <span style="color:#fc5fa3">true</span>}, ptr: <span style="color:#d0a8ff">new</span>([<span style="color:#d0bf69">100</span>]<span style="color:#fc5fa3">bool</span>)},
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Basic type slice test cases.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        {input: []<span style="color:#fc5fa3">bool</span>{<span style="color:#fc5fa3">true</span>, <span style="color:#fc5fa3">false</span>, <span style="color:#fc5fa3">true</span>, <span style="color:#fc5fa3">true</span>, <span style="color:#fc5fa3">true</span>}, ptr: <span style="color:#d0a8ff">new</span>([]<span style="color:#fc5fa3">bool</span>)},
+</span></span><span style="display:flex;"><span>        {input: []<span style="color:#fc5fa3">uint32</span>{<span style="color:#d0bf69">0</span>, <span style="color:#d0bf69">0</span>, <span style="color:#d0bf69">0</span>}, ptr: <span style="color:#d0a8ff">new</span>([]<span style="color:#fc5fa3">uint32</span>)},
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Struct decoding test cases.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        {input: nestedItemExample, ptr: <span style="color:#d0a8ff">new</span>(nestedItem)},
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Non-basic type slice/array test cases.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        {input: [<span style="color:#d0bf69">2</span>]nestedItem{nestedItemExample}, ptr: <span style="color:#d0a8ff">new</span>([<span style="color:#d0bf69">2</span>]nestedItem)},
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Pointer-type test cases.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        {input: &amp;nestedItemExample, ptr: <span style="color:#d0a8ff">new</span>(nestedItem)},
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">for</span> _, tt := <span style="color:#fc5fa3">range</span> tests {
+</span></span><span style="display:flex;"><span>        serializedItem, err := ssz.<span style="color:#41a1c0">Marshal</span>(tt.input)
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>            t.<span style="color:#41a1c0">Fatal</span>(err)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">if</span> err := ssz.<span style="color:#41a1c0">Unmarshal</span>(serializedItem, tt.ptr); err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>            t.<span style="color:#41a1c0">Fatal</span>(err)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        output := reflect.<span style="color:#41a1c0">ValueOf</span>(tt.ptr)
+</span></span><span style="display:flex;"><span>        inputVal := reflect.<span style="color:#41a1c0">ValueOf</span>(tt.input)
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">if</span> inputVal.<span style="color:#41a1c0">Kind</span>() == reflect.Ptr {
+</span></span><span style="display:flex;"><span>            <span style="color:#fc5fa3">if</span> !ssz.<span style="color:#41a1c0">DeepEqual</span>(output.<span style="color:#41a1c0">Interface</span>(), tt.input) {
+</span></span><span style="display:flex;"><span>                t.<span style="color:#41a1c0">Errorf</span>(<span style="color:#fc6a5d">&#34;Expected %v, received %v&#34;</span>, tt.input, output.<span style="color:#41a1c0">Interface</span>())
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        } <span style="color:#fc5fa3">else</span> {
+</span></span><span style="display:flex;"><span>            got := output.<span style="color:#41a1c0">Elem</span>().<span style="color:#41a1c0">Interface</span>()
+</span></span><span style="display:flex;"><span>            want := tt.input
+</span></span><span style="display:flex;"><span>            <span style="color:#fc5fa3">if</span> !ssz.<span style="color:#41a1c0">DeepEqual</span>(want, got) {
+</span></span><span style="display:flex;"><span>                t.<span style="color:#41a1c0">Errorf</span>(<span style="color:#fc6a5d">&#34;Did not unmarshal properly: wanted %v, received %v&#34;</span>, tt.input, output.<span style="color:#41a1c0">Elem</span>().<span style="color:#41a1c0">Interface</span>())
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><h2>Benchmarks and Standards</h2>
+<p>The final step for wrapping up our serialization library has to do with benchmarking and standardization. Note our focus of this implementation was a correct/robust <em>first</em> approach without much attention to optimization. Using benchmarks and Go's pprof are the best ways to catch any relevant bottlenecks, but the most likely problem we will encounter is a massive amount of allocations per operation, as we are consistently creating new pointers, new reflect values, and more.</p>
+<p>Alec Thomas has put together an excellent repository standardizing serialization benchmarks in Go across different libraries you can find <a href="https://github.com/alecthomas/go_serialization_benchmarks">here</a>. We will be adding Go-SSZ to that list quite soon! In the meantime, expect a follow-up post on optimizing SSZ!</p>
+<p>Check out our full repo here: <a href="github.com/prysmaticlabs/go-ssz">github.com/prysmaticlabs/go-ssz</a></p>
+
+</div>
+
+<div class="comments">
+	
+<div id="disqus_thread"></div>
+<script>
+	var disqus_config = function () {
+		this.page.url = 'https://rauljordan.com/\/2019\/07\/02\/go-lessons-from-writing-a-serialization-library-for-ethereum.html';
+		this.page.identifier = '\/2019\/07\/02\/go-lessons-from-writing-a-serialization-library-for-ethereum.html';
+		this.page.title = 'Go Lessons from Writing a Serialization Library for Ethereum';
+	};
+
+	(function () {
+		var d = document, s = d.createElement('script');
+
+		s.src = '//rauljordanblog-1.disqus.com/embed.js';
+
+		s.setAttribute('data-timestamp', +new Date());
+		(d.head || d.body).appendChild(s);
+	})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments
+		powered by Disqus.</a></noscript>
+
+</div>
+
+		</div>
+	</main>
+	
+<footer class="site-footer">
+	<div class="wrapper">
+		<div class="credits">Made With Golang <i class="fas fa-heart"></i></div>
+	</div>
+</footer>
+
+	<script>
+		window.FontAwesomeConfig = {
+			searchPseudoElements: true
+		}
+	</script>
+</body>
+
+</html>

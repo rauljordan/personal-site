@@ -1,0 +1,14 @@
+author: Raul Jordan
+email: rauljordan@alumni.harvard.edu
+about: Hi, my name is Raul Jordan - I am a Go developer working on the Ethereum blockchain protocol. I write regulary about Go programming, technology, life, and ideas for how tech can create a less zero-sum world.
+social_links:
+  - url: https://github.com/rauljordan
+    icon: github-square
+    color: purple
+  - url: https://twitter.com/rauljordaneth
+    icon: twitter-square
+    color: cyan
+  - url: https://medium.com/@rauljordan
+    icon: medium
+    color: red
+

@@ -1,0 +1,15 @@
+{{ define "header" }}
+<div class="site-header">
+	<div class="wrapper">
+		<a class="site-title" rel="author" href="/">
+			rauljordan
+			<b class="command_prompt"></b><b class="blinking_cursor">_</b>
+		</a>
+		<span class="social_links">
+			{{ range $link := .SocialLinks }}
+			<a class="color-{{ $link.Color }}-hover" href="{{ $link.Url }}"><i class="fab fa-{{ $link.Icon }}"></i></a>
+			{{ end }}
+		</span>
+	</div>
+</div>
+{{ end }}

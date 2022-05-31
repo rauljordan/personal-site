@@ -1,0 +1,21 @@
+{{ define "index" }}
+<h1>recent posts</h1>
+<div class="post-links">
+	{{range $post := .Posts }}
+	<div class="post-link-wrapper">
+		<a href="{{ $post.Url }}" class="post-link">{{ $post.Title }}</a>
+		<br />
+		{{ $post.Preview }}
+		<div class="post-meta">
+
+			<div class="post-tags">
+				{{range $tag := $post.Tags }}
+				<a class="tag" href="/tag/{{ $tag }}">{{ $tag }}</a>
+				{{ end }}
+			</div>
+			{{ $post.DateString }}
+		</div>
+	</div>
+	{{end}}
+</div>
+{{ end }}

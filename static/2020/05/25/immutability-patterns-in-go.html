@@ -1,0 +1,457 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Raul Jordan | Immutability Patterns in Go</title>
+	<script defer src="https://use.fontawesome.com/releases/v5.8.1/js/all.js"
+		integrity="sha384-g5uSoOSBd7KkhAMlnQILrecXvzst9TdC09/VM+pjDTCM+1il8RHz5fKANTFFb+gQ"
+		crossorigin="anonymous"></script>
+	<meta property="og:title" content="Immutability Patterns in Go" />
+	<meta name="author" content="Raul Jordan" />
+	<meta property="og:locale" content="en_US" />
+	<meta name="description" content="" />
+	<meta property="og:description" content="" />
+	<meta property="og:site_name" content="rauljordan" />
+	<meta property="og:image" content="" />
+	<meta property="og:type" content="article" />
+	<meta property="article:published_time" content="2020-05-25T00:00:00&#43;0000" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta property="twitter:image" content="" />
+	<meta property="twitter:title" content="Immutability Patterns in Go" />
+	<meta name="twitter:site" content="" />
+	<meta name="twitter:creator" content="" />
+	
+	<link rel="stylesheet" href="/css/style.css">
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-53062950-12"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag() {dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-53062950-12');
+	</script>
+</head>
+
+
+<body>
+	
+<div class="site-header">
+	<div class="wrapper">
+		<a class="site-title" rel="author" href="/">
+			rauljordan
+			<b class="command_prompt"></b><b class="blinking_cursor">_</b>
+		</a>
+		<span class="social_links">
+			
+			<a class="color-purple-hover" href="https://github.com/rauljordan"><i class="fab fa-github-square"></i></a>
+			
+			<a class="color-cyan-hover" href="https://twitter.com/rauljordaneth"><i class="fab fa-twitter-square"></i></a>
+			
+			<a class="color-red-hover" href="https://medium.com/@rauljordan"><i class="fab fa-medium"></i></a>
+			
+		</span>
+	</div>
+</div>
+
+	<main class="page-content" aria-label="Content">
+		<div class="wrapper">
+			
+<div class="author-box">
+	<div class="flex-header">
+		<div class="flex-img">
+			<img src="https://gravatar.com/avatar/bbc15eb70de907e278d669fa0c1016fc?s=256" class="author-avatar" />
+		</div>
+		<div class="flex-content">
+			Hi, my name is Raul Jordan - I am a Go developer working on the Ethereum blockchain protocol. I write regulary about Go programming, technology, life, and ideas for how tech can create a less zero-sum world.
+		</div>
+	</div>
+
+	<div class="read-more">
+		Read more <a href="2017-01-01-about-me.html">about me</a> - contact me <a
+			href="mailto:rauljordan@alumni.harvard.edu">rauljordan@alumni.harvard.edu</a>
+	</div>
+</div>
+
+			
+<div class="post">
+	<h1 class="post-title">Immutability Patterns in Go</h1>
+	<div class="post-tags">
+		
+		<a class="tag" href="/tag/golang">golang</a>
+		
+	</div>
+	<div class="post-date">Published on 24/01/2020</div>
+	<div class="post-description"></div>
+	<p>One of cons of Go as a modern programming language is the lack of native options for making certain data structures immutable. That is, we often have to make key software design decisions in our application just to ensure certain data is immutable throughout the code's runtime, and it may not look pretty. At my company, <a href="https://prysmaticlabs.com">Prysmatic Labs</a>, we often encounter the problem where we need to maintain certain large data structures in-memory for performance reasons and we also need to perform one-off, local computations on such data. That is, we have very intensive <em>read-heavy</em> workloads in our application where we do not want to compromise data safety.</p>
+<p><img src="https://raw.githubusercontent.com/ashleymcnamara/gophers/master/CouchPotatoGopher.png" alt="image"></p>
+<p>A concrete example of this is in the field of distributed systems, where servers typically maintain some global &quot;state&quot; which other computers on the network also maintain through a consensus algorithm. An example of this is <a href="https://ethereum.org">Ethereum</a>, a popular blockchain my team <a href="https://github.com/prysmaticlabs/prysm">develops</a>, which maintains a global state of user accounts, balances and tons of other critical information. These applications are <code>state machines</code>, which update their state through a <code>state transition function</code>: a pure function which takes in some data, the global state, and outputs a new global state in a deterministic fashion.</p>
+<p>Let's give a basic example:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> State <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>    AccountAddresses []<span style="color:#fc5fa3">string</span>
+</span></span><span style="display:flex;"><span>    Balances         []<span style="color:#fc5fa3">uint64</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> InputData <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>    Transfers           []*Transfer
+</span></span><span style="display:flex;"><span>    NewAccountAddresses []<span style="color:#fc5fa3">string</span>
+</span></span><span style="display:flex;"><span>    NewAccountBalances  []<span style="color:#fc5fa3">uint64</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> Transfer <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>    From   <span style="color:#fc5fa3">string</span>
+</span></span><span style="display:flex;"><span>    To     <span style="color:#fc5fa3">string</span>
+</span></span><span style="display:flex;"><span>    Amount <span style="color:#fc5fa3">uint64</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6c7986">// ExecuteStateTransition is a pure function which received some input data,
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986">// a pre-state, and outputs a deterministic post-state if the inputs are valid.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">ExecuteStateTransition</span>(data *InputData, preState *State) (*State, <span style="color:#fc5fa3">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">var</span> err <span style="color:#fc5fa3">error</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">for</span> _, transfer := <span style="color:#fc5fa3">range</span> data.Transfers {
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Apply a transfer to the state.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        preState, err = <span style="color:#41a1c0">applyTransfer</span>(preState, transfer)
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fc5fa3">return</span> <span style="color:#fc5fa3">nil</span>, fmt.<span style="color:#41a1c0">Errorf</span>(<span style="color:#fc6a5d">&#34;could not apply transfer to accounts: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> <span style="color:#d0a8ff">len</span>(data.NewAccountAddresses) != <span style="color:#d0a8ff">len</span>(data.NewAccountBalances) {
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> <span style="color:#fc5fa3">nil</span>, errors.<span style="color:#41a1c0">New</span>(<span style="color:#fc6a5d">&#34;different number of new account addresses and balances&#34;</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">for</span> i, address := <span style="color:#fc5fa3">range</span> data.NewAccountAddresses {
+</span></span><span style="display:flex;"><span>        balance := data.NewAccountBalances[i]
+</span></span><span style="display:flex;"><span>        preState, err = <span style="color:#41a1c0">addAccount</span>(preState, address, balance)
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fc5fa3">return</span> <span style="color:#fc5fa3">nil</span>, fmt.<span style="color:#41a1c0">Errorf</span>(<span style="color:#fc6a5d">&#34;could not create new account in state: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    ...
+</span></span><span style="display:flex;"><span>    <span style="color:#6c7986">// Do some other fancy stuff...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">return</span> preState, <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>In these applications, a state transition may fail, which will leave the state object in an inconsistent state! For example, your code might fail:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">if</span> <span style="color:#d0a8ff">len</span>(data.NewAccountAddresses) != <span style="color:#d0a8ff">len</span>(data.NewAccountBalances) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> <span style="color:#fc5fa3">nil</span>, errors.<span style="color:#41a1c0">New</span>(<span style="color:#fc6a5d">&#34;different number of new account addresses and balances&#34;</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>Despite already having mutated accounts in the state in the preceding lines:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">var</span> err <span style="color:#fc5fa3">error</span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">for</span> _, transfer := <span style="color:#fc5fa3">range</span> data.Transfers {
+</span></span><span style="display:flex;"><span>    <span style="color:#6c7986">// Apply a transfer to the state.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    preState, err = <span style="color:#41a1c0">applyTransfer</span>(preState, transfer)
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span> <span style="color:#fc5fa3">nil</span>, fmt.<span style="color:#41a1c0">Errorf</span>(<span style="color:#fc6a5d">&#34;could not apply transfer to accounts: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><h2>Naive Solution: Full Copy</h2>
+<p>A simple, yet naïve way to solve the problem is to enforce full <code>copying</code> of data before the function runs. For example:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (s *Server) <span style="color:#41a1c0">NaiveCopy</span>() *State {
+</span></span><span style="display:flex;"><span>    newAccountAddresses := <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">string</span>, <span style="color:#d0a8ff">len</span>(s.accountAddresses))
+</span></span><span style="display:flex;"><span>    <span style="color:#d0a8ff">copy</span>(newAccountAddresses, s.accountAddresses)
+</span></span><span style="display:flex;"><span>    newBalances := <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">uint64</span>, <span style="color:#d0a8ff">len</span>(s.balances))
+</span></span><span style="display:flex;"><span>    <span style="color:#d0a8ff">copy</span>(newBalances, s.balances)
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> &amp;State{
+</span></span><span style="display:flex;"><span>        accountAddresses: newAccountAddresses,
+</span></span><span style="display:flex;"><span>        balances:         newBalances,
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span><span style="color:#6c7986">// Retrieve a copy of the current application state.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>preState := s.<span style="color:#41a1c0">NaiveCopy</span>()
+</span></span><span style="display:flex;"><span>postState, err := <span style="color:#41a1c0">ExecuteStateTransition</span>(data, preState)
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">if</span> err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> fmt.<span style="color:#41a1c0">Errorf</span>(<span style="color:#fc6a5d">&#34;could not process state transition: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>...
+</span></span></code></pre><p>This means the state transition function will be operating on a locally scoped, 100% copied instance of the data instead of mutating our precious, real state. However, this is a bad choice when the state might be a massive data structure and also a bad choice depending on how many times the state transition function might run. The fact that we need to copy the entire data structure is a bad pattern that will not scale to real applications. Deep copies might take a long time to run, use a ton of memory, and will very quickly <strong>become your major bottleneck</strong>. Despite this, there are lots of other design patterns in Go that can help solve this problem.</p>
+<h2>Copy on Read</h2>
+<p>What if we want to be able to access a state safely without doing a full copy? Instead, we can copy only the data we need for our functions. For example, say you have a function that just adds up the account balances:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">TotalBalance</span>(state *State) <span style="color:#fc5fa3">uint64</span> {
+</span></span><span style="display:flex;"><span>    total := <span style="color:#d0a8ff">uint64</span>(<span style="color:#d0bf69">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">for</span> _, balance := <span style="color:#fc5fa3">range</span> state.Balances {
+</span></span><span style="display:flex;"><span>        total += balance
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> total
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span><span style="color:#6c7986">// Get a copy of the current state.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>currentState := s.<span style="color:#41a1c0">Copy</span>()
+</span></span><span style="display:flex;"><span>total := <span style="color:#41a1c0">TotalBalance</span>(currentState)
+</span></span><span style="display:flex;"><span>fmt.<span style="color:#41a1c0">Printf</span>(<span style="color:#fc6a5d">&#34;Total balance: %d\n&#34;</span>, total)
+</span></span></code></pre><p>Even for such a simple computation, you still have to copy the entire state data structure! This is absolutely inefficient. You can probably get around this by <em>not</em> copying the state but instead just using the raw value of state.AccountBalances given you're not modifying it, you're just reading from it. However, this is dangerous! You don't want <em>anyone</em> to accidentally modify this value, so you want to be strict around data access and modification. A simple pattern in Go is to instead leverage unexported struct fields with getters and setters to prevent unwanted data mutation. For example, we can restructure our state to look like this:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> State <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>    accountAddresses []<span style="color:#fc5fa3">string</span>
+</span></span><span style="display:flex;"><span>    balances         []<span style="color:#fc5fa3">uint64</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (s *State) <span style="color:#41a1c0">AccountAddresses</span>() []<span style="color:#fc5fa3">string</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> <span style="color:#41a1c0">DeepCopy</span>(s.accountAddresses)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (s *State) <span style="color:#41a1c0">SetAccountAddresses</span>(addresses []<span style="color:#fc5fa3">string</span>) {
+</span></span><span style="display:flex;"><span>    s.accountAddresses = <span style="color:#41a1c0">DeepCopy</span>(addresses)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (s *State) <span style="color:#41a1c0">Balances</span>() []<span style="color:#fc5fa3">uint64</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> <span style="color:#41a1c0">DeepCopy</span>(s.balances)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (s *State) <span style="color:#41a1c0">SetBalances</span>(balances []<span style="color:#fc5fa3">uint64</span>) {
+</span></span><span style="display:flex;"><span>    s.balances = <span style="color:#41a1c0">DeepCopy</span>(balances)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>Now, you can still pass around references to your state, but any function that uses it will <em>only</em> copy as much data as it needs. Instead of copying the entire state every time you just want to add up account balances, you will only copy the accounts balances list.</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">TotalBalance</span>(state *State) <span style="color:#fc5fa3">uint64</span> {
+</span></span><span style="display:flex;"><span>    total := <span style="color:#d0a8ff">uint64</span>(<span style="color:#d0bf69">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">for</span> _, balance := <span style="color:#fc5fa3">range</span> state.<span style="color:#41a1c0">Balances</span>() {
+</span></span><span style="display:flex;"><span>        total += balance
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> total
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>This pattern will prevent anyone, including yourself, from accidentally mutating a field of this state in your application outside of its defined package. This approach works for most use-cases, however, if we have a function that needs every field of the state, such as the state transition function, we are not improving at all upon the naïve case of doing a full copy every single time. Moreover, your application might do a lot more frequent <em>data reads</em> than <em>writes</em>, or vice-versa. If you're calling the <code>TotalBalance</code> function thousands of times per second, this pattern has a trade-off compared to no copying at all.</p>
+<p>Can we do better than <em>always</em> copying...? Let's take a look.</p>
+<h2>Copy on Write</h2>
+<p>An advanced pattern for efficient memory usage while maintaining immutability guarantees is doing a <code>copy on write</code> approach. The general idea is that we have multiple copies of the state, but each of their inner fields point to a single, shared reference for all of them <em>until</em> one copy requires a mutation. A bit confusing, but let's take a look at an image to clear it up:</p>
+<p><img src="https://i.imgur.com/k5Z7DlU.png" alt="image"></p>
+<p>This means we can have multiple copies of <code>State</code> objects, but their inner fields, namely <code>AccountAddresses</code> and <code>Balances</code> both point to a shared reference. Each of these copies can read as much as they want from this single reference, but if they <em>want</em> to modify them, a copy will be created:</p>
+<p><img src="https://i.imgur.com/HCZLiYn.png" alt="image"></p>
+<p>Using this approach, we can intelligently reuse allocations that already exist for old data and ensure we can perform really fast operations such as computing total balance or doing other computation that should not require a full copy. There are two approaches to enforcing copy on write.</p>
+<ol>
+<li>We <em>always</em> perform a copy on write. That is, we maintain shared references by default and whenever any field is mutated, we copy it and perform a new allocation.</li>
+<li>We keep track of allocated references by field. We only perform a copy on write if there exists a shared reference, otherwise we simply mutate the field as is, giving us a more advanced behavior than required.</li>
+</ol>
+<p>Let's take a look at how we would implement (2) in our examples, as it is a more flexible solution.</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> fieldIndex <span style="color:#fc5fa3">int</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">const</span> (
+</span></span><span style="display:flex;"><span>    accountAddressesField fieldIndex = <span style="color:#fc5fa3">iota</span>
+</span></span><span style="display:flex;"><span>    balancesField
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> State <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>    sharedFieldReferences <span style="color:#fc5fa3">map</span>[fieldIndex]*reference
+</span></span><span style="display:flex;"><span>    accountAddresses      []<span style="color:#fc5fa3">string</span>
+</span></span><span style="display:flex;"><span>    balances              []<span style="color:#fc5fa3">uint64</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> reference <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>    refs <span style="color:#fc5fa3">uint</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (r *reference) <span style="color:#41a1c0">Refs</span>() <span style="color:#fc5fa3">uint</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> r.refs
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (r *reference) <span style="color:#41a1c0">AddRef</span>() {
+</span></span><span style="display:flex;"><span>    r.refs++
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (r *reference) <span style="color:#41a1c0">MinusRef</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#6c7986">// Prevent underflow.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#fc5fa3">if</span> r.refs == <span style="color:#d0bf69">0</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">return</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    r.refs--
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (s *State) <span style="color:#41a1c0">SetBalances</span>(balances []<span style="color:#fc5fa3">uint64</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> s.sharedFieldReferences[balancesField].<span style="color:#41a1c0">Refs</span>() == <span style="color:#d0bf69">1</span> { <span style="color:#6c7986">// Only this struct has a reference.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        <span style="color:#6c7986">// Mutate in place...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        s.balances = balances
+</span></span><span style="display:flex;"><span>    } <span style="color:#fc5fa3">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Decrement reference, allocate full copy, and update.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        s.sharedFieldReferences[balancesField].<span style="color:#41a1c0">MinusRef</span>()
+</span></span><span style="display:flex;"><span>        s.sharedFieldReferences[balancesField] = &amp;reference{refs: <span style="color:#d0bf69">1</span>}
+</span></span><span style="display:flex;"><span>        newBalances := <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">uint64</span>, <span style="color:#d0a8ff">len</span>(balances))
+</span></span><span style="display:flex;"><span>        <span style="color:#d0a8ff">copy</span>(newBalances, balances)
+</span></span><span style="display:flex;"><span>        s.balances = newBalances
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (s *State) <span style="color:#41a1c0">SetAccountAddresses</span>(addresses []<span style="color:#fc5fa3">string</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> s.sharedFieldReferences[accountAddressesField].<span style="color:#41a1c0">Refs</span>() == <span style="color:#d0bf69">1</span> { <span style="color:#6c7986">// Only this struct has a reference.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        <span style="color:#6c7986">// Mutate in place...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        s.accountAddresses = addresses
+</span></span><span style="display:flex;"><span>    } <span style="color:#fc5fa3">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Decrement reference, allocate full copy, and update.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        s.sharedFieldReferences[accountAddressesField].<span style="color:#41a1c0">MinusRef</span>()
+</span></span><span style="display:flex;"><span>        s.sharedFieldReferences[accountAddressesField] = &amp;reference{refs: <span style="color:#d0bf69">1</span>}
+</span></span><span style="display:flex;"><span>        newAddresses := <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">string</span>, <span style="color:#d0a8ff">len</span>(addresses))
+</span></span><span style="display:flex;"><span>        <span style="color:#d0a8ff">copy</span>(newAddresses, addresses)
+</span></span><span style="display:flex;"><span>        s.accountAddresses = newAddresses
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>Now, upon creation of a new state copy, we will be incrementing the shared field references for the new object as needed.</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (s *State) <span style="color:#41a1c0">Copy</span>() *State {
+</span></span><span style="display:flex;"><span>    dst := &amp;State{
+</span></span><span style="display:flex;"><span>        accountAddresses:      s.accountAddresses,
+</span></span><span style="display:flex;"><span>        balances:              s.balances,
+</span></span><span style="display:flex;"><span>        sharedFieldReferences: <span style="color:#d0a8ff">make</span>(<span style="color:#fc5fa3">map</span>[fieldIndex]*reference, <span style="color:#d0bf69">2</span>),
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">for</span> field, ref := <span style="color:#fc5fa3">range</span> s.sharedFieldReferences {
+</span></span><span style="display:flex;"><span>        ref.<span style="color:#41a1c0">AddRef</span>()
+</span></span><span style="display:flex;"><span>        dst.sharedFieldReferences[field] = ref
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6c7986">// Finalizer runs when the destination object is being
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#6c7986">// destroyed in garbage collection.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    runtime.<span style="color:#41a1c0">SetFinalizer</span>(dst, <span style="color:#fc5fa3">func</span>(s *State) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">for</span> _, v := <span style="color:#fc5fa3">range</span> s.sharedFieldReferences {
+</span></span><span style="display:flex;"><span>        v.<span style="color:#41a1c0">MinusRef</span>()
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    })
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> dst
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>In the code above, we leverage a special function from the Go standard library called <a href="https://golang.org/pkg/runtime/#SetFinalizer">runtime.SetFinalizer</a>. From its godoc definition:</p>
+<blockquote>
+<p>SetFinalizer sets the finalizer associated with obj to the provided finalizer function. When the garbage collector finds an unreachable block with an associated finalizer, it clears the association and runs finalizer(obj) in a separate goroutine.</p>
+</blockquote>
+<p>This basically tells the garbage collector what action to perform when destroying the object's allocated memory once  it is no longer needed.</p>
+<p>Let's try this out and prove it for ourselves with a unit test:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">TestStateReferenceSharing_GarbageCollectionFinalizer</span>(t *testing.T) {
+</span></span><span style="display:flex;"><span>    <span style="color:#6c7986">// First, we initialize a state with some basic values
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#6c7986">// and shared field reference counts of 1 for each field.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    a := &amp;State{
+</span></span><span style="display:flex;"><span>        accountAddresses:      <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">string</span>, <span style="color:#d0bf69">1000</span>),
+</span></span><span style="display:flex;"><span>        balances:              <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">uint64</span>, <span style="color:#d0bf69">1000</span>),
+</span></span><span style="display:flex;"><span>        sharedFieldReferences: <span style="color:#d0a8ff">make</span>(<span style="color:#fc5fa3">map</span>[fieldIndex]*reference, <span style="color:#d0bf69">2</span>),
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    a.sharedFieldReferences[accountAddressesField] = &amp;reference{refs: <span style="color:#d0bf69">1</span>}
+</span></span><span style="display:flex;"><span>    a.sharedFieldReferences[balancesField] = &amp;reference{refs: <span style="color:#d0bf69">1</span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">func</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#6c7986">// Create object in a different scope for garbage collection.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>        b := a.<span style="color:#41a1c0">Copy</span>()
+</span></span><span style="display:flex;"><span>        <span style="color:#fc5fa3">if</span> a.sharedFieldReferences[balancesField].refs != <span style="color:#d0bf69">2</span> {
+</span></span><span style="display:flex;"><span>            t.<span style="color:#41a1c0">Error</span>(<span style="color:#fc6a5d">&#34;Expected 2 references to balances&#34;</span>)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        _ = b
+</span></span><span style="display:flex;"><span>    }()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6c7986">// Now, we trigger garbage collection which will call the
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#6c7986">// RunFinalizer function on object b.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    runtime.<span style="color:#41a1c0">GC</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> a.sharedFieldReferences[balancesField].refs != <span style="color:#d0bf69">1</span> {
+</span></span><span style="display:flex;"><span>        t.<span style="color:#41a1c0">Errorf</span>(<span style="color:#fc6a5d">&#34;Expected 1 shared reference to balances&#34;</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6c7986">// We initialize b again, which will cause the shared reference count
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#6c7986">// for both objects to go up to 2.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    b := a.<span style="color:#41a1c0">Copy</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> a.sharedFieldReferences[balancesField].refs != <span style="color:#d0bf69">2</span> {
+</span></span><span style="display:flex;"><span>        t.<span style="color:#41a1c0">Error</span>(<span style="color:#fc6a5d">&#34;Expected 2 shared references to balances in a&#34;</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> b.sharedFieldReferences[balancesField].refs != <span style="color:#d0bf69">2</span> {
+</span></span><span style="display:flex;"><span>        t.<span style="color:#41a1c0">Error</span>(<span style="color:#fc6a5d">&#34;Expected 2 shared references to balances in b&#34;</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6c7986">// Now, we write to b, which will cause the balances field to be copied
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    <span style="color:#6c7986">// and decrement the shared field reference for both objects.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>    b.<span style="color:#41a1c0">SetBalances</span>(<span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">uint64</span>, <span style="color:#d0bf69">2000</span>))
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">if</span> b.sharedFieldReferences[balancesField].refs != <span style="color:#d0bf69">1</span> || a.sharedFieldReferences[balancesField].refs != <span style="color:#d0bf69">1</span> {
+</span></span><span style="display:flex;"><span>        t.<span style="color:#41a1c0">Error</span>(<span style="color:#fc6a5d">&#34;Expected 1 shared reference to balances for both a and b&#34;</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>Now running the test...</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span>ok      github.com/rauljordan/experiment 0.281s
+</span></span></code></pre><p>Let's see how much of a difference it actually makes compared to the naïve full copy approach with a benchmark:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (s *State) <span style="color:#41a1c0">NaiveCopy</span>() *State {
+</span></span><span style="display:flex;"><span>    newAccountAddresses := <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">string</span>, <span style="color:#d0a8ff">len</span>(s.accountAddresses))
+</span></span><span style="display:flex;"><span>    <span style="color:#d0a8ff">copy</span>(newAccountAddresses, s.accountAddresses)
+</span></span><span style="display:flex;"><span>    newBalances := <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">uint64</span>, <span style="color:#d0a8ff">len</span>(s.balances))
+</span></span><span style="display:flex;"><span>    <span style="color:#d0a8ff">copy</span>(newBalances, s.balances)
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">return</span> &amp;State{
+</span></span><span style="display:flex;"><span>        accountAddresses: newAccountAddresses,
+</span></span><span style="display:flex;"><span>        balances:         newBalances,
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">BenchmarkCopy_SharedReferences</span>(b *testing.B) {
+</span></span><span style="display:flex;"><span>    st1 := &amp;State{
+</span></span><span style="display:flex;"><span>        accountAddresses:      <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">string</span>, <span style="color:#d0bf69">1000</span>),
+</span></span><span style="display:flex;"><span>        balances:              <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">uint64</span>, <span style="color:#d0bf69">1000</span>),
+</span></span><span style="display:flex;"><span>        sharedFieldReferences: <span style="color:#d0a8ff">make</span>(<span style="color:#fc5fa3">map</span>[fieldIndex]*reference, <span style="color:#d0bf69">2</span>),
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">for</span> i := <span style="color:#d0bf69">0</span>; i &lt; b.N; i++ {
+</span></span><span style="display:flex;"><span>        st1.<span style="color:#41a1c0">Copy</span>()
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">BenchmarkCopy_Naive</span>(b *testing.B) {
+</span></span><span style="display:flex;"><span>    st1 := &amp;State{
+</span></span><span style="display:flex;"><span>        accountAddresses: <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">string</span>, <span style="color:#d0bf69">1000</span>),
+</span></span><span style="display:flex;"><span>        balances:         <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">uint64</span>, <span style="color:#d0bf69">1000</span>),
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fc5fa3">for</span> i := <span style="color:#d0bf69">0</span>; i &lt; b.N; i++ {
+</span></span><span style="display:flex;"><span>        st1.<span style="color:#41a1c0">NaiveCopy</span>()
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>Now running the benchmark...</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span>$ go test -bench=. -benchmem
+</span></span><span style="display:flex;"><span>goos: darwin
+</span></span><span style="display:flex;"><span>goarch: amd64
+</span></span><span style="display:flex;"><span>pkg: github.com/rauljordan/experiment
+</span></span><span style="display:flex;"><span>BenchmarkCopy_SharedReferences-6         3249732               451 ns/op             112 B/op          2 allocs/op
+</span></span><span style="display:flex;"><span>BenchmarkCopy_Naive-6                     350588              3279 ns/op           24576 B/op          2 allocs/op
+</span></span><span style="display:flex;"><span>PASS
+</span></span><span style="display:flex;"><span>ok      github.com/rauljordan/experiment 3.348s
+</span></span></code></pre><p>Wow, we get almost <em>free</em> copies of the full state! This means we can have thousands of full state copies and all of them will be using a single shared reference for their fields. We can comfortably use them in our application having confidence that they are safe to mutate, as any mutation will create a copy and decrease the shared reference of the field. We might not have default immutability, but this is a great compromise if your application requires safe, immutable types and you perform a significant amount of reads in your application, making it <em>super</em> cheap to copy data for use :).</p>
+<h2>Resources</h2>
+<p>You may wonder, why doesn't Go just support immutability of structs and other custom types as a default feature in the language? Dave Cheney, a prominent Go developer, has an <a href="https://dave.cheney.net/tag/immutability">excellent post</a> on what would happen to Go as a language if items such as generics or immutability would be added as primitives. Go is an excellent language with numerous merits albeit with some clear problems at times. Nonetheless, it is still possible to follow sound software engineering principles to be able to get around Go's weaknesses and achieve good results.</p>
+<p>Fun fact, here is Go's list of immutable types:</p>
+<ul>
+<li>interfaces</li>
+<li>booleans, numeric values (including values of type int)</li>
+<li>strings</li>
+<li>pointers</li>
+<li>function pointers, and closures which can be reduced to function pointers</li>
+<li>structs having a single field</li>
+</ul>
+
+</div>
+
+<div class="comments">
+	
+<div id="disqus_thread"></div>
+<script>
+	var disqus_config = function () {
+		this.page.url = 'https://rauljordan.com/\/2020\/05\/25\/immutability-patterns-in-go.html';
+		this.page.identifier = '\/2020\/05\/25\/immutability-patterns-in-go.html';
+		this.page.title = 'Immutability Patterns in Go';
+	};
+
+	(function () {
+		var d = document, s = d.createElement('script');
+
+		s.src = '//rauljordanblog-1.disqus.com/embed.js';
+
+		s.setAttribute('data-timestamp', +new Date());
+		(d.head || d.body).appendChild(s);
+	})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments
+		powered by Disqus.</a></noscript>
+
+</div>
+
+		</div>
+	</main>
+	
+<footer class="site-footer">
+	<div class="wrapper">
+		<div class="credits">Made With Golang <i class="fas fa-heart"></i></div>
+	</div>
+</footer>
+
+	<script>
+		window.FontAwesomeConfig = {
+			searchPseudoElements: true
+		}
+	</script>
+</body>
+
+</html>

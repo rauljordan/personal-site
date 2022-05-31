@@ -1,0 +1,23 @@
+{{ define "base" }}
+<!DOCTYPE html>
+<html lang="en">
+{{ template "head" . }}
+
+<body>
+	{{ template "header" . }}
+	<main class="page-content" aria-label="Content">
+		<div class="wrapper">
+			{{ template "author" . }}
+			{{ .Contents }}
+		</div>
+	</main>
+	{{ template "footer" }}
+	<script>
+		window.FontAwesomeConfig = {
+			searchPseudoElements: true
+		}
+	</script>
+</body>
+
+</html>
+{{ end }}

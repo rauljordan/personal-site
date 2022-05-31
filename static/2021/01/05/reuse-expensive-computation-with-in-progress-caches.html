@@ -1,0 +1,369 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Raul Jordan | Reuse Expensive Computation With In-Progress Caches in Go</title>
+	<script defer src="https://use.fontawesome.com/releases/v5.8.1/js/all.js"
+		integrity="sha384-g5uSoOSBd7KkhAMlnQILrecXvzst9TdC09/VM+pjDTCM+1il8RHz5fKANTFFb+gQ"
+		crossorigin="anonymous"></script>
+	<meta property="og:title" content="Reuse Expensive Computation With In-Progress Caches in Go" />
+	<meta name="author" content="Raul Jordan" />
+	<meta property="og:locale" content="en_US" />
+	<meta name="description" content="" />
+	<meta property="og:description" content="" />
+	<meta property="og:site_name" content="rauljordan" />
+	<meta property="og:image" content="" />
+	<meta property="og:type" content="article" />
+	<meta property="article:published_time" content="2021-01-05T00:00:00&#43;0000" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta property="twitter:image" content="" />
+	<meta property="twitter:title" content="Reuse Expensive Computation With In-Progress Caches in Go" />
+	<meta name="twitter:site" content="" />
+	<meta name="twitter:creator" content="" />
+	
+	<link rel="stylesheet" href="/css/style.css">
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-53062950-12"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag() {dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-53062950-12');
+	</script>
+</head>
+
+
+<body>
+	
+<div class="site-header">
+	<div class="wrapper">
+		<a class="site-title" rel="author" href="/">
+			rauljordan
+			<b class="command_prompt"></b><b class="blinking_cursor">_</b>
+		</a>
+		<span class="social_links">
+			
+			<a class="color-purple-hover" href="https://github.com/rauljordan"><i class="fab fa-github-square"></i></a>
+			
+			<a class="color-cyan-hover" href="https://twitter.com/rauljordaneth"><i class="fab fa-twitter-square"></i></a>
+			
+			<a class="color-red-hover" href="https://medium.com/@rauljordan"><i class="fab fa-medium"></i></a>
+			
+		</span>
+	</div>
+</div>
+
+	<main class="page-content" aria-label="Content">
+		<div class="wrapper">
+			
+<div class="author-box">
+	<div class="flex-header">
+		<div class="flex-img">
+			<img src="https://gravatar.com/avatar/bbc15eb70de907e278d669fa0c1016fc?s=256" class="author-avatar" />
+		</div>
+		<div class="flex-content">
+			Hi, my name is Raul Jordan - I am a Go developer working on the Ethereum blockchain protocol. I write regulary about Go programming, technology, life, and ideas for how tech can create a less zero-sum world.
+		</div>
+	</div>
+
+	<div class="read-more">
+		Read more <a href="2017-01-01-about-me.html">about me</a> - contact me <a
+			href="mailto:rauljordan@alumni.harvard.edu">rauljordan@alumni.harvard.edu</a>
+	</div>
+</div>
+
+			
+<div class="post">
+	<h1 class="post-title">Reuse Expensive Computation With In-Progress Caches in Go</h1>
+	<div class="post-tags">
+		
+		<a class="tag" href="/tag/golang">golang</a>
+		
+	</div>
+	<div class="post-date">Published on 24/01/2020</div>
+	<div class="post-description"></div>
+	<p>Caching is the go-to solution in applications to avoid repeating expensive computation and instead prefer some value that can be readily fetched in-memory. A simple caching strategy is to use a cache as a thin layer above database read access as follows:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">package</span> main
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">import</span> <span style="color:#fc6a5d">&#34;sync&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> Database <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>	cache <span style="color:#fc5fa3">map</span>[<span style="color:#fc5fa3">string</span>][]<span style="color:#fc5fa3">byte</span>
+</span></span><span style="display:flex;"><span>	lock  sync.RWMutex
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (db *Database) <span style="color:#41a1c0">GetItem</span>(key []<span style="color:#fc5fa3">byte</span>) ([]<span style="color:#fc5fa3">byte</span>, <span style="color:#fc5fa3">error</span>) {
+</span></span><span style="display:flex;"><span>	db.lock.<span style="color:#41a1c0">RLock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fc5fa3">if</span> value, ok := db.cache[<span style="color:#d0a8ff">string</span>(key)]; ok {
+</span></span><span style="display:flex;"><span>		db.lock.<span style="color:#41a1c0">RUnlock</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#fc5fa3">return</span> value
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	db.lock.<span style="color:#41a1c0">RUnlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fc5fa3">return</span> db.<span style="color:#41a1c0">readFromDatabase</span>(key)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (db *Database) <span style="color:#41a1c0">WriteItem</span>(key, value []<span style="color:#fc5fa3">byte</span>) <span style="color:#fc5fa3">error</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fc5fa3">if</span> err := db.<span style="color:#41a1c0">writeToDatabase</span>(key, value); err != <span style="color:#fc5fa3">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fc5fa3">return</span> err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	db.lock.<span style="color:#41a1c0">Lock</span>()
+</span></span><span style="display:flex;"><span>	db.cache[<span style="color:#d0a8ff">string</span>(key)] = value
+</span></span><span style="display:flex;"><span>	db.lock.<span style="color:#41a1c0">Unlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fc5fa3">return</span> <span style="color:#fc5fa3">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>This strategy works great for applications where you have requests to read access for a certain value repeatedly, preventing you from performing a potentially expensive db query and leveraging fast access in-memory. Caching is very helpful. For some problems, however, a cache is definitely not enough.</p>
+<h3>The busy workers problem</h3>
+<p>Imagine you have thousands or more processes attempting to perform the same expensive computation at the same time. Perhaps all of them were notified they need to crunch certain numbers which takes a long time, or they need perform a prohibitively expensive operation that can max out your CPU or RAM if overdone. This is quite a common problem in my project, Prysm, which has many different workers in the form of goroutines often attempting to perform duplicate work. A naive solution to this is to simply leverage a cache strategy to avoid repeated computation, as shown above. However, what if there is nothing in the cache yet for the value you care about and thousands of workers are <em>already</em> attempting the expensive computation? Perhaps there are many workers attempting to perform an action that is <em>already in progress</em>. This is a great use-case for what we call an <strong>in progress cache</strong>. Let's look at an example:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">package</span> main
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">import</span> <span style="color:#fc6a5d">&#34;sync&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#fc5fa3">var</span> wg sync.WaitGroup
+</span></span><span style="display:flex;"><span>	numWorkers := <span style="color:#d0bf69">1000</span>
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#41a1c0">Add</span>(numWorkers)
+</span></span><span style="display:flex;"><span>	<span style="color:#fc5fa3">for</span> i := <span style="color:#d0bf69">0</span>; i &lt; numWorkers; i++ {
+</span></span><span style="display:flex;"><span>		<span style="color:#fc5fa3">go</span> <span style="color:#fc5fa3">func</span>(w *sync.WaitGroup) {
+</span></span><span style="display:flex;"><span>			<span style="color:#fc5fa3">defer</span> wg.<span style="color:#41a1c0">Done</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#41a1c0">doSomethingExpensive</span>()
+</span></span><span style="display:flex;"><span>		}(&amp;wg)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#41a1c0">Wait</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">doSomethingExpensive</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7986">// Get result from cache if it has already completed.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>	value, ok := <span style="color:#41a1c0">checkCache</span>()
+</span></span><span style="display:flex;"><span>	ok{
+</span></span><span style="display:flex;"><span>		<span style="color:#6c7986">// Do something with the cached value.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7986">// Expensive operation which can take a few seconds to complete...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>}
+</span></span></code></pre><p>But what if there is nothing in the cache yet when all 1000 workers are attempting to perform the expensive operation? Well, all of them will start performing your expensive operation, your computer might blow up, and our cache was pretty much useless. Instead, we can leverage the power of <strong>Go channels</strong> to mark work as <strong>in progress</strong> and instead have all workers share the same return value of whichever worker completed it first. Let's think about how to do this.</p>
+<p>First of all, we need a way to <em>block</em> a worker from performing expensive computation if a request we care about is already in progress. Second, once a <em>single worker completes</em> an expensive computation, we need to notify all workers that were attempting the same computation of the return value immediately. To accomplish the first task, we can leverage a combination of a shared map to check if a request is in progress, then subscribe to the in-progress request by initializing a channel and appending it to some shared list for the request. Finally, once a worker completes the computation, it can send out the result to all receivers subscribed to that in-progress request. Let's see it in action.</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> service <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>	inProgress         <span style="color:#fc5fa3">map</span>[<span style="color:#fc5fa3">string</span>]<span style="color:#fc5fa3">bool</span>
+</span></span><span style="display:flex;"><span>	awaitingCompletion <span style="color:#fc5fa3">map</span>[<span style="color:#fc5fa3">string</span>][]<span style="color:#fc5fa3">chan</span> <span style="color:#fc5fa3">string</span>
+</span></span><span style="display:flex;"><span>	lock               sync.RWMutex
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>Above, we define a simple struct used to encapsulate this information. In our example, the result of our expensive computation is some string value and the request identity is also a string. We keep track of two maps for request identities: the first is called <code>inProgress</code> and will be used by workers to check if expensive computation is already in progress. The second is called <code>awaitingCompletion</code>, which is a list of channels that are awaiting to be notified of an in-progress request. They are essentially other workers that are subscribing to the computed value of the worker currently in progress. We use a mutex to make these maps thread-safe.</p>
+<p>Next up, we start our <code>main</code> function simulating 5 workers doing some expensive operation concurrently.</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">main</span>() {
+</span></span><span style="display:flex;"><span>	ss := &amp;service{
+</span></span><span style="display:flex;"><span>		inProgress:         <span style="color:#d0a8ff">make</span>(<span style="color:#fc5fa3">map</span>[<span style="color:#fc5fa3">string</span>]<span style="color:#fc5fa3">bool</span>),
+</span></span><span style="display:flex;"><span>		awaitingCompletion: <span style="color:#d0a8ff">make</span>(<span style="color:#fc5fa3">map</span>[<span style="color:#fc5fa3">string</span>][]<span style="color:#fc5fa3">chan</span> <span style="color:#fc5fa3">string</span>),
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7986">// Create N = 5 workers.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>	numWorkers := <span style="color:#d0bf69">5</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fc5fa3">var</span> wg sync.WaitGroup
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#41a1c0">Add</span>(numWorkers)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7986">// Launch N goroutines performing the same work:
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>	<span style="color:#6c7986">// a request with ID &#34;expensivecomputation&#34;.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>	requestID := <span style="color:#fc6a5d">&#34;expensivecomputation&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fc5fa3">for</span> i := <span style="color:#d0bf69">0</span>; i &lt; numWorkers; i++ {
+</span></span><span style="display:flex;"><span>		<span style="color:#fc5fa3">go</span> <span style="color:#fc5fa3">func</span>(w *sync.WaitGroup, id <span style="color:#fc5fa3">string</span>) {
+</span></span><span style="display:flex;"><span>			<span style="color:#fc5fa3">defer</span> wg.<span style="color:#41a1c0">Done</span>()
+</span></span><span style="display:flex;"><span>			ss.<span style="color:#41a1c0">doWork</span>(id)
+</span></span><span style="display:flex;"><span>		}(&amp;wg, requestID)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7986">// Wait for all goroutines to complete work.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>	wg.<span style="color:#41a1c0">Wait</span>()
+</span></span><span style="display:flex;"><span>	fmt.<span style="color:#41a1c0">Println</span>(<span style="color:#fc6a5d">&#34;Done&#34;</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>Next up, we look at the key function: <code>doWork(requestID string)</code>. We'll write it out in Go pseudocode first.</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">package</span> main
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">import</span> <span style="color:#fc6a5d">&#34;time&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (s *service) <span style="color:#41a1c0">doWork</span>(requestID <span style="color:#fc5fa3">string</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#fc5fa3">if</span> ok := s.inProgress[requestID]; ok {
+</span></span><span style="display:flex;"><span>		<span style="color:#6c7986">// Subscribe to be notified of when the in-progress
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>		<span style="color:#6c7986">// request completes via a channel.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6c7986">// Await the response from the worker currently in-progress...
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fc5fa3">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7986">// Mark the requestID as in progress.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>	s.lock.<span style="color:#41a1c0">Lock</span>()
+</span></span><span style="display:flex;"><span>	s.inProgress[requestID] = <span style="color:#fc5fa3">true</span>
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#41a1c0">Unlock</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7986">// Perform some expensive, lengthy work (time.Sleep used to simulate it).
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>	time.<span style="color:#41a1c0">Sleep</span>(time.Second * <span style="color:#d0bf69">4</span>)
+</span></span><span style="display:flex;"><span>	response := <span style="color:#fc6a5d">&#34;the answer is 42&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7986">// Send to all subscribers.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>	s.lock.<span style="color:#41a1c0">RLock</span>()
+</span></span><span style="display:flex;"><span>	receiversWaiting, ok := s.awaitingCompletion[requestID]
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#41a1c0">RUnlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fc5fa3">if</span> ok {
+</span></span><span style="display:flex;"><span>		<span style="color:#fc5fa3">for</span> _, ch := <span style="color:#fc5fa3">range</span> receiversWaiting {
+</span></span><span style="display:flex;"><span>			ch &lt;- response
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7986">// Reset the in-progress data for the requestID.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>	s.lock.<span style="color:#41a1c0">Lock</span>()
+</span></span><span style="display:flex;"><span>	s.inProgress[requestID] = <span style="color:#fc5fa3">false</span>
+</span></span><span style="display:flex;"><span>	s.awaitingCompletion[requestID] = <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">chan</span> <span style="color:#fc5fa3">string</span>, <span style="color:#d0bf69">0</span>)
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#41a1c0">Unlock</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>We lock around the map access to reduce lock contention in the real application. Next up, we fill in the logic for <code>if ok := inProgress[key]; ok</code>.</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">if</span> ok := s.inProgress[requestID]; ok {
+</span></span><span style="display:flex;"><span>  <span style="color:#6c7986">// We add a buffer of 1 to prevent blocking
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>  <span style="color:#6c7986">// the sender&#39;s goroutine.
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>  responseChan := <span style="color:#d0a8ff">make</span>(<span style="color:#fc5fa3">chan</span> <span style="color:#fc5fa3">string</span>, <span style="color:#d0bf69">1</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#fc5fa3">defer</span> <span style="color:#d0a8ff">close</span>(responseChan)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  lock.<span style="color:#41a1c0">Lock</span>()
+</span></span><span style="display:flex;"><span>  s.awaitingCompletion[requestID] = <span style="color:#d0a8ff">append</span>(s.awaitingCompletion[requestID], responseChan)
+</span></span><span style="display:flex;"><span>  lock.<span style="color:#41a1c0">Unlock</span>()
+</span></span><span style="display:flex;"><span>  fmt.<span style="color:#41a1c0">Println</span>(<span style="color:#fc6a5d">&#34;Awaiting work in-progress&#34;</span>)
+</span></span><span style="display:flex;"><span>  val := &lt;-responseChan
+</span></span><span style="display:flex;"><span>  fmt.<span style="color:#41a1c0">Printf</span>(<span style="color:#fc6a5d">&#34;Work result received with value %s\n&#34;</span>, val)
+</span></span><span style="display:flex;"><span>  <span style="color:#fc5fa3">return</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>Putting it altogether, we get:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span><span style="color:#fc5fa3">package</span> main
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">import</span> (
+</span></span><span style="display:flex;"><span>	<span style="color:#fc6a5d">&#34;fmt&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fc6a5d">&#34;sync&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fc6a5d">&#34;time&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">type</span> service <span style="color:#fc5fa3">struct</span> {
+</span></span><span style="display:flex;"><span>	inProgress         <span style="color:#fc5fa3">map</span>[<span style="color:#fc5fa3">string</span>]<span style="color:#fc5fa3">bool</span>
+</span></span><span style="display:flex;"><span>	awaitingCompletion <span style="color:#fc5fa3">map</span>[<span style="color:#fc5fa3">string</span>][]<span style="color:#fc5fa3">chan</span> <span style="color:#fc5fa3">string</span>
+</span></span><span style="display:flex;"><span>	lock               sync.RWMutex
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> (s *service) <span style="color:#41a1c0">doWork</span>(requestID <span style="color:#fc5fa3">string</span>) {
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#41a1c0">RLock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fc5fa3">if</span> ok := s.inProgress[requestID]; ok {
+</span></span><span style="display:flex;"><span>		s.lock.<span style="color:#41a1c0">RUnlock</span>()
+</span></span><span style="display:flex;"><span>		responseChan := <span style="color:#d0a8ff">make</span>(<span style="color:#fc5fa3">chan</span> <span style="color:#fc5fa3">string</span>, <span style="color:#d0bf69">1</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#fc5fa3">defer</span> <span style="color:#d0a8ff">close</span>(responseChan)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		s.lock.<span style="color:#41a1c0">Lock</span>()
+</span></span><span style="display:flex;"><span>		s.awaitingCompletion[requestID] = <span style="color:#d0a8ff">append</span>(s.awaitingCompletion[requestID], responseChan)
+</span></span><span style="display:flex;"><span>		s.lock.<span style="color:#41a1c0">Unlock</span>()
+</span></span><span style="display:flex;"><span>		fmt.<span style="color:#41a1c0">Println</span>(<span style="color:#fc6a5d">&#34;Awaiting work completed&#34;</span>)
+</span></span><span style="display:flex;"><span>		val := &lt;-responseChan
+</span></span><span style="display:flex;"><span>		fmt.<span style="color:#41a1c0">Printf</span>(<span style="color:#fc6a5d">&#34;Work result received with value %s\n&#34;</span>, val)
+</span></span><span style="display:flex;"><span>		<span style="color:#fc5fa3">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#41a1c0">RUnlock</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#41a1c0">Lock</span>()
+</span></span><span style="display:flex;"><span>	s.inProgress[requestID] = <span style="color:#fc5fa3">true</span>
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#41a1c0">Unlock</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6c7986">// Do expensive operation
+</span></span></span><span style="display:flex;"><span><span style="color:#6c7986"></span>	fmt.<span style="color:#41a1c0">Println</span>(<span style="color:#fc6a5d">&#34;Doing expensive work...&#34;</span>)
+</span></span><span style="display:flex;"><span>	time.<span style="color:#41a1c0">Sleep</span>(time.Second * <span style="color:#d0bf69">4</span>)
+</span></span><span style="display:flex;"><span>	result := <span style="color:#fc6a5d">&#34;the answer is 42&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#41a1c0">RLock</span>()
+</span></span><span style="display:flex;"><span>	receiversWaiting, ok := s.awaitingCompletion[requestID]
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#41a1c0">RUnlock</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fc5fa3">if</span> ok {
+</span></span><span style="display:flex;"><span>		<span style="color:#fc5fa3">for</span> _, ch := <span style="color:#fc5fa3">range</span> receiversWaiting {
+</span></span><span style="display:flex;"><span>			ch &lt;- result
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		fmt.<span style="color:#41a1c0">Println</span>(<span style="color:#fc6a5d">&#34;Sent result to all subscribers&#34;</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#41a1c0">Lock</span>()
+</span></span><span style="display:flex;"><span>	s.inProgress[requestID] = <span style="color:#fc5fa3">false</span>
+</span></span><span style="display:flex;"><span>	s.awaitingCompletion[requestID] = <span style="color:#d0a8ff">make</span>([]<span style="color:#fc5fa3">chan</span> <span style="color:#fc5fa3">string</span>, <span style="color:#d0bf69">0</span>)
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#41a1c0">Unlock</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fc5fa3">func</span> <span style="color:#41a1c0">main</span>() {
+</span></span><span style="display:flex;"><span>	ss := &amp;service{
+</span></span><span style="display:flex;"><span>		inProgress:         <span style="color:#d0a8ff">make</span>(<span style="color:#fc5fa3">map</span>[<span style="color:#fc5fa3">string</span>]<span style="color:#fc5fa3">bool</span>),
+</span></span><span style="display:flex;"><span>		awaitingCompletion: <span style="color:#d0a8ff">make</span>(<span style="color:#fc5fa3">map</span>[<span style="color:#fc5fa3">string</span>][]<span style="color:#fc5fa3">chan</span> <span style="color:#fc5fa3">string</span>),
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	numWorkers := <span style="color:#d0bf69">5</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fc5fa3">var</span> wg sync.WaitGroup
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#41a1c0">Add</span>(numWorkers)
+</span></span><span style="display:flex;"><span>	requestID := <span style="color:#fc6a5d">&#34;expensivecomputation&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fc5fa3">for</span> i := <span style="color:#d0bf69">0</span>; i &lt; numWorkers; i++ {
+</span></span><span style="display:flex;"><span>		<span style="color:#fc5fa3">go</span> <span style="color:#fc5fa3">func</span>(w *sync.WaitGroup, id <span style="color:#fc5fa3">string</span>) {
+</span></span><span style="display:flex;"><span>			<span style="color:#fc5fa3">defer</span> wg.<span style="color:#41a1c0">Done</span>()
+</span></span><span style="display:flex;"><span>			ss.<span style="color:#41a1c0">doWork</span>(id)
+</span></span><span style="display:flex;"><span>		}(&amp;wg, requestID)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#41a1c0">Wait</span>()
+</span></span><span style="display:flex;"><span>	fmt.<span style="color:#41a1c0">Println</span>(<span style="color:#fc6a5d">&#34;Done&#34;</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre><p>Now running the main.go file: <code>go run main.go</code>, we observe it happening as expected:</p>
+<pre tabindex="0" style="color:#fff;background-color:#1f1f24;"><code><span style="display:flex;"><span>Doing expensive work...
+</span></span><span style="display:flex;"><span>Awaiting work completed
+</span></span><span style="display:flex;"><span>Awaiting work completed
+</span></span><span style="display:flex;"><span>Awaiting work completed
+</span></span><span style="display:flex;"><span>Awaiting work completed
+</span></span><span style="display:flex;"><span>Sent result to all subscribers
+</span></span><span style="display:flex;"><span>Work result received with value the answer is 42
+</span></span><span style="display:flex;"><span>Work result received with value the answer is 42
+</span></span><span style="display:flex;"><span>Work result received with value the answer is 42
+</span></span><span style="display:flex;"><span>Work result received with value the answer is 42
+</span></span><span style="display:flex;"><span>Done
+</span></span></code></pre><p>One out of 5 workers is doing the expensive work, the rest are waiting for it to complete. Once it completes after 4 seconds, the 4 subscribed workers receive the value correctly &quot;the answer is 42&quot;! Hopefully this simple approach can help you when you want to reduce duplicate work performed by your background routines, leveraging the power of Go channels to block goroutines until a value is received.</p>
+<p><strong>NOTE</strong>: The code above is not meant for production, as in production you need to have better ways of dealing with goroutine context cancelation and a smarter way of namespacing requests and subscribers rather than just using naive maps.</p>
+
+</div>
+
+<div class="comments">
+	
+<div id="disqus_thread"></div>
+<script>
+	var disqus_config = function () {
+		this.page.url = 'https://rauljordan.com/\/2021\/01\/05\/reuse-expensive-computation-with-in-progress-caches.html';
+		this.page.identifier = '\/2021\/01\/05\/reuse-expensive-computation-with-in-progress-caches.html';
+		this.page.title = 'Reuse Expensive Computation With In-Progress Caches in Go';
+	};
+
+	(function () {
+		var d = document, s = d.createElement('script');
+
+		s.src = '//rauljordanblog-1.disqus.com/embed.js';
+
+		s.setAttribute('data-timestamp', +new Date());
+		(d.head || d.body).appendChild(s);
+	})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments
+		powered by Disqus.</a></noscript>
+
+</div>
+
+		</div>
+	</main>
+	
+<footer class="site-footer">
+	<div class="wrapper">
+		<div class="credits">Made With Golang <i class="fas fa-heart"></i></div>
+	</div>
+</footer>
+
+	<script>
+		window.FontAwesomeConfig = {
+			searchPseudoElements: true
+		}
+	</script>
+</body>
+
+</html>
