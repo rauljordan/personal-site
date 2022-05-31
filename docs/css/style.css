@@ -292,7 +292,7 @@ pre {
  * Author box
  */
 .author-box {
-  margin-bottom: -20px;
+  margin-bottom: -10px;
   text-align: left;
   min-height: 72px;
 }
@@ -313,6 +313,7 @@ pre {
   margin-top: 20px; }
 
 .post-title {
+  margin-top: 40px;
   color: #DAE4ED;
   line-height: 2rem;
   text-align: left; }
