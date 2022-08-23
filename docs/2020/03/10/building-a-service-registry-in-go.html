@@ -86,7 +86,6 @@
 		
 	</div>
 	<div class="post-date">Published on 24/01/2020</div>
-	<div class="post-description"></div>
 	<p>Thinking of building an application in Go that has multiple running parts? Say you have some server that needs to do a bunch of different things while it runs, such as perform some backround jobs, update caches, handle several requests, expose a REST API, perform outbound requests to other APIs, all without blocking the main thread - what do you do? Typically, this is a good task for creating a microservices architecture where you have multiple applications talking to each other over some network service mesh, each containerized in some nice docker environment, orchestrated through something like Kubernetes or docker-compose.</p>
 <p><img src="https://golang.org/doc/gopher/fiveyears.jpg" alt="image"></p>
 <p>However, sometimes you just want a straightforward application that can do it all! A good example of this is a blockchain node, such as a Bitcoin or Ethereum node, which needs to do a bunch of things while it runs including:</p>

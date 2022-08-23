@@ -86,7 +86,6 @@
 		
 	</div>
 	<div class="post-date">Published on 24/01/2020</div>
-	<div class="post-description">Concurrency is awesome</div>
 	<p>This blog post explores the design rationale behind building a performant, simple, one-to-many event feed library in Go. We'll be recreating the event library from the <a href="https://github.com/ethereum/go-ethereum/blob/master/event/feed.go">go-ethereum</a> project step by step, even explaining some of the tricky design decisions behind its robust concurrency approach.</p>
 <h1>Ping Pong</h1>
 <p>When I first started learning Go, I didn't truly understand the <em>fantastic</em> concurrency primitives the language provides. Most real world applications tend to be concurrent and asynchronous...meaning all sorts of things can and will happen simultaneously and at different time intervals, often beyond our control. A big challenge when building concurrent applications is then the control and flow of shared state information, often becoming a very complex problem. In Go, communication between concurrent threads happens through special data structures called <strong>channels</strong>, which are <em>typed</em> and allow for a basic &quot;sender&quot; vs. &quot;listener&quot; design pattern. This pattern, as we'll soon see, is more expressive than it seems, giving Go one of the strongest toolkits to handle even the most complex concurrency challenges.</p>
