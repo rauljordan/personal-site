@@ -150,8 +150,6 @@ give around 4 CPUs and 8Gb of memory if possible for a smooth installation.</p>
 <p><img src="https://user-images.githubusercontent.com/5572669/186052300-80d9e6d5-e2b7-4e1a-9113-1593e5a5872f.png" alt="Image"></p>
 <p>Your Prysm validator client should also be functional:</p>
 <p><img src="https://user-images.githubusercontent.com/5572669/186052298-54b82ff2-a901-482e-9e5a-a7c265605ad6.png" alt="Image"></p>
-<p>Upon entering proof-of-stake mode, once the mining difficulty hits <strong>50</strong> in go-ethereum, you will see our special panda in your Prysm beacon chain below:</p>
-<p><img src="https://user-images.githubusercontent.com/5572669/186052296-03c18e6f-17f2-4d94-830d-ba7522cc09c8.png" alt="Image"></p>
 <p>This sets up a single node development network with 64 deterministically-generated validator keys to
 drive the creation of blocks in an Ethereum proof-of-stake chain. Here's how it works:</p>
 <ol>
@@ -162,8 +160,11 @@ drive the creation of blocks in an Ethereum proof-of-stake chain. Here's how it 
 letting Prysm drive the consensus of blocks</li>
 </ol>
 <p>The development net is fully functional and allows for the deployment of smart contracts and all the features
-that also come with the Prysm consensus client such as its rich set of APIs for retrieving data from the blockchain.
-This development net is a great way to understand the internals of Ethereum proof-of-stake and to mess around
+that also come with the Prysm consensus client such as its rich set of APIs for retrieving data from the blockchain.</p>
+<p>You now have access to the normal, Ethereum JSON-RPC APIs on http://localhost:8545 and
+the new consensus client APIs for the beacon chain on http://localhost:3500. You can see a list of available
+API endpoints for the beacon chain client <a href="https://ethereum.github.io/beacon-APIs/">here</a></p>
+<p>This development net is a great way to understand the internals of Ethereum proof-of-stake and to mess around
 with the different settings that make the system possible.</p>
 <h1>Manual setup built from source</h1>
 <p>All you will need for a manual installation guide is the Go programming language and <code>git</code>. Install the latest version of Go <a href="https://www.notion.so/How-we-work-e9237b3f750844a0ad3d12768a68d4d7">here</a> and confirm your installation by doing:</p>
