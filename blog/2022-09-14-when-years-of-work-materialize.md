@@ -1,7 +1,8 @@
 ---
 layout: post
 title:  "When Years of Work Finally Materialize"
-date: 2022-sept-20
+preview: After four years of work, we finally shipped proof-of-stake on Ethereum
+date: 2022-Sep-20
 image: https://twitter.com/rauljordaneth/status/1570313476358213632/photo/1
 tags: 
   - ethereum
