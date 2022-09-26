@@ -1,31 +1,37 @@
 ---
 layout: post
 title:  "Blog Series: Pure, functional programming for modern blockchain development"
+preview: A no nonsense guide to learning functional programming in an imperative world
+image: https://i.imgur.com/wfhSw91.png
 date: 2022-Sep-25
 tags: 
   - functional-programming
 ---
 
+![Image](https://i.imgur.com/wfhSw91.png)
+
 Today, modern blockchains tend to be built in the popular Rust and Go programming languages for the 
 myriad benefits they offer. In particular, Rust has risen to popularity with empowering developers to write
-memory-safe software and great performance while Go has been a complentary choice for its powerful concurrency
-and networking primitives while being easy to write. In domain of distributed systems engineering, writing 
-software that is less bug-prone, more secure, and performant are what we tend to optimize for.
+memory-safe software and great performance while Go has been a complementary choice for its powerful concurrency
+and networking primitives while being easy to write. In the domain of distributed systems engineering, writing 
+software that is less bug-prone, more secure, and performant is what we tend to optimize for.
 
 This blog series will focus on making the case for functional programming as a fantastic approach to blockchain development.
-Each post will assume little-to-no familiarity with functional programming concepts, and focus on
+Each post will be tailored to engineers that are seasoned in imperative programming, but beginners in functional programming. 
+We will assume little-to-no familiarity with functional programming concepts, and focus on
 showing how it can be used to solve _real problems_. We will not go into any mathematical topics and instead
 only showcase how these concepts are useful by example. 
 
 In each post, we'll introduce different concepts of functional programming and solve problems
 we run into when designing distributed systems. We'll be using the Haskell programming language in this series and will be introducing 
-language constructs as we go along. No need to be a Haskell expert to understand the premise of each post.
-The series will culminate with guidance on how to develop software for production using a modern Haskell stack that actually works!
+language constructs as we go along. There is no need to be a Haskell expert to understand the premise of each post.
+
+For more advanced readers, we will be posting more advanced takes on fp over time, sometimes between posts in the series.
 
 ## What exactly is functional programming?
 
-The most popular, modern languages today use imperative programming, which works as a series of defined procedures
-to accomplish a task. In Go, for example, the `main()` function of your program can do anything as an ordered procedure of computation.
+The most popular, modern languages today use imperative programming, which works as a series of procedures
+to accomplish a task. In Go, for example, the `main()` function of your program can do anything as an ordered procedure of computations.
 
 ```go
 func main() {
@@ -46,15 +52,15 @@ func main() {
 }
 ```
 
-In the example above, we need to read the program from top to bottom to fully understand what it must do. Each function makes sense
+In the example above, we need to read the program from top-to-bottom to fully understand what it is doing. Each function can make sense
 in isolation, mostly due to a descriptive name, but it is hard to reason about how they fit together until one 
 reads this `main()` function in its entirety. **Maybe you didn't want to save any block if any block in the batch failed to process**.
 This is harder to spot if you had a more complex codebase, and can sneak up on you without the compiler protecting you from the
 bad intent of the code.
 
 Functional programming (FP) flips this paradigm on its head. Instead, it follows a model of "declative programming" where we 
-declare programs in terms of what things _are_ rather than procedures to be done. FP treats types, functions, and definitions 
-as first-class citizens, and only allows deterministic, pure functions! In FP, all functions only depend on their input, 
+declare programs in terms of what things _are_ rather than procedures to be done. FP in Haskell treats types, functions, and definitions 
+as first-class citizens, and only allows deterministic, pure functions! In Haskell, all functions only depend on their input, 
 cannot mutate data, and can only _transform_ their inputs into new values in a deterministic manner.
 
 To illustrate, here's how we could produce a list of N `ones` in an imperative language (Go):
@@ -90,7 +96,7 @@ exactly something is, sometimes in a visually striking manner. Here is how we wo
 ```haskell
 quicksort :: (Ord a) => [a] -> [a] -- Type annotation of the quicksort function.
 quicksort [] = []
-quicksort (x:xs) =                -- Pattern matching a list with head element `x` and a tail `xs`
+quicksort (x:xs) = -- Pattern matching a list with head element `x` and a tail `xs`
   let smaller = quicksort (filter (<=x) xs) in
   let bigger = quicksort (filter (>x) xs) in
   smaller ++ [x] ++ bigger
@@ -148,8 +154,10 @@ sandwich.decideSauce = inputSauce()
 return sandwich
 ```
 
-In the code above, we mutate sandwich along the way, and nothing stops us from doing something crazy such as
-making an HTTP request in the middle, or maybe sending an email when all we want is to build a sandwich!
+In the code above, we mutate the sandwich variable along the way, and nothing stops us from doing something crazy such as
+making an HTTP request in the middle, or maybe sending an email when all we want is to build a sandwich! Even worse, if we do
+not make copies, and the sandwich is a pointer from an external input, we could be mutating a shared value and leaving it
+in an inconsistent state if any intermediate steps fail.
 
 ### Thinking in types changes everything
 
@@ -174,7 +182,7 @@ we simply define what a school lunch sandwich actually is in terms of its parts.
 
 ```haskell
 schoolLunch :: Sandwich
-schoolLunch = SquareBun PeanutButter Nothing [Jelly] -- No cheese because ew.
+schoolLunch = SquareBun PeanutButter Nothing [Jelly] -- No cheese obviously.
 ```
 
 A school lunch above is simply a square-bun, pb&j sandwich! No need for an ordered mutation of sandwich data
@@ -183,8 +191,8 @@ when we can simply declare what we want.
 ### Technical debt
 
 Functional programs tend to be comprised of many small functions that can be understood individually, whereas imperative programs
-tend to grow into mega-sized functions and procedures that make refactoring a pain, and reasoning about the whole
-program difficult. This is because **procedural order is key to imperative programs**. Imperative code is **easy to write but hard to read**.
+tend to grow into mega-sized functions and procedures that make refactoring a pain. With imperative code, reasoning about the whole
+program can be difficult. This is because **procedural order is key to imperative programs**. Imperative code is **easy to write but hard to read**.
 When your code is being developed in a team environment, and a previous developer was the only one that understood all the logic
 of a critical, 1000-line function, you might be in trouble. Modifying even a single line of a procedure could **cripple
 a program or introduce a serious bug**, making it easier to grow technical debt.
@@ -202,9 +210,8 @@ deterministic transformation from inputs to outputs. That is, side-effects are n
 > No side-effects?! That seems impractical in the real world!
 
 It sounds impossible to have a useful program that _does not_ have side-effects, as we use these all the time in
-imperative programs to do valuable things. What alternative do we have in fp? It turns out we have a way of using
-really cool techniques to kind of "emulate" imperative code using pure functions and still maintaining 
-some awesome guarantees which we'll cover in this series.
+imperative programs to do valuable things. What alternative do we have in fp? It turns out we have
+really cool techniques to get effectful code using pure types and still maintain awesome guarantees which we'll cover in this series.
 
 In imperative code, however, your software could be doing something like this:
 

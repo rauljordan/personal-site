@@ -4,37 +4,37 @@
 
 
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Raul Jordan | Blog Series: Pure, functional programming for modern blockchain development</title>
-	<script defer src="https://use.fontawesome.com/releases/v5.8.1/js/all.js"
-		integrity="sha384-g5uSoOSBd7KkhAMlnQILrecXvzst9TdC09/VM+pjDTCM+1il8RHz5fKANTFFb+gQ"
-		crossorigin="anonymous"></script>
-	<meta property="og:title" content="Blog Series: Pure, functional programming for modern blockchain development" />
-	<meta name="author" content="Raul Jordan" />
-	<meta property="og:locale" content="en_US" />
-	<meta name="description" content="" />
-	<meta property="og:description" content="" />
-	<meta property="og:site_name" content="rauljordan" />
-	<meta property="og:image" content="" />
-	<meta property="og:type" content="article" />
-	<meta property="article:published_time" content="2022-09-25T00:00:00&#43;0000" />
-	<meta name="twitter:card" content="summary_large_image" />
-	<meta property="twitter:image" content="" />
-	<meta property="twitter:title" content="Blog Series: Pure, functional programming for modern blockchain development" />
-	<meta name="twitter:site" content="" />
-	<meta name="twitter:creator" content="" />
-	
-	<link rel="stylesheet" href="/css/style.css">
-	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-53062950-12"></script>
-	<script>
-		window.dataLayer = window.dataLayer || [];
-		function gtag() {dataLayer.push(arguments);}
-		gtag('js', new Date());
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Raul Jordan | Blog Series: Pure, functional programming for modern blockchain development</title>
+  <script defer src="https://use.fontawesome.com/releases/v5.8.1/js/all.js"
+    integrity="sha384-g5uSoOSBd7KkhAMlnQILrecXvzst9TdC09/VM+pjDTCM+1il8RHz5fKANTFFb+gQ"
+    crossorigin="anonymous"></script>
+  <meta property="og:title" content="Blog Series: Pure, functional programming for modern blockchain development" />
+  <meta name="author" content="Raul Jordan" />
+  <meta property="og:locale" content="en_US" />
+  <meta name="description" content="" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="rauljordan" />
+  <meta property="og:image" content="https://i.imgur.com/wfhSw91.png" />
+  <meta property="og:type" content="article" />
+  <meta property="article:published_time" content="2022-09-25T00:00:00&#43;0000" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta property="twitter:image" content="https://i.imgur.com/wfhSw91.png" />
+  <meta property="twitter:title" content="Blog Series: Pure, functional programming for modern blockchain development" />
+  <meta name="twitter:site" content="" />
+  <meta name="twitter:creator" content="" />
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-53062950-12"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {dataLayer.push(arguments);}
+    gtag('js', new Date());
 
-		gtag('config', 'UA-53062950-12');
-	</script>
+    gtag('config', 'UA-53062950-12');
+  </script>
 </head>
 
 
@@ -86,22 +86,24 @@
     
   </div>
   <div class="post-date">Published on 2022-Sep-25</div>
-  <p>Today, modern blockchains tend to be built in the popular Rust and Go programming languages for the
+  <p><img src="https://i.imgur.com/wfhSw91.png" alt="Image"></p>
+<p>Today, modern blockchains tend to be built in the popular Rust and Go programming languages for the
 myriad benefits they offer. In particular, Rust has risen to popularity with empowering developers to write
-memory-safe software and great performance while Go has been a complentary choice for its powerful concurrency
-and networking primitives while being easy to write. In domain of distributed systems engineering, writing
-software that is less bug-prone, more secure, and performant are what we tend to optimize for.</p>
+memory-safe software and great performance while Go has been a complementary choice for its powerful concurrency
+and networking primitives while being easy to write. In the domain of distributed systems engineering, writing
+software that is less bug-prone, more secure, and performant is what we tend to optimize for.</p>
 <p>This blog series will focus on making the case for functional programming as a fantastic approach to blockchain development.
-Each post will assume little-to-no familiarity with functional programming concepts, and focus on
+Each post will be tailored to engineers that are seasoned in imperative programming, but beginners in functional programming.
+We will assume little-to-no familiarity with functional programming concepts, and focus on
 showing how it can be used to solve <em>real problems</em>. We will not go into any mathematical topics and instead
 only showcase how these concepts are useful by example.</p>
 <p>In each post, we'll introduce different concepts of functional programming and solve problems
 we run into when designing distributed systems. We'll be using the Haskell programming language in this series and will be introducing
-language constructs as we go along. No need to be a Haskell expert to understand the premise of each post.
-The series will culminate with guidance on how to develop software for production using a modern Haskell stack that actually works!</p>
+language constructs as we go along. There is no need to be a Haskell expert to understand the premise of each post.</p>
+<p>For more advanced readers, we will be posting more advanced takes on fp over time, sometimes between posts in the series.</p>
 <h2>What exactly is functional programming?</h2>
-<p>The most popular, modern languages today use imperative programming, which works as a series of defined procedures
-to accomplish a task. In Go, for example, the <code>main()</code> function of your program can do anything as an ordered procedure of computation.</p>
+<p>The most popular, modern languages today use imperative programming, which works as a series of procedures
+to accomplish a task. In Go, for example, the <code>main()</code> function of your program can do anything as an ordered procedure of computations.</p>
 <pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
 </span></span><span style="display:flex;"><span>  db <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">openDB</span>()
 </span></span><span style="display:flex;"><span>  recentBlocks <span style="color:#ff79c6">:=</span> db.<span style="color:#50fa7b">GetRecentBlocks</span>()
@@ -118,14 +120,14 @@ to accomplish a task. In Go, for example, the <code>main()</code> function of yo
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">...</span> <span style="color:#6272a4">// Do more operations...
 </span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>}
-</span></span></code></pre><p>In the example above, we need to read the program from top to bottom to fully understand what it must do. Each function makes sense
+</span></span></code></pre><p>In the example above, we need to read the program from top-to-bottom to fully understand what it is doing. Each function can make sense
 in isolation, mostly due to a descriptive name, but it is hard to reason about how they fit together until one
 reads this <code>main()</code> function in its entirety. <strong>Maybe you didn't want to save any block if any block in the batch failed to process</strong>.
 This is harder to spot if you had a more complex codebase, and can sneak up on you without the compiler protecting you from the
 bad intent of the code.</p>
 <p>Functional programming (FP) flips this paradigm on its head. Instead, it follows a model of &quot;declative programming&quot; where we
-declare programs in terms of what things <em>are</em> rather than procedures to be done. FP treats types, functions, and definitions
-as first-class citizens, and only allows deterministic, pure functions! In FP, all functions only depend on their input,
+declare programs in terms of what things <em>are</em> rather than procedures to be done. FP in Haskell treats types, functions, and definitions
+as first-class citizens, and only allows deterministic, pure functions! In Haskell, all functions only depend on their input,
 cannot mutate data, and can only <em>transform</em> their inputs into new values in a deterministic manner.</p>
 <p>To illustrate, here's how we could produce a list of N <code>ones</code> in an imperative language (Go):</p>
 <pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">ones</span>(n <span style="color:#8be9fd">int</span>) []<span style="color:#8be9fd">int</span> {
@@ -149,7 +151,7 @@ exactly something is, sometimes in a visually striking manner. Here is how we wo
 <code>quicksort</code> algorithm in this manner:</p>
 <pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#50fa7b">quicksort</span> <span style="color:#ff79c6">::</span> (<span style="color:#8be9fd">Ord</span> a) <span style="color:#ff79c6">=&gt;</span> [a] <span style="color:#ff79c6">-&gt;</span> [a] <span style="color:#6272a4">-- Type annotation of the quicksort function.</span>
 </span></span><span style="display:flex;"><span><span style="color:#50fa7b">quicksort</span> <span style="color:#8be9fd">[]</span> <span style="color:#ff79c6">=</span> <span style="color:#8be9fd">[]</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">quicksort</span> (x<span style="color:#8be9fd">:</span>xs) <span style="color:#ff79c6">=</span>                <span style="color:#6272a4">-- Pattern matching a list with head element `x` and a tail `xs`</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">quicksort</span> (x<span style="color:#8be9fd">:</span>xs) <span style="color:#ff79c6">=</span> <span style="color:#6272a4">-- Pattern matching a list with head element `x` and a tail `xs`</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">let</span> smaller <span style="color:#ff79c6">=</span> quicksort (filter (<span style="color:#ff79c6">&lt;=</span>x) xs) <span style="color:#ff79c6">in</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">let</span> bigger <span style="color:#ff79c6">=</span> quicksort (filter (<span style="color:#ff79c6">&gt;</span>x) xs) <span style="color:#ff79c6">in</span>
 </span></span><span style="display:flex;"><span>  smaller <span style="color:#ff79c6">++</span> [x] <span style="color:#ff79c6">++</span> bigger
@@ -189,8 +191,10 @@ We might do something like this:</p>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>sandwich.decideSauce = <span style="color:#50fa7b">inputSauce</span>()
 </span></span><span style="display:flex;"><span><span style="color:#ff79c6">return</span> sandwich
-</span></span></code></pre><p>In the code above, we mutate sandwich along the way, and nothing stops us from doing something crazy such as
-making an HTTP request in the middle, or maybe sending an email when all we want is to build a sandwich!</p>
+</span></span></code></pre><p>In the code above, we mutate the sandwich variable along the way, and nothing stops us from doing something crazy such as
+making an HTTP request in the middle, or maybe sending an email when all we want is to build a sandwich! Even worse, if we do
+not make copies, and the sandwich is a pointer from an external input, we could be mutating a shared value and leaving it
+in an inconsistent state if any intermediate steps fail.</p>
 <h3>Thinking in types changes everything</h3>
 <p>Instead of saying how to build a sandwich, let's define what a sandwich <em>is</em>. In Haskell,
 we &quot;think in types&quot; and build our entire definitions around type sets we have full control over.</p>
@@ -207,13 +211,13 @@ we &quot;think in types&quot; and build our entire definitions around type sets 
 </span></span></code></pre><p>From here, instead of needing to define a <em>procedure</em> to build a sandwich as a series of steps,
 we simply define what a school lunch sandwich actually is in terms of its parts.</p>
 <pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#50fa7b">schoolLunch</span> <span style="color:#ff79c6">::</span> <span style="color:#8be9fd">Sandwich</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">schoolLunch</span> <span style="color:#ff79c6">=</span> <span style="color:#8be9fd">SquareBun</span> <span style="color:#8be9fd">PeanutButter</span> <span style="color:#8be9fd">Nothing</span> [<span style="color:#8be9fd">Jelly</span>] <span style="color:#6272a4">-- No cheese because ew.</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">schoolLunch</span> <span style="color:#ff79c6">=</span> <span style="color:#8be9fd">SquareBun</span> <span style="color:#8be9fd">PeanutButter</span> <span style="color:#8be9fd">Nothing</span> [<span style="color:#8be9fd">Jelly</span>] <span style="color:#6272a4">-- No cheese obviously.</span>
 </span></span></code></pre><p>A school lunch above is simply a square-bun, pb&amp;j sandwich! No need for an ordered mutation of sandwich data
 when we can simply declare what we want.</p>
 <h3>Technical debt</h3>
 <p>Functional programs tend to be comprised of many small functions that can be understood individually, whereas imperative programs
-tend to grow into mega-sized functions and procedures that make refactoring a pain, and reasoning about the whole
-program difficult. This is because <strong>procedural order is key to imperative programs</strong>. Imperative code is <strong>easy to write but hard to read</strong>.
+tend to grow into mega-sized functions and procedures that make refactoring a pain. With imperative code, reasoning about the whole
+program can be difficult. This is because <strong>procedural order is key to imperative programs</strong>. Imperative code is <strong>easy to write but hard to read</strong>.
 When your code is being developed in a team environment, and a previous developer was the only one that understood all the logic
 of a critical, 1000-line function, you might be in trouble. Modifying even a single line of a procedure could <strong>cripple
 a program or introduce a serious bug</strong>, making it easier to grow technical debt.</p>
@@ -228,9 +232,8 @@ deterministic transformation from inputs to outputs. That is, side-effects are n
 <p>No side-effects?! That seems impractical in the real world!</p>
 </blockquote>
 <p>It sounds impossible to have a useful program that <em>does not</em> have side-effects, as we use these all the time in
-imperative programs to do valuable things. What alternative do we have in fp? It turns out we have a way of using
-really cool techniques to kind of &quot;emulate&quot; imperative code using pure functions and still maintaining
-some awesome guarantees which we'll cover in this series.</p>
+imperative programs to do valuable things. What alternative do we have in fp? It turns out we have
+really cool techniques to get effectful code using pure types and still maintain awesome guarantees which we'll cover in this series.</p>
 <p>In imperative code, however, your software could be doing something like this:</p>
 <pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#6272a4">// Simple addition of two integers.
 </span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">addNumbers</span>(x, y <span style="color:#8be9fd">int</span>) {
@@ -264,8 +267,8 @@ to bring these ideas to developers that are not yet familiar with them.</p>
 <div id="disqus_thread"></div>
 <script>
 	var disqus_config = function () {
-		this.page.url = 'https://rauljordan.com/\/2022\/09\/22\/part-i-functional-programming-for-ethereum.html';
-		this.page.identifier = '\/2022\/09\/22\/part-i-functional-programming-for-ethereum.html';
+		this.page.url = 'https://rauljordan.com/\/2022\/09\/25\/blog-series-functional-programming-for-blockchain.html';
+		this.page.identifier = '\/2022\/09\/25\/blog-series-functional-programming-for-blockchain.html';
 		this.page.title = 'Blog Series: Pure, functional programming for modern blockchain development';
 	};
 

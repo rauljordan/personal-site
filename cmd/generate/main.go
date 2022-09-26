@@ -65,6 +65,7 @@ type Post struct {
 	DateString  string
 	Preview     string
 	Url         string
+	Image       string
 	Description string
 	Tags        []string
 	Contents    template.HTML
@@ -249,6 +250,7 @@ func renderIndividualBlogPost(t *template.Template, page *Page, blogPostFile, ou
 	page.MetaDate = post.Date.Format(niceFormat)
 	page.MetaTitle = post.Title
 	page.MetaDescription = post.Description
+	page.MetaImage = post.Image
 	return t.Lookup("base").Execute(f, page)
 }
 
@@ -304,6 +306,7 @@ func generateBlogPostHtmlFromMarkdown(blogPostPath string) (*Post, error) {
 	var tags []string
 	var date time.Time
 	var dateString string
+	var image string
 	if tl, ok := metaData["title"].(string); ok {
 		title = tl
 	}
@@ -312,6 +315,9 @@ func generateBlogPostHtmlFromMarkdown(blogPostPath string) (*Post, error) {
 	}
 	if d, ok := metaData["description"].(string); ok {
 		desc = d
+	}
+	if i, ok := metaData["image"].(string); ok {
+		image = i
 	}
 	if d, ok := metaData["date"].(string); ok {
 		dateString = d
@@ -336,6 +342,7 @@ func generateBlogPostHtmlFromMarkdown(blogPostPath string) (*Post, error) {
 	url = strings.Replace(url, "-", "/", 3)
 	return &Post{
 		Title:       title,
+		Image:       image,
 		Preview:     preview,
 		Date:        date,
 		DateString:  dateString,
