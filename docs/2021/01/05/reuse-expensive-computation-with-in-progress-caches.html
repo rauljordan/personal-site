@@ -87,229 +87,229 @@
 	</div>
 	<div class="post-date">Published on 24/01/2020</div>
 	<p>Caching is the go-to solution in applications to avoid repeating expensive computation and instead prefer some value that can be readily fetched in-memory. A simple caching strategy is to use a cache as a thin layer above database read access as follows:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#ff79c6">package</span> main
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;sync&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">import</span> <span style="color:#f1fa8c">&#34;sync&#34;</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Database</span> <span style="color:#66d9ef">struct</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">cache</span> <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>][]<span style="color:#66d9ef">byte</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">lock</span>  <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">RWMutex</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Database <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>	cache <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>][]<span style="color:#8be9fd">byte</span>
+</span></span><span style="display:flex;"><span>	lock  sync.RWMutex
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">db</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Database</span>) <span style="color:#a6e22e">GetItem</span>(<span style="color:#a6e22e">key</span> []<span style="color:#66d9ef">byte</span>) ([]<span style="color:#66d9ef">byte</span>, <span style="color:#66d9ef">error</span>) {
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">RLock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">value</span>, <span style="color:#a6e22e">ok</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">cache</span>[string(<span style="color:#a6e22e">key</span>)]; <span style="color:#a6e22e">ok</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">RUnlock</span>()
-</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">value</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (db <span style="color:#ff79c6">*</span>Database) <span style="color:#50fa7b">GetItem</span>(key []<span style="color:#8be9fd">byte</span>) ([]<span style="color:#8be9fd">byte</span>, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>	db.lock.<span style="color:#50fa7b">RLock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> value, ok <span style="color:#ff79c6">:=</span> db.cache[<span style="color:#8be9fd;font-style:italic">string</span>(key)]; ok {
+</span></span><span style="display:flex;"><span>		db.lock.<span style="color:#50fa7b">RUnlock</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> value
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">RUnlock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">readFromDatabase</span>(<span style="color:#a6e22e">key</span>)
+</span></span><span style="display:flex;"><span>	db.lock.<span style="color:#50fa7b">RUnlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> db.<span style="color:#50fa7b">readFromDatabase</span>(key)
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">db</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Database</span>) <span style="color:#a6e22e">WriteItem</span>(<span style="color:#a6e22e">key</span>, <span style="color:#a6e22e">value</span> []<span style="color:#66d9ef">byte</span>) <span style="color:#66d9ef">error</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">writeToDatabase</span>(<span style="color:#a6e22e">key</span>, <span style="color:#a6e22e">value</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (db <span style="color:#ff79c6">*</span>Database) <span style="color:#50fa7b">WriteItem</span>(key, value []<span style="color:#8be9fd">byte</span>) <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> db.<span style="color:#50fa7b">writeToDatabase</span>(key, value); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> err
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Lock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">cache</span>[string(<span style="color:#a6e22e">key</span>)] = <span style="color:#a6e22e">value</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Unlock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+</span></span><span style="display:flex;"><span>	db.lock.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>	db.cache[<span style="color:#8be9fd;font-style:italic">string</span>(key)] = value
+</span></span><span style="display:flex;"><span>	db.lock.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>This strategy works great for applications where you have requests to read access for a certain value repeatedly, preventing you from performing a potentially expensive db query and leveraging fast access in-memory. Caching is very helpful. For some problems, however, a cache is definitely not enough.</p>
 <h3>The busy workers problem</h3>
 <p>Imagine you have thousands or more processes attempting to perform the same expensive computation at the same time. Perhaps all of them were notified they need to crunch certain numbers which takes a long time, or they need perform a prohibitively expensive operation that can max out your CPU or RAM if overdone. This is quite a common problem in my project, Prysm, which has many different workers in the form of goroutines often attempting to perform duplicate work. A naive solution to this is to simply leverage a cache strategy to avoid repeated computation, as shown above. However, what if there is nothing in the cache yet for the value you care about and thousands of workers are <em>already</em> attempting the expensive computation? Perhaps there are many workers attempting to perform an action that is <em>already in progress</em>. This is a great use-case for what we call an <strong>in progress cache</strong>. Let's look at an example:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#ff79c6">package</span> main
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;sync&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">import</span> <span style="color:#f1fa8c">&#34;sync&#34;</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">numWorkers</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">1000</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#a6e22e">numWorkers</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#a6e22e">numWorkers</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">w</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>) {
-</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
-</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">doSomethingExpensive</span>()
-</span></span><span style="display:flex;"><span>		}(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">wg</span>)
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> wg sync.WaitGroup
+</span></span><span style="display:flex;"><span>	numWorkers <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">1000</span>
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#50fa7b">Add</span>(numWorkers)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; numWorkers; i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>(w <span style="color:#ff79c6">*</span>sync.WaitGroup) {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">defer</span> wg.<span style="color:#50fa7b">Done</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#50fa7b">doSomethingExpensive</span>()
+</span></span><span style="display:flex;"><span>		}(<span style="color:#ff79c6">&amp;</span>wg)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#50fa7b">Wait</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">doSomethingExpensive</span>() {
-</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Get result from cache if it has already completed.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">value</span>, <span style="color:#a6e22e">ok</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">checkCache</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">ok</span>{
-</span></span><span style="display:flex;"><span>		<span style="color:#75715e">// Do something with the cached value.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	}
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">doSomethingExpensive</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Get result from cache if it has already completed.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	value, ok <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">checkCache</span>()
+</span></span><span style="display:flex;"><span>	ok{
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Do something with the cached value.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Expensive operation which can take a few seconds to complete...
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Expensive operation which can take a few seconds to complete...
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>}
 </span></span></code></pre><p>But what if there is nothing in the cache yet when all 1000 workers are attempting to perform the expensive operation? Well, all of them will start performing your expensive operation, your computer might blow up, and our cache was pretty much useless. Instead, we can leverage the power of <strong>Go channels</strong> to mark work as <strong>in progress</strong> and instead have all workers share the same return value of whichever worker completed it first. Let's think about how to do this.</p>
 <p>First of all, we need a way to <em>block</em> a worker from performing expensive computation if a request we care about is already in progress. Second, once a <em>single worker completes</em> an expensive computation, we need to notify all workers that were attempting the same computation of the return value immediately. To accomplish the first task, we can leverage a combination of a shared map to check if a request is in progress, then subscribe to the in-progress request by initializing a channel and appending it to some shared list for the request. Finally, once a worker completes the computation, it can send out the result to all receivers subscribed to that in-progress request. Let's see it in action.</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">service</span> <span style="color:#66d9ef">struct</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">inProgress</span>         <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">bool</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">awaitingCompletion</span> <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>][]<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">lock</span>               <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">RWMutex</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> service <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>	inProgress         <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">bool</span>
+</span></span><span style="display:flex;"><span>	awaitingCompletion <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>][]<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">string</span>
+</span></span><span style="display:flex;"><span>	lock               sync.RWMutex
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>Above, we define a simple struct used to encapsulate this information. In our example, the result of our expensive computation is some string value and the request identity is also a string. We keep track of two maps for request identities: the first is called <code>inProgress</code> and will be used by workers to check if expensive computation is already in progress. The second is called <code>awaitingCompletion</code>, which is a list of channels that are awaiting to be notified of an in-progress request. They are essentially other workers that are subscribing to the computed value of the worker currently in progress. We use a mutex to make these maps thread-safe.</p>
 <p>Next up, we start our <code>main</code> function simulating 5 workers doing some expensive operation concurrently.</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">ss</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">service</span>{
-</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">inProgress</span>:         make(<span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">bool</span>),
-</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">awaitingCompletion</span>: make(<span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>][]<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>),
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>	ss <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>service{
+</span></span><span style="display:flex;"><span>		inProgress:         <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">bool</span>),
+</span></span><span style="display:flex;"><span>		awaitingCompletion: <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>][]<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">string</span>),
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Create N = 5 workers.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">numWorkers</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">5</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#a6e22e">numWorkers</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Create N = 5 workers.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	numWorkers <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">5</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> wg sync.WaitGroup
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#50fa7b">Add</span>(numWorkers)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Launch N goroutines performing the same work:
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">// a request with ID &#34;expensivecomputation&#34;.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">requestID</span> <span style="color:#f92672">:=</span> <span style="color:#e6db74">&#34;expensivecomputation&#34;</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#a6e22e">numWorkers</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">w</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>, <span style="color:#a6e22e">id</span> <span style="color:#66d9ef">string</span>) {
-</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
-</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">ss</span>.<span style="color:#a6e22e">doWork</span>(<span style="color:#a6e22e">id</span>)
-</span></span><span style="display:flex;"><span>		}(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">wg</span>, <span style="color:#a6e22e">requestID</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Launch N goroutines performing the same work:
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	<span style="color:#6272a4">// a request with ID &#34;expensivecomputation&#34;.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	requestID <span style="color:#ff79c6">:=</span> <span style="color:#f1fa8c">&#34;expensivecomputation&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; numWorkers; i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>(w <span style="color:#ff79c6">*</span>sync.WaitGroup, id <span style="color:#8be9fd">string</span>) {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">defer</span> wg.<span style="color:#50fa7b">Done</span>()
+</span></span><span style="display:flex;"><span>			ss.<span style="color:#50fa7b">doWork</span>(id)
+</span></span><span style="display:flex;"><span>		}(<span style="color:#ff79c6">&amp;</span>wg, requestID)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Wait for all goroutines to complete work.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Done&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Wait for all goroutines to complete work.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	wg.<span style="color:#50fa7b">Wait</span>()
+</span></span><span style="display:flex;"><span>	fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;Done&#34;</span>)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>Next up, we look at the key function: <code>doWork(requestID string)</code>. We'll write it out in Go pseudocode first.</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#ff79c6">package</span> main
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;time&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">import</span> <span style="color:#f1fa8c">&#34;time&#34;</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">service</span>) <span style="color:#a6e22e">doWork</span>(<span style="color:#a6e22e">requestID</span> <span style="color:#66d9ef">string</span>) {
-</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">ok</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">inProgress</span>[<span style="color:#a6e22e">requestID</span>]; <span style="color:#a6e22e">ok</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#75715e">// Subscribe to be notified of when the in-progress
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>		<span style="color:#75715e">// request completes via a channel.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
-</span></span><span style="display:flex;"><span>		<span style="color:#75715e">// Await the response from the worker currently in-progress...
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
-</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (s <span style="color:#ff79c6">*</span>service) <span style="color:#50fa7b">doWork</span>(requestID <span style="color:#8be9fd">string</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> ok <span style="color:#ff79c6">:=</span> s.inProgress[requestID]; ok {
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Subscribe to be notified of when the in-progress
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>		<span style="color:#6272a4">// request completes via a channel.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Await the response from the worker currently in-progress...
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Mark the requestID as in progress.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Lock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">inProgress</span>[<span style="color:#a6e22e">requestID</span>] = <span style="color:#66d9ef">true</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Unlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Mark the requestID as in progress.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	s.lock.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>	s.inProgress[requestID] = <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#50fa7b">Unlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Perform some expensive, lengthy work (time.Sleep used to simulate it).
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">4</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">response</span> <span style="color:#f92672">:=</span> <span style="color:#e6db74">&#34;the answer is 42&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Perform some expensive, lengthy work (time.Sleep used to simulate it).
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	time.<span style="color:#50fa7b">Sleep</span>(time.Second <span style="color:#ff79c6">*</span> <span style="color:#bd93f9">4</span>)
+</span></span><span style="display:flex;"><span>	response <span style="color:#ff79c6">:=</span> <span style="color:#f1fa8c">&#34;the answer is 42&#34;</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Send to all subscribers.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">RLock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">receiversWaiting</span>, <span style="color:#a6e22e">ok</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">awaitingCompletion</span>[<span style="color:#a6e22e">requestID</span>]
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">RUnlock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">ok</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">receiversWaiting</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">ch</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">response</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Send to all subscribers.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	s.lock.<span style="color:#50fa7b">RLock</span>()
+</span></span><span style="display:flex;"><span>	receiversWaiting, ok <span style="color:#ff79c6">:=</span> s.awaitingCompletion[requestID]
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#50fa7b">RUnlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> ok {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, ch <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> receiversWaiting {
+</span></span><span style="display:flex;"><span>			ch <span style="color:#ff79c6">&lt;-</span> response
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Reset the in-progress data for the requestID.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Lock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">inProgress</span>[<span style="color:#a6e22e">requestID</span>] = <span style="color:#66d9ef">false</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">awaitingCompletion</span>[<span style="color:#a6e22e">requestID</span>] = make([]<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>, <span style="color:#ae81ff">0</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Unlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Reset the in-progress data for the requestID.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	s.lock.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>	s.inProgress[requestID] = <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>	s.awaitingCompletion[requestID] = <span style="color:#8be9fd;font-style:italic">make</span>([]<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">string</span>, <span style="color:#bd93f9">0</span>)
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#50fa7b">Unlock</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>We lock around the map access to reduce lock contention in the real application. Next up, we fill in the logic for <code>if ok := inProgress[key]; ok</code>.</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#a6e22e">ok</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">inProgress</span>[<span style="color:#a6e22e">requestID</span>]; <span style="color:#a6e22e">ok</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// We add a buffer of 1 to prevent blocking
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// the sender&#39;s goroutine.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">responseChan</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>, <span style="color:#ae81ff">1</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">defer</span> close(<span style="color:#a6e22e">responseChan</span>)
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#ff79c6">if</span> ok <span style="color:#ff79c6">:=</span> s.inProgress[requestID]; ok {
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// We add a buffer of 1 to prevent blocking
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// the sender&#39;s goroutine.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  responseChan <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">string</span>, <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">defer</span> <span style="color:#8be9fd;font-style:italic">close</span>(responseChan)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Lock</span>()
-</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">awaitingCompletion</span>[<span style="color:#a6e22e">requestID</span>] = append(<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">awaitingCompletion</span>[<span style="color:#a6e22e">requestID</span>], <span style="color:#a6e22e">responseChan</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Unlock</span>()
-</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Awaiting work in-progress&#34;</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">val</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">responseChan</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Work result received with value %s\n&#34;</span>, <span style="color:#a6e22e">val</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>  lock.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>  s.awaitingCompletion[requestID] = <span style="color:#8be9fd;font-style:italic">append</span>(s.awaitingCompletion[requestID], responseChan)
+</span></span><span style="display:flex;"><span>  lock.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span>  fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;Awaiting work in-progress&#34;</span>)
+</span></span><span style="display:flex;"><span>  val <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>responseChan
+</span></span><span style="display:flex;"><span>  fmt.<span style="color:#50fa7b">Printf</span>(<span style="color:#f1fa8c">&#34;Work result received with value %s\n&#34;</span>, val)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>Putting it altogether, we get:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#ff79c6">package</span> main
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> (
-</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;fmt&#34;</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;sync&#34;</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;time&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">import</span> (
+</span></span><span style="display:flex;"><span>	<span style="color:#f1fa8c">&#34;fmt&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f1fa8c">&#34;sync&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f1fa8c">&#34;time&#34;</span>
 </span></span><span style="display:flex;"><span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">service</span> <span style="color:#66d9ef">struct</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">inProgress</span>         <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">bool</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">awaitingCompletion</span> <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>][]<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">lock</span>               <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">RWMutex</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> service <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>	inProgress         <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">bool</span>
+</span></span><span style="display:flex;"><span>	awaitingCompletion <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>][]<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">string</span>
+</span></span><span style="display:flex;"><span>	lock               sync.RWMutex
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">service</span>) <span style="color:#a6e22e">doWork</span>(<span style="color:#a6e22e">requestID</span> <span style="color:#66d9ef">string</span>) {
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">RLock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">ok</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">inProgress</span>[<span style="color:#a6e22e">requestID</span>]; <span style="color:#a6e22e">ok</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">RUnlock</span>()
-</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">responseChan</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>, <span style="color:#ae81ff">1</span>)
-</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">defer</span> close(<span style="color:#a6e22e">responseChan</span>)
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (s <span style="color:#ff79c6">*</span>service) <span style="color:#50fa7b">doWork</span>(requestID <span style="color:#8be9fd">string</span>) {
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#50fa7b">RLock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> ok <span style="color:#ff79c6">:=</span> s.inProgress[requestID]; ok {
+</span></span><span style="display:flex;"><span>		s.lock.<span style="color:#50fa7b">RUnlock</span>()
+</span></span><span style="display:flex;"><span>		responseChan <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">string</span>, <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">defer</span> <span style="color:#8be9fd;font-style:italic">close</span>(responseChan)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Lock</span>()
-</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">awaitingCompletion</span>[<span style="color:#a6e22e">requestID</span>] = append(<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">awaitingCompletion</span>[<span style="color:#a6e22e">requestID</span>], <span style="color:#a6e22e">responseChan</span>)
-</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Unlock</span>()
-</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Awaiting work completed&#34;</span>)
-</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">val</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">responseChan</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Work result received with value %s\n&#34;</span>, <span style="color:#a6e22e">val</span>)
-</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>		s.lock.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>		s.awaitingCompletion[requestID] = <span style="color:#8be9fd;font-style:italic">append</span>(s.awaitingCompletion[requestID], responseChan)
+</span></span><span style="display:flex;"><span>		s.lock.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span>		fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;Awaiting work completed&#34;</span>)
+</span></span><span style="display:flex;"><span>		val <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>responseChan
+</span></span><span style="display:flex;"><span>		fmt.<span style="color:#50fa7b">Printf</span>(<span style="color:#f1fa8c">&#34;Work result received with value %s\n&#34;</span>, val)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">RUnlock</span>()
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#50fa7b">RUnlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Lock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">inProgress</span>[<span style="color:#a6e22e">requestID</span>] = <span style="color:#66d9ef">true</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Unlock</span>()
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>	s.inProgress[requestID] = <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#50fa7b">Unlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Do expensive operation
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Doing expensive work...&#34;</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">4</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">result</span> <span style="color:#f92672">:=</span> <span style="color:#e6db74">&#34;the answer is 42&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Do expensive operation
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;Doing expensive work...&#34;</span>)
+</span></span><span style="display:flex;"><span>	time.<span style="color:#50fa7b">Sleep</span>(time.Second <span style="color:#ff79c6">*</span> <span style="color:#bd93f9">4</span>)
+</span></span><span style="display:flex;"><span>	result <span style="color:#ff79c6">:=</span> <span style="color:#f1fa8c">&#34;the answer is 42&#34;</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">RLock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">receiversWaiting</span>, <span style="color:#a6e22e">ok</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">awaitingCompletion</span>[<span style="color:#a6e22e">requestID</span>]
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">RUnlock</span>()
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#50fa7b">RLock</span>()
+</span></span><span style="display:flex;"><span>	receiversWaiting, ok <span style="color:#ff79c6">:=</span> s.awaitingCompletion[requestID]
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#50fa7b">RUnlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">ok</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">receiversWaiting</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">ch</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">result</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> ok {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, ch <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> receiversWaiting {
+</span></span><span style="display:flex;"><span>			ch <span style="color:#ff79c6">&lt;-</span> result
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Sent result to all subscribers&#34;</span>)
+</span></span><span style="display:flex;"><span>		fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;Sent result to all subscribers&#34;</span>)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Lock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">inProgress</span>[<span style="color:#a6e22e">requestID</span>] = <span style="color:#66d9ef">false</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">awaitingCompletion</span>[<span style="color:#a6e22e">requestID</span>] = make([]<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>, <span style="color:#ae81ff">0</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Unlock</span>()
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>	s.inProgress[requestID] = <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>	s.awaitingCompletion[requestID] = <span style="color:#8be9fd;font-style:italic">make</span>([]<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">string</span>, <span style="color:#bd93f9">0</span>)
+</span></span><span style="display:flex;"><span>	s.lock.<span style="color:#50fa7b">Unlock</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">ss</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">service</span>{
-</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">inProgress</span>:         make(<span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">bool</span>),
-</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">awaitingCompletion</span>: make(<span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>][]<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>),
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>	ss <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>service{
+</span></span><span style="display:flex;"><span>		inProgress:         <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">bool</span>),
+</span></span><span style="display:flex;"><span>		awaitingCompletion: <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>][]<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">string</span>),
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">numWorkers</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">5</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#a6e22e">numWorkers</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">requestID</span> <span style="color:#f92672">:=</span> <span style="color:#e6db74">&#34;expensivecomputation&#34;</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#a6e22e">numWorkers</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">w</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>, <span style="color:#a6e22e">id</span> <span style="color:#66d9ef">string</span>) {
-</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
-</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">ss</span>.<span style="color:#a6e22e">doWork</span>(<span style="color:#a6e22e">id</span>)
-</span></span><span style="display:flex;"><span>		}(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">wg</span>, <span style="color:#a6e22e">requestID</span>)
+</span></span><span style="display:flex;"><span>	numWorkers <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">5</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> wg sync.WaitGroup
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#50fa7b">Add</span>(numWorkers)
+</span></span><span style="display:flex;"><span>	requestID <span style="color:#ff79c6">:=</span> <span style="color:#f1fa8c">&#34;expensivecomputation&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; numWorkers; i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>(w <span style="color:#ff79c6">*</span>sync.WaitGroup, id <span style="color:#8be9fd">string</span>) {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">defer</span> wg.<span style="color:#50fa7b">Done</span>()
+</span></span><span style="display:flex;"><span>			ss.<span style="color:#50fa7b">doWork</span>(id)
+</span></span><span style="display:flex;"><span>		}(<span style="color:#ff79c6">&amp;</span>wg, requestID)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Done&#34;</span>)
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#50fa7b">Wait</span>()
+</span></span><span style="display:flex;"><span>	fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;Done&#34;</span>)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>Now running the main.go file: <code>go run main.go</code>, we observe it happening as expected:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>Doing expensive work...
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>Doing expensive work...
 </span></span><span style="display:flex;"><span>Awaiting work completed
 </span></span><span style="display:flex;"><span>Awaiting work completed
 </span></span><span style="display:flex;"><span>Awaiting work completed

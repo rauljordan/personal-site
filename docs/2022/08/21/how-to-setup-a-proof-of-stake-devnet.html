@@ -130,8 +130,8 @@ give around 4 CPUs and 8Gb of memory if possible for a smooth installation.</p>
 <pre><code>docker compose up
 </code></pre>
 <p>Boom! Your network is up and running.</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>$ docker compose up -d
-</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>+<span style="color:#f92672">]</span> Running 7/7
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>$ docker compose up -d
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>+<span style="color:#ff79c6">]</span> Running 7/7
 </span></span><span style="display:flex;"><span> ⠿ Network eth-pos-devnet_default                          Created
 </span></span><span style="display:flex;"><span> ⠿ Container eth-pos-devnet-geth-genesis-1                 Started
 </span></span><span style="display:flex;"><span> ⠿ Container eth-pos-devnet-create-beacon-chain-genesis-1  Started
@@ -168,23 +168,23 @@ API endpoints for the beacon chain client <a href="https://ethereum.github.io/be
 with the different settings that make the system possible.</p>
 <h1>Manual setup built from source</h1>
 <p>All you will need for a manual installation guide is the Go programming language and <code>git</code>. Install the latest version of Go <a href="https://www.notion.so/How-we-work-e9237b3f750844a0ad3d12768a68d4d7">here</a> and confirm your installation by doing:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>go version
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>go version
 </span></span></code></pre><p>You should see an output showing you the version you have installed. Next, create a folder called <code>devnet</code> and change directory into it</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>mkdir devnet <span style="color:#f92672">&amp;&amp;</span> cd devnet
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>mkdir devnet <span style="color:#ff79c6">&amp;&amp;</span> <span style="color:#8be9fd;font-style:italic">cd</span> devnet
 </span></span></code></pre><p>The instructions below are running with Prysm commit <a href="https://www.notion.so/How-we-work-e9237b3f750844a0ad3d12768a68d4d7">a65c670f5e4b08221e01e702cbd527684460c2e9</a> and go-ethereum commit <a href="https://www.notion.so/How-we-work-e9237b3f750844a0ad3d12768a68d4d7">23ac8df15302bbde098cab6d711abdd24843d66a</a></p>
 <p>Clone the Prysm repository and build the following binaries. We’ll be outputting them to the <code>devnet</code> folder:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>git clone https://github.com/prysmaticlabs/prysm <span style="color:#f92672">&amp;&amp;</span> cd prysm
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>git clone https://github.com/prysmaticlabs/prysm <span style="color:#ff79c6">&amp;&amp;</span> <span style="color:#8be9fd;font-style:italic">cd</span> prysm
 </span></span><span style="display:flex;"><span>git checkout a65c670f5e4b08221e01e702cbd527684460c2e9
-</span></span><span style="display:flex;"><span>go build -o<span style="color:#f92672">=</span>../beacon-chain ./cmd/beacon-chain
-</span></span><span style="display:flex;"><span>go build -o<span style="color:#f92672">=</span>../validator ./cmd/validator
-</span></span><span style="display:flex;"><span>go build -o<span style="color:#f92672">=</span>../generate-genesis ./tools/genesis-state-gen
-</span></span><span style="display:flex;"><span>cd ..
+</span></span><span style="display:flex;"><span>go build -o<span style="color:#ff79c6">=</span>../beacon-chain ./cmd/beacon-chain
+</span></span><span style="display:flex;"><span>go build -o<span style="color:#ff79c6">=</span>../validator ./cmd/validator
+</span></span><span style="display:flex;"><span>go build -o<span style="color:#ff79c6">=</span>../generate-genesis ./tools/genesis-state-gen
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">cd</span> ..
 </span></span></code></pre><p>Clone the go-ethereum repository and build it:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>git clone https://github.com/ethereum/go-ethereum <span style="color:#f92672">&amp;&amp;</span> cd go-ethereum
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>git clone https://github.com/ethereum/go-ethereum <span style="color:#ff79c6">&amp;&amp;</span> <span style="color:#8be9fd;font-style:italic">cd</span> go-ethereum
 </span></span><span style="display:flex;"><span>git checkout 23ac8df15302bbde098cab6d711abdd24843d66a
 </span></span><span style="display:flex;"><span>make geth
 </span></span><span style="display:flex;"><span>cp ./build/bin/geth ../geth
-</span></span><span style="display:flex;"><span>cd ..
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">cd</span> ..
 </span></span></code></pre><p>You will now have all the executables you need to run the the software for the devnet.</p>
 <h2>Configuration files</h2>
 <p>You will need configuration files for setting up Prysm and Go-Ethereum.</p>
@@ -193,43 +193,43 @@ with the different settings that make the system possible.</p>
 <p>The configuration above contains information about the different hard-fork versions that are required for Prysm to run, and has some custom parameters to make running your devnet easier. It’s important to note that you can change any of these settings as desired. To see the full list of configuration options you can change, see <a href="https://www.notion.so/How-we-work-e9237b3f750844a0ad3d12768a68d4d7">here</a>. For example, in the devnet above, we will only have 4 seconds per slot and 4 slots per epoch, making it go faster than normal.</p>
 <h3>Go-Ethereum</h3>
 <p>On the go-ethereum side, you will need to set-up a private key that will help advance the chain from genesis by mining up until it reaches <strong>proof-of-stake</strong> mode. Create a file called <code>secret.json</code> inside of your <code>devnet</code> folder with the following:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622
 </span></span></code></pre><p>Next, save the following file as <code>genesis.json</code> inside of your devnet folder as well:</p>
 <p>The file above sets up the genesis configuration for go-ethereum, which seeds certain accounts with an ETH balance and deploys a validator deposit contract at address <code>0x4242424242424242424242424242424242424242</code> which is used for new validators to deposit 32 ETH and join the proof-of-stake chain. The account that we are running go-ethereum with, <code>0x123463a4b065722e99115d6c222f267d9cabb524</code>, will have an ETH balance you can use to submit transactions on your devnet.</p>
 <h2>Running the devnet</h2>
 <h3>Go-Ethereum</h3>
 <p>Next, we will start by running <strong>go-ethereum</strong> in our <code>devnet</code> folder:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>./geth --datadir<span style="color:#f92672">=</span>gethdata init genesis.json
-</span></span><span style="display:flex;"><span>./geth --datadir<span style="color:#f92672">=</span>gethdata account import sk.json
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>./geth --datadir<span style="color:#ff79c6">=</span>gethdata init genesis.json
+</span></span><span style="display:flex;"><span>./geth --datadir<span style="color:#ff79c6">=</span>gethdata account import sk.json
 </span></span></code></pre><p>The last command will ask you to input a password for your secret key. You can just hit enter twice to leave it empty. Next, run geth using the command below</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>./geth --http --http.api <span style="color:#e6db74">&#34;eth,engine&#34;</span> --datadir<span style="color:#f92672">=</span>gethdata --allow-insecure-unlock --unlock<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;0x123463a4b065722e99115d6c222f267d9cabb524&#34;</span> --password<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span> --nodiscover console --syncmode<span style="color:#f92672">=</span>full --mine
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>./geth --http --http.api <span style="color:#f1fa8c">&#34;eth,engine&#34;</span> --datadir<span style="color:#ff79c6">=</span>gethdata --allow-insecure-unlock --unlock<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;0x123463a4b065722e99115d6c222f267d9cabb524&#34;</span> --password<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;&#34;</span> --nodiscover console --syncmode<span style="color:#ff79c6">=</span>full --mine
 </span></span></code></pre><p>You can check the ETH balance in the geth console by typing in</p>
 <p><code>eth.getBalance(&quot;0x123463a4b065722e99115d6c222f267d9cabb524&quot;)</code> which should show <code>2e+22</code></p>
 <h3>Prysm</h3>
 <p>We will then need to run a Prysm beacon node and a validator client. Prysm will need a <strong>genesis state</strong> which is essentially some data that tells it the initial set of validators. We will be creating a genesis state from a deterministic set of keys below:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>./generate-genesis --num-validators<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> --output-ssz<span style="color:#f92672">=</span>genesis.ssz --chain-config-file<span style="color:#f92672">=</span>config.yml
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>./generate-genesis --num-validators<span style="color:#ff79c6">=</span><span style="color:#bd93f9">64</span> --output-ssz<span style="color:#ff79c6">=</span>genesis.ssz --chain-config-file<span style="color:#ff79c6">=</span>config.yml
 </span></span></code></pre><p>This will out a file <code>genesis.ssz</code> in your <code>devnet</code> folder. Now, run the Prysm beacon node soon after:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>./beacon-chain <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --datadir<span style="color:#f92672">=</span>beacondata <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --min-sync-peers<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --interop-genesis-state<span style="color:#f92672">=</span>genesis.ssz <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --interop-eth1data-votes <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --bootstrap-node<span style="color:#f92672">=</span> <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --chain-config-file<span style="color:#f92672">=</span>config.yml <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --config-file<span style="color:#f92672">=</span>config.yml <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --chain-id<span style="color:#f92672">=</span><span style="color:#ae81ff">32382</span> <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --execution-endpoint<span style="color:#f92672">=</span>http://localhost:8551 <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --accept-terms-of-use <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --jwt-secret<span style="color:#f92672">=</span>gethdata/geth/jwtsecret
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>./beacon-chain <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --datadir<span style="color:#ff79c6">=</span>beacondata <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --min-sync-peers<span style="color:#ff79c6">=</span><span style="color:#bd93f9">0</span> <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --interop-genesis-state<span style="color:#ff79c6">=</span>genesis.ssz <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --interop-eth1data-votes <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --bootstrap-node<span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --chain-config-file<span style="color:#ff79c6">=</span>config.yml <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --config-file<span style="color:#ff79c6">=</span>config.yml <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --chain-id<span style="color:#ff79c6">=</span><span style="color:#bd93f9">32382</span> <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --execution-endpoint<span style="color:#ff79c6">=</span>http://localhost:8551 <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --accept-terms-of-use <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --jwt-secret<span style="color:#ff79c6">=</span>gethdata/geth/jwtsecret
 </span></span></code></pre><p>and the Prysm validator client soon after:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>./validator <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --datadir<span style="color:#f92672">=</span>validatordata <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --accept-terms-of-use <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --interop-num-validators<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --interop-start-index<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --force-clear-db <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --chain-config-file<span style="color:#f92672">=</span>config.yml <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --config-file<span style="color:#f92672">=</span>config.yml
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>./validator <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --datadir<span style="color:#ff79c6">=</span>validatordata <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --accept-terms-of-use <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --interop-num-validators<span style="color:#ff79c6">=</span><span style="color:#bd93f9">64</span> <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --interop-start-index<span style="color:#ff79c6">=</span><span style="color:#bd93f9">0</span> <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --force-clear-db <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --chain-config-file<span style="color:#ff79c6">=</span>config.yml <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --config-file<span style="color:#ff79c6">=</span>config.yml
 </span></span></code></pre><h2>Expected output</h2>
 <p>Your go-ethereum node should look as follows:</p>
 <p><img src="https://user-images.githubusercontent.com/5572669/186052301-dd487b50-183a-4fa6-bbec-216f32d6f03a.png" alt="Image"></p>
@@ -242,35 +242,35 @@ with the different settings that make the system possible.</p>
 <p><img src="https://user-images.githubusercontent.com/5572669/186052296-03c18e6f-17f2-4d94-830d-ba7522cc09c8.png" alt="Image"></p>
 <h2>Adding Prysm peers to your network</h2>
 <p>You can add additional, Prysm beacon chain peers to your proof-of-stake devnet by running the similar command as your first beacon node, but with a few tweaks. In a terminal window, use the following command:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>curl localhost:8080/p2p
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>curl localhost:8080/p2p
 </span></span></code></pre><p>You should get output similar to this:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>bootnode<span style="color:#f92672">=[]</span>
-</span></span><span style="display:flex;"><span>self<span style="color:#f92672">=</span>enr:-MK4QCxV5SEkUO1chqZDSqMChX5fTbqeas4PEJqZtzmcWqZOKpZN8ABVrQFTqHI74M9TKNjE6DPAAgyv5JydsQ6NfPqGAYKxymm8h2F0dG5ldHOI-7v9vd4GdE2EZXRoMpCMkQYoIAAAkf__________gmlkgnY0gmlwhAoAAEqJc2VjcDI1NmsxoQNZcfvPnVEfnKz-mFv285nkDzgRXRVujloXQ_tjuCNEbYhzeW5jbmV0cw-DdGNwgjLIg3VkcIIu4A,/ip4/10.0.0.74/tcp/13000/p2p/16Uiu2HAmJg9Sfy8bX4wyjZNTi8soJrdPt9E9pPzJSmewN5rLoRM6
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">bootnode</span><span style="color:#ff79c6">=[]</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">self</span><span style="color:#ff79c6">=</span>enr:-MK4QCxV5SEkUO1chqZDSqMChX5fTbqeas4PEJqZtzmcWqZOKpZN8ABVrQFTqHI74M9TKNjE6DPAAgyv5JydsQ6NfPqGAYKxymm8h2F0dG5ldHOI-7v9vd4GdE2EZXRoMpCMkQYoIAAAkf__________gmlkgnY0gmlwhAoAAEqJc2VjcDI1NmsxoQNZcfvPnVEfnKz-mFv285nkDzgRXRVujloXQ_tjuCNEbYhzeW5jbmV0cw-DdGNwgjLIg3VkcIIu4A,/ip4/10.0.0.74/tcp/13000/p2p/16Uiu2HAmJg9Sfy8bX4wyjZNTi8soJrdPt9E9pPzJSmewN5rLoRM6
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0</span> peers
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">0</span> peers
 </span></span></code></pre><p>Copy the part that starts with <code>/ip4</code> after the comma, so in the example above,</p>
 <p><code>/ip4/10.0.0.74/tcp/13000/p2p/16Uiu2HAmJg9Sfy8bX4wyjZNTi8soJrdPt9E9pPzJSmewN5rLoRM6</code></p>
 <p>then set this as an environment variable:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>export PEER<span style="color:#f92672">=</span>/ip4/10.0.0.74/tcp/13000/p2p/16Uiu2HAmJg9Sfy8bX4wyjZNTi8soJrdPt9E9pPzJSmewN5rLoRM6
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">export</span> <span style="color:#8be9fd;font-style:italic">PEER</span><span style="color:#ff79c6">=</span>/ip4/10.0.0.74/tcp/13000/p2p/16Uiu2HAmJg9Sfy8bX4wyjZNTi8soJrdPt9E9pPzJSmewN5rLoRM6
 </span></span></code></pre><p>Then, run a second Prysm beacon node as follows:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>./beacon-chain <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --datadir<span style="color:#f92672">=</span>beacondata2 <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --min-sync-peers<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --interop-genesis-state<span style="color:#f92672">=</span>genesis.ssz <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --interop-eth1data-votes <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --bootstrap-node<span style="color:#f92672">=</span> <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --chain-config-file<span style="color:#f92672">=</span>config.yml <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --config-file<span style="color:#f92672">=</span>config.yml <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --chain-id<span style="color:#f92672">=</span><span style="color:#ae81ff">32382</span> <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --execution-endpoint<span style="color:#f92672">=</span>http://localhost:8551 <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --accept-terms-of-use <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --rpc-port<span style="color:#f92672">=</span><span style="color:#ae81ff">4001</span> <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --p2p-tcp-port<span style="color:#f92672">=</span><span style="color:#ae81ff">13001</span> <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --p2p-udp-port<span style="color:#f92672">=</span><span style="color:#ae81ff">12001</span> <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --grpc-gateway-port<span style="color:#f92672">=</span><span style="color:#ae81ff">3501</span> <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --monitoring-port<span style="color:#f92672">=</span><span style="color:#ae81ff">8001</span> <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --jwt-secret<span style="color:#f92672">=</span>gethdata/geth/jwtsecret <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  --peer<span style="color:#f92672">=</span>$PEER
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>./beacon-chain <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --datadir<span style="color:#ff79c6">=</span>beacondata2 <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --min-sync-peers<span style="color:#ff79c6">=</span><span style="color:#bd93f9">1</span> <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --interop-genesis-state<span style="color:#ff79c6">=</span>genesis.ssz <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --interop-eth1data-votes <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --bootstrap-node<span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --chain-config-file<span style="color:#ff79c6">=</span>config.yml <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --config-file<span style="color:#ff79c6">=</span>config.yml <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --chain-id<span style="color:#ff79c6">=</span><span style="color:#bd93f9">32382</span> <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --execution-endpoint<span style="color:#ff79c6">=</span>http://localhost:8551 <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --accept-terms-of-use <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --rpc-port<span style="color:#ff79c6">=</span><span style="color:#bd93f9">4001</span> <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --p2p-tcp-port<span style="color:#ff79c6">=</span><span style="color:#bd93f9">13001</span> <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --p2p-udp-port<span style="color:#ff79c6">=</span><span style="color:#bd93f9">12001</span> <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --grpc-gateway-port<span style="color:#ff79c6">=</span><span style="color:#bd93f9">3501</span> <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --monitoring-port<span style="color:#ff79c6">=</span><span style="color:#bd93f9">8001</span> <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --jwt-secret<span style="color:#ff79c6">=</span>gethdata/geth/jwtsecret <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --peer<span style="color:#ff79c6">=</span><span style="color:#8be9fd;font-style:italic">$PEER</span>
 </span></span></code></pre><p>You will see the node start to synchronize with the chain as expected!</p>
 <p><img src="https://user-images.githubusercontent.com/5572669/186052294-70909835-210f-4b13-86a3-cf1f568bb8a3.png" alt="Image"></p>
 

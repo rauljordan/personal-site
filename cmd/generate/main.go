@@ -286,7 +286,7 @@ func generateBlogPostHtmlFromMarkdown(blogPostPath string) (*Post, error) {
 		goldmark.WithExtensions(
 			meta.Meta,
 			highlighting.NewHighlighting(
-				highlighting.WithStyle("monokai"),
+				highlighting.WithStyle("dracula"),
 			),
 		),
 	)

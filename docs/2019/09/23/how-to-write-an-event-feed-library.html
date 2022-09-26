@@ -90,35 +90,35 @@
 <h1>Ping Pong</h1>
 <p>When I first started learning Go, I didn't truly understand the <em>fantastic</em> concurrency primitives the language provides. Most real world applications tend to be concurrent and asynchronous...meaning all sorts of things can and will happen simultaneously and at different time intervals, often beyond our control. A big challenge when building concurrent applications is then the control and flow of shared state information, often becoming a very complex problem. In Go, communication between concurrent threads happens through special data structures called <strong>channels</strong>, which are <em>typed</em> and allow for a basic &quot;sender&quot; vs. &quot;listener&quot; design pattern. This pattern, as we'll soon see, is more expressive than it seems, giving Go one of the strongest toolkits to handle even the most complex concurrency challenges.</p>
 <p>Let's take a look at a basic example:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#ff79c6">package</span> main
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> (
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;fmt&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;time&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">import</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#f1fa8c">&#34;fmt&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f1fa8c">&#34;time&#34;</span>
 </span></span><span style="display:flex;"><span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">ping</span>(<span style="color:#a6e22e">ch</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">pong</span>(<span style="color:#a6e22e">ch</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">select</span> {}
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>    ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">string</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> <span style="color:#50fa7b">ping</span>(ch)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> <span style="color:#50fa7b">pong</span>(ch)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">select</span> {}
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">ping</span>(<span style="color:#a6e22e">ch</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Sending message...&#34;</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">ch</span> <span style="color:#f92672">&lt;-</span> <span style="color:#e6db74">&#34;ping&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">ping</span>(ch <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">string</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>        time.<span style="color:#50fa7b">Sleep</span>(time.Second)
+</span></span><span style="display:flex;"><span>        fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;Sending message...&#34;</span>)
+</span></span><span style="display:flex;"><span>        ch <span style="color:#ff79c6">&lt;-</span> <span style="color:#f1fa8c">&#34;ping&#34;</span>
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">pong</span>(<span style="color:#a6e22e">ch</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">select</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">p</span> <span style="color:#f92672">:=&lt;-</span><span style="color:#a6e22e">ch</span>:
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Received message %s\n&#34;</span>, <span style="color:#a6e22e">p</span>)
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">p</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;ping&#34;</span> {
-</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;pong&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">pong</span>(ch <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">string</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">case</span> p <span style="color:#ff79c6">:=&lt;-</span>ch:
+</span></span><span style="display:flex;"><span>            fmt.<span style="color:#50fa7b">Printf</span>(<span style="color:#f1fa8c">&#34;Received message %s\n&#34;</span>, p)
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> p <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;ping&#34;</span> {
+</span></span><span style="display:flex;"><span>                fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;pong&#34;</span>)
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
@@ -128,36 +128,36 @@
 <h2>Gotchas: Buffered vs. Unbuffered Channels</h2>
 <p>When creating a Go channel, we have the option of making it either buffered or unbuffered. An unbuffered channel is initialized with a simple make call along with its type, <code>make(chan bool)</code>. A buffered channel instead specifies a <code>buffer</code> length, such as <code>make(chan bool, 5)</code>. Think of channels as the mailman, bringing packages all across the neighborhood. The buffer is the the capacity of his mailbag, containing all the envelopes. The mailman will wait till his bag is full before making a trip to deliver the letters. Whenever you specify a buffered channel, that's what happens. Essentially, data is kept in the buffer until it fills up to capacity, and at that point a listener or receiver can read all of the information contains in the channel. An unbuffered channel, however, has a capacity of 0, so it can't store data. Every send over an unbuffered channel <em>must</em> have a recipient ready to process the send right away.</p>
 <p>Let's take a look at a basic unbuffered example:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">ch</span> <span style="color:#f92672">&lt;-</span> <span style="color:#e6db74">&#34;hello world&#34;</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>    ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">string</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>        ch <span style="color:#ff79c6">&lt;-</span> <span style="color:#f1fa8c">&#34;hello world&#34;</span>
 </span></span><span style="display:flex;"><span>    }()
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">msg</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">ch</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">msg</span>)
+</span></span><span style="display:flex;"><span>    msg <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>ch
+</span></span><span style="display:flex;"><span>    fmt.<span style="color:#50fa7b">Println</span>(msg)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>We create a listener over our basic, unbuffered channel and log once we receive it, great! If we run this program we see our little &quot;hello world&quot; pop up on our terminal window. If we never send, the program will wait forever, given the recipient will hang there never receiving a message to proceed into the Println statement.</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>, <span style="color:#ae81ff">1</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">ch</span> <span style="color:#f92672">&lt;-</span> <span style="color:#e6db74">&#34;hello world&#34;</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>    ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">string</span>, <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>        ch <span style="color:#ff79c6">&lt;-</span> <span style="color:#f1fa8c">&#34;hello world&#34;</span>
 </span></span><span style="display:flex;"><span>    }()
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">msg</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">ch</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">msg</span>)
+</span></span><span style="display:flex;"><span>    msg <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>ch
+</span></span><span style="display:flex;"><span>    fmt.<span style="color:#50fa7b">Println</span>(msg)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>What happens if we try to send and receive in the same goroutine with an unbuffered channel?</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">string</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ch</span> <span style="color:#f92672">&lt;-</span> <span style="color:#e6db74">&#34;hello world&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">msg</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">ch</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">msg</span>)
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>    ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">string</span>)
+</span></span><span style="display:flex;"><span>    ch <span style="color:#ff79c6">&lt;-</span> <span style="color:#f1fa8c">&#34;hello world&#34;</span>
+</span></span><span style="display:flex;"><span>    msg <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>ch
+</span></span><span style="display:flex;"><span>    fmt.<span style="color:#50fa7b">Println</span>(msg)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>Running...</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>$ go run main.go
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>$ go run main.go
 </span></span><span style="display:flex;"><span>fatal error: all goroutines are asleep - deadlock!
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>goroutine <span style="color:#ae81ff">1</span> <span style="color:#f92672">[</span>chan send<span style="color:#f92672">]</span>:
-</span></span><span style="display:flex;"><span>main.main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>goroutine <span style="color:#bd93f9">1</span> <span style="color:#ff79c6">[</span>chan send<span style="color:#ff79c6">]</span>:
+</span></span><span style="display:flex;"><span>main.main<span style="color:#ff79c6">()</span>
 </span></span></code></pre><p><img src="https://raw.githubusercontent.com/MariaLetta/free-gophers-pack/master/illustrations/png/2.png" alt="image"></p>
 <p>Yikes! Well the issue is pretty clear here, as there's no listener, the channel will <em>block</em> the main thread on sending, preventing it from advancing at all! Even if we add a listener right beneath the send, we will get the same error because the code can <em>never</em> proceed past <code>ch &lt;- &quot;hello world&quot;</code>, as the send call never even completes. There must already be a listener prepared to receive when the <code>send</code> is called.</p>
 <blockquote>
@@ -166,133 +166,133 @@
 <p>The code above works if we initialize our channel with a buffer <code>ch := make(chan string, 1)</code>, as the channel will then store the data until a listener reads it even if there is no listener ready at the time of sending.</p>
 <h2>Why Buffered Channels Are Great</h2>
 <p>Buffered channels have a fundamentally different use case than unbuffered ones, as by their very nature, they're well-suited to handle aggregation of information across goroutines. For example, say you're creating a concurrent web scraper that tries to scrape a ton of websites at the same time, and eventually you want to aggregate the results into some nice form for final processing. If you know the list of websites you'll be scraping ahead of time, you can create a buffered channel of that length, do the heavy lifting across a bunch of concurrent goroutines, and write the results to this channel. When you're done, a listener will be ready to loop over the aggregated results and handle them accordingly. Let's take a look:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">ScrapedData</span> <span style="color:#66d9ef">struct</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Url</span>      <span style="color:#66d9ef">string</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Html</span>     <span style="color:#66d9ef">string</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">NumLinks</span> <span style="color:#66d9ef">int</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> ScrapedData <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>    Url      <span style="color:#8be9fd">string</span>
+</span></span><span style="display:flex;"><span>    Html     <span style="color:#8be9fd">string</span>
+</span></span><span style="display:flex;"><span>    NumLinks <span style="color:#8be9fd">int</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">scrapeSite</span>(<span style="color:#a6e22e">s</span> <span style="color:#66d9ef">string</span>) <span style="color:#f92672">*</span><span style="color:#a6e22e">ScrapedData</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Do some intense data scraping...
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">htmlResult</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">getHtmlResults</span>(<span style="color:#a6e22e">s</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">numLinks</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">getNumLinks</span>(<span style="color:#a6e22e">htmlResult</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">...</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">ScrapedData</span>{
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Url</span>: <span style="color:#a6e22e">s</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Html</span>:     <span style="color:#a6e22e">htmlResults</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">NumLinks</span>: <span style="color:#a6e22e">numLinks</span>,
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">scrapeSite</span>(s <span style="color:#8be9fd">string</span>) <span style="color:#ff79c6">*</span>ScrapedData {
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Do some intense data scraping...
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    htmlResult <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">getHtmlResults</span>(s)
+</span></span><span style="display:flex;"><span>    numLinks <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">getNumLinks</span>(htmlResult)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>ScrapedData{
+</span></span><span style="display:flex;"><span>        Url: s,
+</span></span><span style="display:flex;"><span>        Html:     htmlResults,
+</span></span><span style="display:flex;"><span>        NumLinks: numLinks,
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">websites</span> <span style="color:#f92672">:=</span> []<span style="color:#66d9ef">string</span>{<span style="color:#e6db74">&#34;example.com&#34;</span>, <span style="color:#e6db74">&#34;wikipedia.org&#34;</span>}
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">ScrapedData</span>, len(<span style="color:#a6e22e">websites</span>))
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>    websites <span style="color:#ff79c6">:=</span> []<span style="color:#8be9fd">string</span>{<span style="color:#f1fa8c">&#34;example.com&#34;</span>, <span style="color:#f1fa8c">&#34;wikipedia.org&#34;</span>}
+</span></span><span style="display:flex;"><span>    ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>ScrapedData, <span style="color:#8be9fd;font-style:italic">len</span>(websites))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; len(<span style="color:#a6e22e">websites</span>); <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">ii</span> <span style="color:#66d9ef">int</span>) {
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">ch</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">scrapeSite</span>(<span style="color:#a6e22e">websites</span>[<span style="color:#a6e22e">ii</span>])
-</span></span><span style="display:flex;"><span>        }(<span style="color:#a6e22e">i</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; <span style="color:#8be9fd;font-style:italic">len</span>(websites); i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>(ii <span style="color:#8be9fd">int</span>) {
+</span></span><span style="display:flex;"><span>            ch <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">scrapeSite</span>(websites[ii])
+</span></span><span style="display:flex;"><span>        }(i)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">val</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">ch</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Scraped %s with number of links %d\n&#34;</span>, <span style="color:#a6e22e">val</span>.<span style="color:#a6e22e">Url</span>, <span style="color:#a6e22e">val</span>.<span style="color:#a6e22e">NumLinks</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> val <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> ch {
+</span></span><span style="display:flex;"><span>        fmt.<span style="color:#50fa7b">Printf</span>(<span style="color:#f1fa8c">&#34;Scraped %s with number of links %d\n&#34;</span>, val.Url, val.NumLinks)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>Using the concepts from before, we declare a <em>buffered</em> channel of type <code>*ScrapedData</code>. Then, for every website, we spawn off a goroutine that does some heavy data scraping and writes the result to the channel. In the end, we loop over the results and print out every single value we just scraped. Does the code above run? Let's see:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>$ go run main.go
-</span></span><span style="display:flex;"><span>Scraped example.com with number of links <span style="color:#ae81ff">10</span>
-</span></span><span style="display:flex;"><span>Scraped wikipedia.org with number of links <span style="color:#ae81ff">20</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>$ go run main.go
+</span></span><span style="display:flex;"><span>Scraped example.com with number of links <span style="color:#bd93f9">10</span>
+</span></span><span style="display:flex;"><span>Scraped wikipedia.org with number of links <span style="color:#bd93f9">20</span>
 </span></span><span style="display:flex;"><span>fatal error: all goroutines are asleep - deadlock!
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>goroutine <span style="color:#ae81ff">1</span> <span style="color:#f92672">[</span>chan receive<span style="color:#f92672">]</span>:
-</span></span><span style="display:flex;"><span>main.main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>goroutine <span style="color:#bd93f9">1</span> <span style="color:#ff79c6">[</span>chan receive<span style="color:#ff79c6">]</span>:
+</span></span><span style="display:flex;"><span>main.main<span style="color:#ff79c6">()</span>
 </span></span></code></pre><p>Shoot - what the heck happened here? As it turns out, Go's <code>range</code> function isn't smart enough to figure out we're done writing into the channel, and that's not its fault! Given we're building some concurrent application, there could be some other routine that tries to keep writing into the channel, so there's no way for <code>range</code> to know we're done writing, even if the channel is filled up to the brim. Instead, once we're done writing and we're sure of it, we should call Go's built-in <code>close</code> operator to close the channel off for future communication.</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">websites</span> <span style="color:#f92672">:=</span> []<span style="color:#66d9ef">string</span>{<span style="color:#e6db74">&#34;example.com&#34;</span>, <span style="color:#e6db74">&#34;wikipedia.org&#34;</span>}
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">ScrapedData</span>, len(<span style="color:#a6e22e">websites</span>))
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>    websites <span style="color:#ff79c6">:=</span> []<span style="color:#8be9fd">string</span>{<span style="color:#f1fa8c">&#34;example.com&#34;</span>, <span style="color:#f1fa8c">&#34;wikipedia.org&#34;</span>}
+</span></span><span style="display:flex;"><span>    ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>ScrapedData, <span style="color:#8be9fd;font-style:italic">len</span>(websites))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; len(<span style="color:#a6e22e">websites</span>); <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">ii</span> <span style="color:#66d9ef">int</span>) {
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">ch</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">scrapeSite</span>(<span style="color:#a6e22e">websites</span>[<span style="color:#a6e22e">ii</span>])
-</span></span><span style="display:flex;"><span>        }(<span style="color:#a6e22e">i</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; <span style="color:#8be9fd;font-style:italic">len</span>(websites); i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>(ii <span style="color:#8be9fd">int</span>) {
+</span></span><span style="display:flex;"><span>            ch <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">scrapeSite</span>(websites[ii])
+</span></span><span style="display:flex;"><span>        }(i)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    close(<span style="color:#a6e22e">ch</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">close</span>(ch)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">val</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">ch</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Scraped %s with number of links %d\n&#34;</span>, <span style="color:#a6e22e">val</span>.<span style="color:#a6e22e">Url</span>, <span style="color:#a6e22e">val</span>.<span style="color:#a6e22e">NumLinks</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> val <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> ch {
+</span></span><span style="display:flex;"><span>        fmt.<span style="color:#50fa7b">Printf</span>(<span style="color:#f1fa8c">&#34;Scraped %s with number of links %d\n&#34;</span>, val.Url, val.NumLinks)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>Turns out this eliminates the deadlock error, but nothing else gets printed out...what gives? Concurrent applications are often <em>asynchronous</em>, meaning we don't know when they'll complete relative to other threads and we should not make any assumptions regarding this. In the code above, when we spawn off two goroutines, the main thread keeps going, there's nothing stopping it! <em>So the <code>close</code> call might have happened way before we attempt to scrape the data</em>, leaving us in a weird spot. As a solution, Go provides an awesome tool called a <code>WaitGroup</code>, which lets us block threads until a specified number of goroutines complete.</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">websites</span> <span style="color:#f92672">:=</span> []<span style="color:#66d9ef">string</span>{<span style="color:#e6db74">&#34;example.com&#34;</span>, <span style="color:#e6db74">&#34;wikipedia.org&#34;</span>}
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">ScrapedData</span>, len(<span style="color:#a6e22e">websites</span>))
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>    websites <span style="color:#ff79c6">:=</span> []<span style="color:#8be9fd">string</span>{<span style="color:#f1fa8c">&#34;example.com&#34;</span>, <span style="color:#f1fa8c">&#34;wikipedia.org&#34;</span>}
+</span></span><span style="display:flex;"><span>    ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>ScrapedData, <span style="color:#8be9fd;font-style:italic">len</span>(websites))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(len(<span style="color:#a6e22e">websites</span>))
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; len(<span style="color:#a6e22e">websites</span>); <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">ii</span> <span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">w</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>) {
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">ch</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">scrapeSite</span>(<span style="color:#a6e22e">websites</span>[<span style="color:#a6e22e">ii</span>])
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">w</span>.<span style="color:#a6e22e">Done</span>()
-</span></span><span style="display:flex;"><span>        }(<span style="color:#a6e22e">i</span>, <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">wg</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> wg sync.WaitGroup
+</span></span><span style="display:flex;"><span>    wg.<span style="color:#50fa7b">Add</span>(<span style="color:#8be9fd;font-style:italic">len</span>(websites))
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; <span style="color:#8be9fd;font-style:italic">len</span>(websites); i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>(ii <span style="color:#8be9fd">int</span>, w <span style="color:#ff79c6">*</span>sync.WaitGroup) {
+</span></span><span style="display:flex;"><span>            ch <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">scrapeSite</span>(websites[ii])
+</span></span><span style="display:flex;"><span>            w.<span style="color:#50fa7b">Done</span>()
+</span></span><span style="display:flex;"><span>        }(i, <span style="color:#ff79c6">&amp;</span>wg)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
-</span></span><span style="display:flex;"><span>    close(<span style="color:#a6e22e">ch</span>)
+</span></span><span style="display:flex;"><span>    wg.<span style="color:#50fa7b">Wait</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">close</span>(ch)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">val</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">ch</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Scraped %s with number of links %d\n&#34;</span>, <span style="color:#a6e22e">val</span>.<span style="color:#a6e22e">Url</span>, <span style="color:#a6e22e">val</span>.<span style="color:#a6e22e">NumLinks</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> val <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> ch {
+</span></span><span style="display:flex;"><span>        fmt.<span style="color:#50fa7b">Printf</span>(<span style="color:#f1fa8c">&#34;Scraped %s with number of links %d\n&#34;</span>, val.Url, val.NumLinks)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>Using a wait group, we can tell the program &quot;hey, we have 2 goroutines that are scheduled, wait until they're finished before proceeding&quot;. When the goroutine finishes, we can call <code>wg.Done()</code> to notify the wait group. Note we pass in a reference to the wait group in the goroutine's arguments to ensure we don't make a different copy of the wait group we initialized. <em>Now</em>, when we run the code again, we'll wait till all routines complete before we close off the channel, and we should have a fully functional program now with wait groups, fancy buffered channels, and even a range loop to read the aggregated data results :).</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>$ go run main.go
-</span></span><span style="display:flex;"><span>Scraped example.com with number of links <span style="color:#ae81ff">10</span>
-</span></span><span style="display:flex;"><span>Scraped wikipedia.org with number of links <span style="color:#ae81ff">20</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>$ go run main.go
+</span></span><span style="display:flex;"><span>Scraped example.com with number of links <span style="color:#bd93f9">10</span>
+</span></span><span style="display:flex;"><span>Scraped wikipedia.org with number of links <span style="color:#bd93f9">20</span>
 </span></span></code></pre><h2>One-to-Many Subscriptions</h2>
 <p>Now that we reviewed buffered and unbuffered channels as well as goroutines, let's see what else this powerful construct allows us to build. So far, we've only seen single sender vs. receiver patterns, where there's a single listener waiting for results sent into some channel. But what if we want many listeners to receive the same data and do something with it <em>simultaneously</em>? This should work, right?</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">userID</span> = <span style="color:#ae81ff">0</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">var</span> userID = <span style="color:#bd93f9">0</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">UserInfo</span> <span style="color:#66d9ef">struct</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ID</span> <span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> UserInfo <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>    ID <span style="color:#8be9fd">int</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">UserInfo</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">simulateUserSignup</span>(<span style="color:#a6e22e">ch</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">sendEmail</span>(<span style="color:#a6e22e">ch</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">saveUserToDB</span>(<span style="color:#a6e22e">ch</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">select</span> {}
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>    ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>UserInfo)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> <span style="color:#50fa7b">simulateUserSignup</span>(ch)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> <span style="color:#50fa7b">sendEmail</span>(ch)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> <span style="color:#50fa7b">saveUserToDB</span>(ch)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">select</span> {}
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">simulateUserSignup</span>(<span style="color:#a6e22e">ch</span> <span style="color:#66d9ef">chan</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">UserInfo</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">ch</span> <span style="color:#f92672">&lt;-</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">UserInfo</span>{
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">ID</span>: <span style="color:#a6e22e">userID</span>,
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">simulateUserSignup</span>(ch <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>UserInfo) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>        time.<span style="color:#50fa7b">Sleep</span>(time.Second)
+</span></span><span style="display:flex;"><span>        ch <span style="color:#ff79c6">&lt;-</span> <span style="color:#ff79c6">&amp;</span>UserInfo{
+</span></span><span style="display:flex;"><span>            ID: userID,
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">userID</span><span style="color:#f92672">++</span>
+</span></span><span style="display:flex;"><span>        userID<span style="color:#ff79c6">++</span>
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">sendEmail</span>(<span style="color:#a6e22e">ch</span> <span style="color:#66d9ef">chan</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">UserInfo</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">select</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">user</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">ch</span>:
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Sending confirmation email to user with ID %d...\n&#34;</span>, <span style="color:#a6e22e">user</span>.<span style="color:#a6e22e">ID</span>)
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">sendEmail</span>(ch <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>UserInfo) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">case</span> user <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>ch:
+</span></span><span style="display:flex;"><span>            fmt.<span style="color:#50fa7b">Printf</span>(<span style="color:#f1fa8c">&#34;Sending confirmation email to user with ID %d...\n&#34;</span>, user.ID)
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">saveUserToDB</span>(<span style="color:#a6e22e">ch</span> <span style="color:#66d9ef">chan</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">UserInfo</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">select</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">user</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">ch</span>:
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Saving user data to database with ID %d...\n&#34;</span>, <span style="color:#a6e22e">user</span>.<span style="color:#a6e22e">ID</span>)
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">saveUserToDB</span>(ch <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>UserInfo) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">case</span> user <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>ch:
+</span></span><span style="display:flex;"><span>            fmt.<span style="color:#50fa7b">Printf</span>(<span style="color:#f1fa8c">&#34;Saving user data to database with ID %d...\n&#34;</span>, user.ID)
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>The output...</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>$ go run main.go
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>$ go run main.go
 </span></span><span style="display:flex;"><span>Saving user data to database with ID 0...
 </span></span><span style="display:flex;"><span>Sending confirmation email to user with ID 1...
 </span></span><span style="display:flex;"><span>Saving user data to database with ID 2...
@@ -303,17 +303,17 @@
 </span></span><span style="display:flex;"><span>Sending confirmation email to user with ID 7...
 </span></span><span style="display:flex;"><span>Saving user data to database with ID 8...
 </span></span></code></pre><p>Oh no...we <em>really</em> don't that to happen. We want <strong>both</strong> the sending of a confirmation email + the saving a user to the DB to happen together, not skipping every other user! Turns out, naïve channels don't exactly work when you need a one-to-many subscription pattern. We could indeed rearchitect the code above to instead listen once and perform both actions sequentially and synchronously:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">UserInfo</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">simulateUserSignup</span>(<span style="color:#a6e22e">ch</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">select</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">user</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">ch</span>:
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Saving user data to database with ID %d...\n&#34;</span>, <span style="color:#a6e22e">user</span>.<span style="color:#a6e22e">ID</span>)
-</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Perform the db save...
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Sending confirmation email to user with ID %d...\n&#34;</span>, <span style="color:#a6e22e">user</span>.<span style="color:#a6e22e">ID</span>)
-</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Send the confirmation email...
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        }
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>    ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>UserInfo)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> <span style="color:#50fa7b">simulateUserSignup</span>(ch)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">case</span> user <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>ch:
+</span></span><span style="display:flex;"><span>            fmt.<span style="color:#50fa7b">Printf</span>(<span style="color:#f1fa8c">&#34;Saving user data to database with ID %d...\n&#34;</span>, user.ID)
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// Perform the db save...
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>            fmt.<span style="color:#50fa7b">Printf</span>(<span style="color:#f1fa8c">&#34;Sending confirmation email to user with ID %d...\n&#34;</span>, user.ID)
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// Send the confirmation email...
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>And sure, this is the <em>best</em> solution if your entire application is a single event loop, but more complex applications typically have various services running concurrently with their own event loops, and having everything work in this synchronous pattern isn't always the best. Sometimes, we want to simply trigger events in our applications without worrying too much about who's listening, with the possibility of having infinitely many listeners that can conditionally <strong>subscribe</strong> to the event notification. This common pattern is conventionally referred to as <code>PubSub</code>. A naïve implementation of a one-to-many pubsub with a single channel won't work for this use case, as we see above, there can only be at most 1 listener that receives a single send at any given time. However, can we use these channel primitives to come with a one-to-many implementation that is simple and robust enough to use in production?</p>
@@ -329,207 +329,207 @@
 <h2>A First Pass Implementation</h2>
 <p>So, where do we start? A good design typically begins by identifying the key invariants of necessary features. We want to focus first on the core desired functionality, which is to allow for <strong>one-to-many</strong> subscriptions of triggered events. To keep things simple, our first implementation will only allow for <code>bool</code> type event subscriptions, so let's call our feed a <code>BoolFeed</code>.</p>
 <p>Given a single channel send can only receive data by at most one listener, why don't we allow our library to send to a bunch of registered channels simultaneously? That is, we can allow listeners to <em>register</em> a channel they want to be notified through, and as we trigger a new event, we send data over all the registered channels via a for loop. Let's give that a shot:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">BoolFeed</span> <span style="color:#66d9ef">struct</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">lock</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">Mutex</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">listeners</span> []<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">bool</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> BoolFeed <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>    lock sync.Mutex
+</span></span><span style="display:flex;"><span>    listeners []<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">bool</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">f</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">BoolFeed</span>) <span style="color:#a6e22e">Send</span>(<span style="color:#a6e22e">data</span> <span style="color:#66d9ef">bool</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Lock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">lis</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">listeners</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">lis</span><span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">data</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (f <span style="color:#ff79c6">*</span>BoolFeed) <span style="color:#50fa7b">Send</span>(data <span style="color:#8be9fd">bool</span>) {
+</span></span><span style="display:flex;"><span>    f.lock.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> _, lis <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> f.listeners {
+</span></span><span style="display:flex;"><span>        lis<span style="color:#ff79c6">&lt;-</span>data
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Unlock</span>()
+</span></span><span style="display:flex;"><span>    f.lock.<span style="color:#50fa7b">Unlock</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">f</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">BoolFeed</span>) <span style="color:#a6e22e">RegisterListener</span>(<span style="color:#a6e22e">lis</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">bool</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Lock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">listeners</span> = append(<span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">listeners</span>, <span style="color:#a6e22e">lis</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Unlock</span>()
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (f <span style="color:#ff79c6">*</span>BoolFeed) <span style="color:#50fa7b">RegisterListener</span>(lis <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">bool</span>) {
+</span></span><span style="display:flex;"><span>    f.lock.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>    f.listeners = <span style="color:#8be9fd;font-style:italic">append</span>(f.listeners, lis)
+</span></span><span style="display:flex;"><span>    f.lock.<span style="color:#50fa7b">Unlock</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">firstListener</span>(<span style="color:#a6e22e">f</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">BoolFeed</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">bool</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">RegisterListener</span>(<span style="color:#a6e22e">ch</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">select</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">ch</span>:
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Received data in first listener&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">firstListener</span>(f <span style="color:#ff79c6">*</span>BoolFeed) {
+</span></span><span style="display:flex;"><span>    ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">bool</span>)
+</span></span><span style="display:flex;"><span>    f.<span style="color:#50fa7b">RegisterListener</span>(ch)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>ch:
+</span></span><span style="display:flex;"><span>            fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;Received data in first listener&#34;</span>)
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">secondListener</span>(<span style="color:#a6e22e">f</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">BoolFeed</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">bool</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">RegisterListener</span>(<span style="color:#a6e22e">ch</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">select</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">ch</span>:
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Received data in second listener&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">secondListener</span>(f <span style="color:#ff79c6">*</span>BoolFeed) {
+</span></span><span style="display:flex;"><span>    ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">bool</span>)
+</span></span><span style="display:flex;"><span>    f.<span style="color:#50fa7b">RegisterListener</span>(ch)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>ch:
+</span></span><span style="display:flex;"><span>            fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;Received data in second listener&#34;</span>)
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">feed</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">BoolFeed</span>{
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">listeners</span>: make([]<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">bool</span>, <span style="color:#ae81ff">0</span>),
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>    feed <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>BoolFeed{
+</span></span><span style="display:flex;"><span>        listeners: <span style="color:#8be9fd;font-style:italic">make</span>([]<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">bool</span>, <span style="color:#bd93f9">0</span>),
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">ff</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">BoolFeed</span>) {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span>)
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">ff</span>.<span style="color:#a6e22e">Send</span>(<span style="color:#66d9ef">true</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>(ff <span style="color:#ff79c6">*</span>BoolFeed) {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>            time.<span style="color:#50fa7b">Sleep</span>(time.Second)
+</span></span><span style="display:flex;"><span>            ff.<span style="color:#50fa7b">Send</span>(<span style="color:#ff79c6">true</span>)
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>    }(<span style="color:#a6e22e">feed</span>)
+</span></span><span style="display:flex;"><span>    }(feed)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">firstListener</span>(<span style="color:#a6e22e">feed</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">secondListener</span>(<span style="color:#a6e22e">feed</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">select</span> {}
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> <span style="color:#50fa7b">firstListener</span>(feed)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> <span style="color:#50fa7b">secondListener</span>(feed)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">select</span> {}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>We use a mutex above to make the operations thread safe, preventing calls to <code>RegisterListener</code> from happening at the exact same time as we're doing a send of the data over the currently registered channels. We run the code, and...</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">$</span> <span style="color:#66d9ef">go</span> <span style="color:#a6e22e">run</span> <span style="color:#a6e22e">main</span>.<span style="color:#66d9ef">go</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">Received</span> <span style="color:#a6e22e">data</span> <span style="color:#a6e22e">in</span> <span style="color:#a6e22e">second</span> <span style="color:#a6e22e">listener</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">Received</span> <span style="color:#a6e22e">data</span> <span style="color:#a6e22e">in</span> <span style="color:#a6e22e">first</span> <span style="color:#a6e22e">listener</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">Received</span> <span style="color:#a6e22e">data</span> <span style="color:#a6e22e">in</span> <span style="color:#a6e22e">second</span> <span style="color:#a6e22e">listener</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">Received</span> <span style="color:#a6e22e">data</span> <span style="color:#a6e22e">in</span> <span style="color:#a6e22e">first</span> <span style="color:#a6e22e">listener</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">Received</span> <span style="color:#a6e22e">data</span> <span style="color:#a6e22e">in</span> <span style="color:#a6e22e">first</span> <span style="color:#a6e22e">listener</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>$ <span style="color:#ff79c6">go</span> run main.<span style="color:#ff79c6">go</span>
+</span></span><span style="display:flex;"><span>Received data in second listener
+</span></span><span style="display:flex;"><span>Received data in first listener
+</span></span><span style="display:flex;"><span>Received data in second listener
+</span></span><span style="display:flex;"><span>Received data in first listener
+</span></span><span style="display:flex;"><span>Received data in first listener
 </span></span></code></pre><p>It works, we see data being properly received by the different listeners. Even though we get the result we expected in this contrived example, <em><strong>our naïve approach still has a critical limitation that makes it unsuitable for production</strong></em> which we'll analyze in the next sections.</p>
 <p>For now, let's see if we can meet another invariant in our features requirement, which is to unsubscribe from the event triggers whenever want to. For this, we can define a <code>Subscription</code> type, which contains an <code>Unsubscribe()</code> method, and which can be returned by the <code>RegisterListener</code> function. As a subscriber, we don't care about how this unsubscribing by itself works underneath the hood, we just need to have it as an option. For easier testing and implementation, we can define subscriptions as a Go interface:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Subscription</span> <span style="color:#66d9ef">interface</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Unsubscribe</span>()
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Subscription <span style="color:#8be9fd;font-style:italic">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">Unsubscribe</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>and amend our <code>BoolFeed</code> as follows:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">f</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">BoolFeed</span>) <span style="color:#a6e22e">RegisterListener</span>() <span style="color:#a6e22e">Subscription</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (f <span style="color:#ff79c6">*</span>BoolFeed) <span style="color:#50fa7b">RegisterListener</span>() Subscription
 </span></span></code></pre><p>While we're at it, let's make our implementation more idiomatic and rename <code>RegisterListener</code> to <code>Subscribe</code> to end up with:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">f</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">BoolFeed</span>) <span style="color:#a6e22e">Subscribe</span>(<span style="color:#a6e22e">ch</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">bool</span>) <span style="color:#a6e22e">Subscription</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">...</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (f <span style="color:#ff79c6">*</span>BoolFeed) <span style="color:#50fa7b">Subscribe</span>(ch <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">bool</span>) Subscription {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">...</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">someListener</span>(<span style="color:#a6e22e">feed</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">BoolFeed</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">bool</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sub</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">feed</span>.<span style="color:#a6e22e">Subscribe</span>(<span style="color:#a6e22e">ch</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">sub</span>.<span style="color:#a6e22e">Unsubscribe</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">select</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">ch</span>:
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Received data in first listener&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">someListener</span>(feed <span style="color:#ff79c6">*</span>BoolFeed) {
+</span></span><span style="display:flex;"><span>    ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">bool</span>)
+</span></span><span style="display:flex;"><span>    sub <span style="color:#ff79c6">:=</span> feed.<span style="color:#50fa7b">Subscribe</span>(ch)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> sub.<span style="color:#50fa7b">Unsubscribe</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>ch:
+</span></span><span style="display:flex;"><span>            fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;Received data in first listener&#34;</span>)
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>But what if the feed we're subscribed to all of a sudden has problems, or maybe it belongs to another service that shuts down, how would we know? Indeed, every subscription should have an <code>error</code> channel that we can also listen for and unsubscribe if needed.</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Subscription</span> <span style="color:#66d9ef">interface</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Unsubscribe</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Err</span>() <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">error</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Subscription <span style="color:#8be9fd;font-style:italic">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">Unsubscribe</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">Err</span>() <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">error</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">someListener</span>(<span style="color:#a6e22e">feed</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">BoolFeed</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">bool</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sub</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">feed</span>.<span style="color:#a6e22e">Subscribe</span>(<span style="color:#a6e22e">ch</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">sub</span>.<span style="color:#a6e22e">Unsubscribe</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">select</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">ch</span>:
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Received data in first listener&#34;</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">err</span><span style="color:#f92672">:=&lt;-</span><span style="color:#a6e22e">sub</span>.<span style="color:#a6e22e">Err</span>():
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Oh no - something went wrong: %v&#34;</span>, <span style="color:#a6e22e">err</span>)
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">someListener</span>(feed <span style="color:#ff79c6">*</span>BoolFeed) {
+</span></span><span style="display:flex;"><span>    ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">bool</span>)
+</span></span><span style="display:flex;"><span>    sub <span style="color:#ff79c6">:=</span> feed.<span style="color:#50fa7b">Subscribe</span>(ch)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> sub.<span style="color:#50fa7b">Unsubscribe</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>ch:
+</span></span><span style="display:flex;"><span>            fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;Received data in first listener&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">case</span> err<span style="color:#ff79c6">:=&lt;-</span>sub.<span style="color:#50fa7b">Err</span>():
+</span></span><span style="display:flex;"><span>            fmt.<span style="color:#50fa7b">Printf</span>(<span style="color:#f1fa8c">&#34;Oh no - something went wrong: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span>
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>Now we have an easy, standard pattern to safely subscribe to and unsubscribe from events should errors occur as we listen for data. As we implement our <code>Unsubscribe()</code> function, we should ensure it can only occur <strong>once</strong> to prevent accidental duplicate calls to have detrimental effects.</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#f92672">...</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#ff79c6">...</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">f</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">BoolFeed</span>) <span style="color:#a6e22e">Subscribe</span>(<span style="color:#a6e22e">lis</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">bool</span>) <span style="color:#a6e22e">Subscription</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Lock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Unlock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">listeners</span> = append(<span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">listeners</span>, <span style="color:#a6e22e">lis</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">sub</span>{
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">feed</span>: <span style="color:#a6e22e">f</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">channelIndex</span>: len(<span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">listeners</span>)<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">channel</span>: <span style="color:#a6e22e">lis</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">err</span>: make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">error</span>, <span style="color:#ae81ff">1</span>),
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (f <span style="color:#ff79c6">*</span>BoolFeed) <span style="color:#50fa7b">Subscribe</span>(lis <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">bool</span>) Subscription {
+</span></span><span style="display:flex;"><span>    f.lock.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> f.lock.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span>    f.listeners = <span style="color:#8be9fd;font-style:italic">append</span>(f.listeners, lis)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>sub{
+</span></span><span style="display:flex;"><span>        feed: f,
+</span></span><span style="display:flex;"><span>        channelIndex: <span style="color:#8be9fd;font-style:italic">len</span>(f.listeners)<span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>        channel: lis,
+</span></span><span style="display:flex;"><span>        err: <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">error</span>, <span style="color:#bd93f9">1</span>),
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">// removes an channel at index i efficiently as order does not
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// matter for listeners we keep track of.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">f</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">BoolFeed</span>) <span style="color:#a6e22e">remove</span>(<span style="color:#a6e22e">i</span> <span style="color:#66d9ef">int</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Lock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">listeners</span>[<span style="color:#a6e22e">i</span>] = <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">listeners</span>[len(<span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">listeners</span>)<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">listeners</span> = <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">listeners</span>[:len(<span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">listeners</span>)<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Unlock</span>()
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// removes an channel at index i efficiently as order does not
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">// matter for listeners we keep track of.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#8be9fd;font-style:italic">func</span> (f <span style="color:#ff79c6">*</span>BoolFeed) <span style="color:#50fa7b">remove</span>(i <span style="color:#8be9fd">int</span>) {
+</span></span><span style="display:flex;"><span>    f.lock.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>    f.listeners[i] = f.listeners[<span style="color:#8be9fd;font-style:italic">len</span>(f.listeners)<span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>]
+</span></span><span style="display:flex;"><span>    f.listeners = f.listeners[:<span style="color:#8be9fd;font-style:italic">len</span>(f.listeners)<span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>]
+</span></span><span style="display:flex;"><span>    f.lock.<span style="color:#50fa7b">Unlock</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">sub</span> <span style="color:#66d9ef">struct</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">feed</span>    <span style="color:#f92672">*</span><span style="color:#a6e22e">BoolFeed</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">channelIndex</span> <span style="color:#66d9ef">int</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">channel</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">bool</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">once</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">Once</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">err</span>     <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">error</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> sub <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>    feed    <span style="color:#ff79c6">*</span>BoolFeed
+</span></span><span style="display:flex;"><span>    channelIndex <span style="color:#8be9fd">int</span>
+</span></span><span style="display:flex;"><span>    channel <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">bool</span>
+</span></span><span style="display:flex;"><span>    once sync.Once
+</span></span><span style="display:flex;"><span>    err     <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">error</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">sub</span>) <span style="color:#a6e22e">Unsubscribe</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">once</span>.<span style="color:#a6e22e">Do</span>(<span style="color:#66d9ef">func</span>() {
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">feed</span>.<span style="color:#a6e22e">remove</span>(<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">channelIndex</span>)
-</span></span><span style="display:flex;"><span>        close(<span style="color:#a6e22e">sub</span>.<span style="color:#a6e22e">err</span>)
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (s <span style="color:#ff79c6">*</span>sub) <span style="color:#50fa7b">Unsubscribe</span>() {
+</span></span><span style="display:flex;"><span>    s.once.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>        s.feed.<span style="color:#50fa7b">remove</span>(s.channelIndex)
+</span></span><span style="display:flex;"><span>        <span style="color:#8be9fd;font-style:italic">close</span>(sub.err)
 </span></span><span style="display:flex;"><span>    })
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">sub</span>) <span style="color:#a6e22e">Err</span>() <span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">error</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">sub</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (s <span style="color:#ff79c6">*</span>sub) <span style="color:#50fa7b">Err</span>() <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> s.sub
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>Let's digest what's going on above. First, we returned a <code>&amp;sub{...}</code> from our <code>Subscribe</code> func, storing some information about the channel's index in the listeners, and we also initialize a useful <code>err</code> channel as a <em>buffered channel</em>. Remember how buffered channels don't block a thread on a send? Well, imagine that the error listener all of a sudden disappears for whatever reason, then if we were writing over an unbuffered channel, we'd have a send call that can never complete, causing us to have memory leakage! This is dangerous thing, as it leads to some of the most silent but deadly bugs you can have in an application. Having a buffered channel of size one ensures that a send over it will be non-blocking.</p>
 <p>In our <code>Unsubscribe</code> function, we use the helpful <code>sync.Once</code> helper from the standard library to ensure we run the function once and only once. We remove the channel from the feed's internal list of listeners and then close our buffered sub channel to wrap things up nicely. Another interesting to note is the function signature for the <code>Err() &lt;-chan error</code> func. Specifying <code>&lt;-chan error</code> basically tells whomever uses this function that the returned channel is only capable of <em>receiving</em> data, preventing any external sends into the error channel. So far, our first implementation meets most of the invariants we defined above, but it's still not <em>generic</em>...let's fix that.</p>
 <h2>Next Steps: A Generic Event Feed</h2>
 <p><img src="https://github.com/MariaLetta/free-gophers-pack/blob/master/illustrations/png/15.png?raw=true" alt="image"></p>
 <p>Although Go itself doesn't have built in generic functions, we can still define functions that take in the empty interface <code>interface{}</code>, and use the reflect package from the standard library to perform operations based on the exact type and value passed in. Let's see what we can do by defining a fully generic Feed.</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Feed</span> <span style="color:#66d9ef">struct</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">lock</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">Mutex</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sending</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{}
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sendCases</span> []<span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">SelectCase</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Feed <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>    lock sync.Mutex
+</span></span><span style="display:flex;"><span>    sending <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}
+</span></span><span style="display:flex;"><span>    sendCases []reflect.SelectCase
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">f</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Feed</span>) <span style="color:#a6e22e">Subscribe</span>(<span style="color:#a6e22e">ch</span> <span style="color:#66d9ef">interface</span>{}) (<span style="color:#a6e22e">Subscription</span>, <span style="color:#66d9ef">error</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Lock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Unlock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">val</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">ValueOf</span>(<span style="color:#a6e22e">ch</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">chanTyp</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">val</span>.<span style="color:#a6e22e">Type</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">chanTyp</span>.<span style="color:#a6e22e">Kind</span>() <span style="color:#f92672">!=</span> <span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">Chan</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>, <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Errorf</span>(<span style="color:#e6db74">&#34;wanted channel type as input, received %v&#34;</span>, <span style="color:#a6e22e">chanTyp</span>)
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (f <span style="color:#ff79c6">*</span>Feed) <span style="color:#50fa7b">Subscribe</span>(ch <span style="color:#8be9fd;font-style:italic">interface</span>{}) (Subscription, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>    f.lock.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> f.lock.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span>    val <span style="color:#ff79c6">:=</span> reflect.<span style="color:#50fa7b">ValueOf</span>(ch)
+</span></span><span style="display:flex;"><span>    chanTyp <span style="color:#ff79c6">:=</span> val.<span style="color:#50fa7b">Type</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> chanTyp.<span style="color:#50fa7b">Kind</span>() <span style="color:#ff79c6">!=</span> reflect.Chan {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;wanted channel type as input, received %v&#34;</span>, chanTyp)
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">cs</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">SelectCase</span>{<span style="color:#a6e22e">Dir</span>: <span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">SelectSend</span>, <span style="color:#a6e22e">Chan</span>: <span style="color:#a6e22e">val</span>}
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">sendCases</span> = append(<span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">sendCases</span>, <span style="color:#a6e22e">cs</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">sub</span>{
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">feed</span>: <span style="color:#a6e22e">f</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">channelIndex</span>: len(<span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">sendCases</span>)<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">channel</span>: <span style="color:#a6e22e">val</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">err</span>: make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">error</span>, <span style="color:#ae81ff">1</span>),
+</span></span><span style="display:flex;"><span>    cs <span style="color:#ff79c6">:=</span> reflect.SelectCase{Dir: reflect.SelectSend, Chan: val}
+</span></span><span style="display:flex;"><span>    f.sendCases = <span style="color:#8be9fd;font-style:italic">append</span>(f.sendCases, cs)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>sub{
+</span></span><span style="display:flex;"><span>        feed: f,
+</span></span><span style="display:flex;"><span>        channelIndex: <span style="color:#8be9fd;font-style:italic">len</span>(f.sendCases)<span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>        channel: val,
+</span></span><span style="display:flex;"><span>        err: <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">error</span>, <span style="color:#bd93f9">1</span>),
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>Now, we can accept any generic channel, and instead of keeping track of <code>[]chan bool</code>, we now keep track of <code>[]reflect.SelectCase</code>, what does this mean? From <a href="https://godoc.org/reflect#SelectCase">Godocs</a>, we see there it's a useful wrapper in the standard library for keeping track of a channel and whether or not it is send-only or receive-only, which will be helpful later.</p>
 <p>In our <code>Send</code> function, we can now accept <em>any</em> value by attempting to send over the tracked channels:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">f</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Feed</span>) <span style="color:#a6e22e">Send</span>(<span style="color:#a6e22e">value</span> <span style="color:#66d9ef">interface</span>{}) {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">rvalue</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">ValueOf</span>(<span style="color:#a6e22e">value</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">sending</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Lock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">cs</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">sendCases</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Set the sent value on all channels.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">cs</span>.<span style="color:#a6e22e">Send</span> = <span style="color:#a6e22e">rvalue</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">cs</span>.<span style="color:#a6e22e">TrySend</span>(<span style="color:#a6e22e">rvalue</span>)
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (f <span style="color:#ff79c6">*</span>Feed) <span style="color:#50fa7b">Send</span>(value <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
+</span></span><span style="display:flex;"><span>    rvalue <span style="color:#ff79c6">:=</span> reflect.<span style="color:#50fa7b">ValueOf</span>(value)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&lt;-</span>f.sending
+</span></span><span style="display:flex;"><span>    f.lock.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> _, cs <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> f.sendCases {
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// Set the sent value on all channels.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        cs.Send = rvalue
+</span></span><span style="display:flex;"><span>        cs.<span style="color:#50fa7b">TrySend</span>(rvalue)
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Unlock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">sending</span> <span style="color:#f92672">&lt;-</span> <span style="color:#66d9ef">struct</span>{}{}
+</span></span><span style="display:flex;"><span>    f.lock.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span>    f.sending <span style="color:#ff79c6">&lt;-</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}{}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>We use <code>sending chan struct{}</code> as a way to protect the Send function and make it fully thread safe, as there could be many calls to Send occurring at the same time, we want to ensure they can only happen sequentially.</p>
 <h2>A Critical Problem With Our Approach</h2>
 <p>It seems like now we met most of our invariants, but what's critically wrong from the code above? It seems simple enough, no? Consider the first section of this blog post where we talked about the merits of unbuffered vs. buffered channels as well as typical gotchas regarding them. Well, when we attempt to subscribe any generic channel into our <code>Feed</code> data structure using the code above, we have <strong>no way of determinining whether the channel is buffered or not</strong>. That is, we cannot determine if some operations will block on send while others will not, and that will lead to chaos if we try to use our naïve approach at runtime. Plus, keep in mind we deliver data to listeners by doing a simple for loop over a list of registered channels and performing a send operation, but what if we have the following registered listeners:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>[
-</span></span><span style="display:flex;"><span>    make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">bool</span>, <span style="color:#ae81ff">2</span>),
-</span></span><span style="display:flex;"><span>    make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">bool</span>),
-</span></span><span style="display:flex;"><span>    make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">bool</span>, <span style="color:#ae81ff">1</span>)
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>[
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">bool</span>, <span style="color:#bd93f9">2</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">bool</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">bool</span>, <span style="color:#bd93f9">1</span>)
 </span></span><span style="display:flex;"><span>]
 </span></span></code></pre><p>Any attempt to do:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#a6e22e">cs</span>.<span style="color:#a6e22e">TrySend</span>(<span style="color:#a6e22e">rvalue</span>)
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>cs.<span style="color:#50fa7b">TrySend</span>(rvalue)
 </span></span></code></pre><p>...will succeed on the first channel's send, but <strong>block</strong> the thread on the second if there is no active listener, and remember one of our invariants was that the sender should <strong>not</strong> care about who's listening or their status, but this invariably leads to a major problem.</p>
 <p>Can we do better?</p>
 <h2>Towards a Smarter, Non-Blocking Approach</h2>
@@ -539,164 +539,164 @@
 <li>(b) some of them unsubscribe themselves from the feed</li>
 </ul>
 <p>The <code>TrySend</code> function can actually fail and returns a bool value of <code>false</code> if the channel we are sending to has a full buffer, in which case our logic above does not work. Instead of keeping a single slice of channels we should send over, we can keep two slices: one for channels we have yet to attempt to send, and another for channels we finished sending over. Let's call the former <code>pendingProcessing</code> and the other <code>inProgress</code>.</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Feed</span> <span style="color:#66d9ef">struct</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">lock</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">Mutex</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">pendingProcessing</span> []<span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">SelectCase</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">inProgress</span> []<span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">SelectCase</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Feed <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>    lock sync.Mutex
+</span></span><span style="display:flex;"><span>    pendingProcessing []reflect.SelectCase
+</span></span><span style="display:flex;"><span>    inProgress []reflect.SelectCase
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>We should have a while loop which proceeds until all inProgress cases have been marked as done, and if some of the receiving channels are blocked, we should wait in each iteration of the loop until they unblock before attempting to send again. Here's a bit of pseudocode of how this could work:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span>processing <span style="color:#f92672">=</span> feed<span style="color:#f92672">.</span>in_progress
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">while</span>:
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> case <span style="color:#f92672">in</span> processing:
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># If the channel is blocking, this will fail!</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> case<span style="color:#f92672">.</span>try_send:
-</span></span><span style="display:flex;"><span>            cases <span style="color:#f92672">=</span> cases<span style="color:#f92672">.</span>mark_succeded(case)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> len(cases) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">break</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># For cases that failed and were not marked as succeeded, we pseudo-randomly</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># pick one of them, block with a select statement, and wait for it to unblock</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># and receive our data. Then, we mark it as succeeded.</span>
-</span></span><span style="display:flex;"><span>    chosen <span style="color:#f92672">=</span> wait_for_unblocked_and_send(cases)
-</span></span><span style="display:flex;"><span>    cases <span style="color:#f92672">=</span> cases<span style="color:#f92672">.</span>mark_succeded(chosen)
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>processing <span style="color:#ff79c6">=</span> feed<span style="color:#ff79c6">.</span>in_progress
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">while</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> case <span style="color:#ff79c6">in</span> processing:
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># If the channel is blocking, this will fail!</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> case<span style="color:#ff79c6">.</span>try_send:
+</span></span><span style="display:flex;"><span>            cases <span style="color:#ff79c6">=</span> cases<span style="color:#ff79c6">.</span>mark_succeded(case)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(cases) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">break</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4"># For cases that failed and were not marked as succeeded, we pseudo-randomly</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4"># pick one of them, block with a select statement, and wait for it to unblock</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4"># and receive our data. Then, we mark it as succeeded.</span>
+</span></span><span style="display:flex;"><span>    chosen <span style="color:#ff79c6">=</span> wait_for_unblocked_and_send(cases)
+</span></span><span style="display:flex;"><span>    cases <span style="color:#ff79c6">=</span> cases<span style="color:#ff79c6">.</span>mark_succeded(chosen)
 </span></span></code></pre><p><img src="https://raw.githubusercontent.com/MariaLetta/free-gophers-pack/master/illustrations/png/19.png" alt="image"></p>
 <p>With the logic above, eventually every single in progress case will complete and will get data sent over its channel. Next, we need a function which will deactivate cases from the <code>inProgress</code> slice as we successfully send over them, the <code>mark_succeeded</code> function from our pseudocode above.</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#75715e">// removes an channel at index i efficiently as order does not
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// matter for listeners we keep track of.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">deactivate</span>(<span style="color:#a6e22e">cs</span> []<span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">SelectCase</span>, <span style="color:#a6e22e">index</span> <span style="color:#66d9ef">int</span>) []<span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">SelectCase</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">last</span> <span style="color:#f92672">:=</span> len(<span style="color:#a6e22e">cs</span>) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">cs</span>[<span style="color:#a6e22e">index</span>], <span style="color:#a6e22e">cs</span>[<span style="color:#a6e22e">last</span>] = <span style="color:#a6e22e">cs</span>[<span style="color:#a6e22e">last</span>], <span style="color:#a6e22e">cs</span>[<span style="color:#a6e22e">index</span>]
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">cs</span>[:<span style="color:#a6e22e">last</span>]
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#6272a4">// removes an channel at index i efficiently as order does not
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">// matter for listeners we keep track of.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">deactivate</span>(cs []reflect.SelectCase, index <span style="color:#8be9fd">int</span>) []reflect.SelectCase {
+</span></span><span style="display:flex;"><span>    last <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">len</span>(cs) <span style="color:#ff79c6">-</span> <span style="color:#bd93f9">1</span>
+</span></span><span style="display:flex;"><span>    cs[index], cs[last] = cs[last], cs[index]
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> cs[:last]
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>We name the function <code>deactivate</code> as it basically removes an item at an index from the slice of cases we are attempting to send over. Once the send succeeds, we <code>deactivate</code> the case.</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">f</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Feed</span>) <span style="color:#a6e22e">Send</span>(<span style="color:#a6e22e">value</span> <span style="color:#66d9ef">interface</span>{}) (<span style="color:#a6e22e">nsent</span> <span style="color:#66d9ef">int</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">rvalue</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">ValueOf</span>(<span style="color:#a6e22e">value</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">sending</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (f <span style="color:#ff79c6">*</span>Feed) <span style="color:#50fa7b">Send</span>(value <span style="color:#8be9fd;font-style:italic">interface</span>{}) (nsent <span style="color:#8be9fd">int</span>) {
+</span></span><span style="display:flex;"><span>    rvalue <span style="color:#ff79c6">:=</span> reflect.<span style="color:#50fa7b">ValueOf</span>(value)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&lt;-</span>f.sending
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Add new cases from the pendingProcessing slice after taking the send lock.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Lock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">inProgress</span> = append(<span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">inProgress</span>, <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">pendingProcessing</span><span style="color:#f92672">...</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">pendingProcessing</span> = <span style="color:#66d9ef">nil</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">lock</span>.<span style="color:#a6e22e">Unlock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Add new cases from the pendingProcessing slice after taking the send lock.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    f.lock.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>    f.inProgress = <span style="color:#8be9fd;font-style:italic">append</span>(f.inProgress, f.pendingProcessing<span style="color:#ff79c6">...</span>)
+</span></span><span style="display:flex;"><span>    f.pendingProcessing = <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    f.lock.<span style="color:#50fa7b">Unlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Set the Send value on all channels.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">firstSubSendCase</span>; <span style="color:#a6e22e">i</span> &lt; len(<span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">inProgress</span>); <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">inProgress</span>[<span style="color:#a6e22e">i</span>].<span style="color:#a6e22e">Send</span> = <span style="color:#a6e22e">rvalue</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Set the Send value on all channels.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> firstSubSendCase; i &lt; <span style="color:#8be9fd;font-style:italic">len</span>(f.inProgress); i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>        f.inProgress[i].Send = rvalue
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Send until all channels have been chosen. &#39;cases&#39; tracks a prefix
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// of inProgress. When a send succeeds, the corresponding case moves to the end of
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// &#39;cases&#39; and it shrinks by one element.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">cases</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">inProgress</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Try sending without blocking before adding to the select set.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#75715e">// This should usually succeed if subscribers are fast enough and have free
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#75715e">// buffer space.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; len(<span style="color:#a6e22e">cases</span>); <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">cases</span>[<span style="color:#a6e22e">i</span>].<span style="color:#a6e22e">Chan</span>.<span style="color:#a6e22e">TrySend</span>(<span style="color:#a6e22e">rvalue</span>) {
-</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">nsent</span><span style="color:#f92672">++</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">cases</span> = <span style="color:#a6e22e">cases</span>.<span style="color:#a6e22e">deactivate</span>(<span style="color:#a6e22e">i</span>)
-</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">i</span><span style="color:#f92672">--</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Send until all channels have been chosen. &#39;cases&#39; tracks a prefix
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#6272a4">// of inProgress. When a send succeeds, the corresponding case moves to the end of
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#6272a4">// &#39;cases&#39; and it shrinks by one element.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    cases <span style="color:#ff79c6">:=</span> f.inProgress
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// Try sending without blocking before adding to the select set.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4">// This should usually succeed if subscribers are fast enough and have free
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4">// buffer space.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; <span style="color:#8be9fd;font-style:italic">len</span>(cases); i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> cases[i].Chan.<span style="color:#50fa7b">TrySend</span>(rvalue) {
+</span></span><span style="display:flex;"><span>                nsent<span style="color:#ff79c6">++</span>
+</span></span><span style="display:flex;"><span>                cases = cases.<span style="color:#50fa7b">deactivate</span>(i)
+</span></span><span style="display:flex;"><span>                i<span style="color:#ff79c6">--</span>
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> len(<span style="color:#a6e22e">cases</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(cases) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">break</span>
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Select on all the receivers, waiting for them to unblock.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">chosen</span>, <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">_</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">Select</span>(<span style="color:#a6e22e">cases</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">cases</span> = <span style="color:#a6e22e">cases</span>.<span style="color:#a6e22e">deactivate</span>(<span style="color:#a6e22e">chosen</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">nsent</span><span style="color:#f92672">++</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// Select on all the receivers, waiting for them to unblock.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        chosen, _, _ <span style="color:#ff79c6">:=</span> reflect.<span style="color:#50fa7b">Select</span>(cases)
+</span></span><span style="display:flex;"><span>        cases = cases.<span style="color:#50fa7b">deactivate</span>(chosen)
+</span></span><span style="display:flex;"><span>        nsent<span style="color:#ff79c6">++</span>
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Forget about the sent value.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; len(<span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">inProgress</span>); <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">inProgress</span>[<span style="color:#a6e22e">i</span>].<span style="color:#a6e22e">Send</span> = <span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">Value</span>{}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Forget about the sent value.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; <span style="color:#8be9fd;font-style:italic">len</span>(f.inProgress); i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>        f.inProgress[i].Send = reflect.Value{}
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">sending</span> <span style="color:#f92672">&lt;-</span> <span style="color:#66d9ef">struct</span>{}{}
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">nsent</span>
+</span></span><span style="display:flex;"><span>    f.sending <span style="color:#ff79c6">&lt;-</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}{}
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> nsent
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>What's going on over here? Well, from the pseudocode from earlier, if <code>TrySend</code> fails, we'll go into the latter part of our for loop, which will use <code>reflect.Select(cases)</code>, which pretty much simulates a real, blocking <code>select</code> block in Go!</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">select</span> {
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">case</span> <span style="color:#a6e22e">waitTillUnblocked</span>(<span style="color:#a6e22e">someChan</span>):
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">someChan</span> <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">data</span>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">case</span> <span style="color:#50fa7b">waitTillUnblocked</span>(someChan):
+</span></span><span style="display:flex;"><span>    someChan <span style="color:#ff79c6">&lt;-</span> data
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>This will pseudorandomly pick one of the channels which did not succeed, block the thread until the channel is unblocked, and then send the data over it. With this, we have all the pieces needed to test this out and make sure it fits our invariants. If we try running</p>
 <h2>Testing &amp; Benchmarks</h2>
 <p>How does one even begin to test something like this? With channels of course! Given we have a lot of concurrency, we will have to be careful with our test setup to avoid any deadlocks or goroutine leaks, all while ensuring we properly test the behavior of our functions. Let's try to setup a test to ensure the one-to-many functionality invariant of our library is met.</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">TestFeed_OneToMany</span>(<span style="color:#a6e22e">t</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">testing</span>.<span style="color:#a6e22e">T</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">feed</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">Feed</span>{
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">pendingProcessing</span>: make([]<span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">SelectCase</span>, <span style="color:#ae81ff">0</span>),
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">inProgress</span>:        make([]<span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">SelectCase</span>, <span style="color:#ae81ff">0</span>),
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">TestFeed_OneToMany</span>(t <span style="color:#ff79c6">*</span>testing.T) {
+</span></span><span style="display:flex;"><span>    feed <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>Feed{
+</span></span><span style="display:flex;"><span>        pendingProcessing: <span style="color:#8be9fd;font-style:italic">make</span>([]reflect.SelectCase, <span style="color:#bd93f9">0</span>),
+</span></span><span style="display:flex;"><span>        inProgress:        <span style="color:#8be9fd;font-style:italic">make</span>([]reflect.SelectCase, <span style="color:#bd93f9">0</span>),
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">done</span>, <span style="color:#a6e22e">subscribed</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// We create a wait group for subscribing and a wait group for completing
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// the receipt of the value.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">numRoutines</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">10</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">done</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#a6e22e">numRoutines</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">subscribed</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#a6e22e">numRoutines</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#a6e22e">numRoutines</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">done</span>.<span style="color:#a6e22e">Done</span>()
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">bool</span>, <span style="color:#ae81ff">0</span>)
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">sub</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">feed</span>.<span style="color:#a6e22e">Subscribe</span>(<span style="color:#a6e22e">ch</span>)
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">sub</span>.<span style="color:#a6e22e">Unsubscribe</span>()
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
-</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">t</span>.<span style="color:#a6e22e">Fatal</span>(<span style="color:#a6e22e">err</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> done, subscribed sync.WaitGroup
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// We create a wait group for subscribing and a wait group for completing
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#6272a4">// the receipt of the value.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    numRoutines <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">10</span>
+</span></span><span style="display:flex;"><span>    done.<span style="color:#50fa7b">Add</span>(numRoutines)
+</span></span><span style="display:flex;"><span>    subscribed.<span style="color:#50fa7b">Add</span>(numRoutines)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; numRoutines; i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">defer</span> done.<span style="color:#50fa7b">Done</span>()
+</span></span><span style="display:flex;"><span>            ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">bool</span>, <span style="color:#bd93f9">0</span>)
+</span></span><span style="display:flex;"><span>            sub, err <span style="color:#ff79c6">:=</span> feed.<span style="color:#50fa7b">Subscribe</span>(ch)
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">defer</span> sub.<span style="color:#50fa7b">Unsubscribe</span>()
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>                t.<span style="color:#50fa7b">Fatal</span>(err)
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// We notify the wait group we finished subscribing.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#a6e22e">subscribed</span>.<span style="color:#a6e22e">Done</span>()
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">select</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">val</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">ch</span>:
-</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">t</span>.<span style="color:#a6e22e">Logf</span>(<span style="color:#e6db74">&#34;Received value in listener %d: %v&#34;</span>, <span style="color:#a6e22e">i</span>, <span style="color:#a6e22e">val</span>)
-</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">sub</span>.<span style="color:#a6e22e">Err</span>():
-</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">t</span>.<span style="color:#a6e22e">Errorf</span>(<span style="color:#e6db74">&#34;Received error in listener %d: %v&#34;</span>, <span style="color:#a6e22e">i</span>, <span style="color:#a6e22e">err</span>)
-</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// We notify the wait group we finished subscribing.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>            subscribed.<span style="color:#50fa7b">Done</span>()
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">case</span> val <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>ch:
+</span></span><span style="display:flex;"><span>                t.<span style="color:#50fa7b">Logf</span>(<span style="color:#f1fa8c">&#34;Received value in listener %d: %v&#34;</span>, i, val)
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">case</span> err <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>sub.<span style="color:#50fa7b">Err</span>():
+</span></span><span style="display:flex;"><span>                t.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Received error in listener %d: %v&#34;</span>, i, err)
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span>
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }()
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// We wait for all subscriptions to be completed before we send anything out.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">subscribed</span>.<span style="color:#a6e22e">Wait</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">nsent</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">feed</span>.<span style="color:#a6e22e">Send</span>(<span style="color:#66d9ef">true</span>); <span style="color:#a6e22e">nsent</span> <span style="color:#f92672">!=</span> <span style="color:#a6e22e">numRoutines</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">t</span>.<span style="color:#a6e22e">Errorf</span>(<span style="color:#e6db74">&#34;First send delivered %d times, wanted %d&#34;</span>, <span style="color:#a6e22e">nsent</span>, <span style="color:#a6e22e">numRoutines</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// We wait for all subscriptions to be completed before we send anything out.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    subscribed.<span style="color:#50fa7b">Wait</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> nsent <span style="color:#ff79c6">:=</span> feed.<span style="color:#50fa7b">Send</span>(<span style="color:#ff79c6">true</span>); nsent <span style="color:#ff79c6">!=</span> numRoutines {
+</span></span><span style="display:flex;"><span>        t.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;First send delivered %d times, wanted %d&#34;</span>, nsent, numRoutines)
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// We wait for the values to be received before finishing the test.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">done</span>.<span style="color:#a6e22e">Wait</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// We wait for the values to be received before finishing the test.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    done.<span style="color:#50fa7b">Wait</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>In the example above, we simply setup 10 subscribers which are waiting to receive
 information on a subscribed channel they initialized. We create two wait groups so we can
 wait for the subscriptions to be registered and for the subscribers to receive the values. We simply do a <code>feed.Send</code> and finally the number of sends matches the number of goroutines - simple enough!</p>
 <p>Let's see how a benchmark would work here.</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">BenchmarkFeed_Send</span>(<span style="color:#a6e22e">b</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">testing</span>.<span style="color:#a6e22e">B</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">feed</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">Feed</span>{
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">pendingProcessing</span>: make([]<span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">SelectCase</span>, <span style="color:#ae81ff">0</span>),
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">inProgress</span>:        make([]<span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">SelectCase</span>, <span style="color:#ae81ff">0</span>),
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">BenchmarkFeed_Send</span>(b <span style="color:#ff79c6">*</span>testing.B) {
+</span></span><span style="display:flex;"><span>    feed <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>Feed{
+</span></span><span style="display:flex;"><span>        pendingProcessing: <span style="color:#8be9fd;font-style:italic">make</span>([]reflect.SelectCase, <span style="color:#bd93f9">0</span>),
+</span></span><span style="display:flex;"><span>        inProgress:        <span style="color:#8be9fd;font-style:italic">make</span>([]reflect.SelectCase, <span style="color:#bd93f9">0</span>),
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">numRoutines</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">1000</span>
+</span></span><span style="display:flex;"><span>    numRoutines <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">1000</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">wg</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#a6e22e">numRoutines</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#a6e22e">numRoutines</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">ch</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">numRoutines</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">feed</span>.<span style="color:#a6e22e">Subscribe</span>(<span style="color:#a6e22e">ch</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">cc</span> <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>) {
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">N</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
-</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">cc</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> wg sync.WaitGroup
+</span></span><span style="display:flex;"><span>    wg.<span style="color:#50fa7b">Add</span>(numRoutines)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; numRoutines; i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>        ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">int</span>, numRoutines)
+</span></span><span style="display:flex;"><span>        feed.<span style="color:#50fa7b">Subscribe</span>(ch)
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>(cc <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">int</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; b.N; i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">&lt;-</span>cc
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">done</span>.<span style="color:#a6e22e">Done</span>()
-</span></span><span style="display:flex;"><span>        }(<span style="color:#a6e22e">ch</span>)
+</span></span><span style="display:flex;"><span>            done.<span style="color:#50fa7b">Done</span>()
+</span></span><span style="display:flex;"><span>        }(ch)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">ResetTimer</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">N</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">feed</span>.<span style="color:#a6e22e">Send</span>(<span style="color:#a6e22e">i</span>) <span style="color:#f92672">!=</span> <span style="color:#a6e22e">numRoutines</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">Fatal</span>(<span style="color:#e6db74">&#34;Incorrect number of sends&#34;</span>)
+</span></span><span style="display:flex;"><span>    b.<span style="color:#50fa7b">ResetTimer</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; b.N; i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> feed.<span style="color:#50fa7b">Send</span>(i) <span style="color:#ff79c6">!=</span> numRoutines {
+</span></span><span style="display:flex;"><span>            b.<span style="color:#50fa7b">Fatal</span>(<span style="color:#f1fa8c">&#34;Incorrect number of sends&#34;</span>)
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">StopTimer</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">done</span>.<span style="color:#a6e22e">Wait</span>()
+</span></span><span style="display:flex;"><span>    b.<span style="color:#50fa7b">StopTimer</span>()
+</span></span><span style="display:flex;"><span>    done.<span style="color:#50fa7b">Wait</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>The results only make 1 allocation per operation as we initialize a channel, but we do see quite a few ns/operation of running our <code>Send</code> function:</p>
 <pre><code>$ go test -bench=. -benchmem
