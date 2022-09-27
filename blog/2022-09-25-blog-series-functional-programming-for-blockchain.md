@@ -150,7 +150,7 @@ if wantCheese() {
 } else {
   sandwich.cheeses = nil
 }
-sandwich.decideSauce = inputSauce()
+sandwich.sauces = inputSauces()
 return sandwich
 ```
 
@@ -218,7 +218,7 @@ In imperative code, however, your software could be doing something like this:
 ```go
 // Simple addition of two integers.
 func addNumbers(x, y int) {
-  launch_missiles() // Here be dragons...
+  launchMissiles() // Here be dragons...
   return x + y
 }
 ```
@@ -242,6 +242,6 @@ plan to continue working with imperative codebases (I am a Go developer myself!)
 - Writing real programs in a functional language
 - Why functional programming is not taking over the world yet
 
-Stay tuned, as each post will be packed with content. I hope this peaks your interest as much as it has been a joy for me
+Stay tuned, as each post will be packed with content. I hope this piques your interest as much as it has been a joy for me
 to bring these ideas to developers that are not yet familiar with them.
 

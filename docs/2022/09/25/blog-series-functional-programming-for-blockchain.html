@@ -189,7 +189,7 @@ We might do something like this:</p>
 </span></span><span style="display:flex;"><span>} <span style="color:#ff79c6">else</span> {
 </span></span><span style="display:flex;"><span>  sandwich.cheeses = <span style="color:#ff79c6">nil</span>
 </span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span>sandwich.decideSauce = <span style="color:#50fa7b">inputSauce</span>()
+</span></span><span style="display:flex;"><span>sandwich.sauces = <span style="color:#50fa7b">inputSauces</span>()
 </span></span><span style="display:flex;"><span><span style="color:#ff79c6">return</span> sandwich
 </span></span></code></pre><p>In the code above, we mutate the sandwich variable along the way, and nothing stops us from doing something crazy such as
 making an HTTP request in the middle, or maybe sending an email when all we want is to build a sandwich! Even worse, if we do
@@ -237,7 +237,7 @@ really cool techniques to get effectful code using pure types and still maintain
 <p>In imperative code, however, your software could be doing something like this:</p>
 <pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span><span style="color:#6272a4">// Simple addition of two integers.
 </span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">addNumbers</span>(x, y <span style="color:#8be9fd">int</span>) {
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">launch_missiles</span>() <span style="color:#6272a4">// Here be dragons...
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">launchMissiles</span>() <span style="color:#6272a4">// Here be dragons...
 </span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">return</span> x <span style="color:#ff79c6">+</span> y
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre><p>Although the example above is contrived, it is harder to stop bad side-effects when your functions are thousands of lines
@@ -257,7 +257,7 @@ plan to continue working with imperative codebases (I am a Go developer myself!)
 <li>Writing real programs in a functional language</li>
 <li>Why functional programming is not taking over the world yet</li>
 </ul>
-<p>Stay tuned, as each post will be packed with content. I hope this peaks your interest as much as it has been a joy for me
+<p>Stay tuned, as each post will be packed with content. I hope this piques your interest as much as it has been a joy for me
 to bring these ideas to developers that are not yet familiar with them.</p>
 
 </div>
