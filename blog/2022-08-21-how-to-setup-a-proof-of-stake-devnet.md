@@ -156,7 +156,7 @@ You will need configuration files for setting up Prysm and Go-Ethereum.
 
 On the Prysm side, create a file called `config.yml` in your `devnet` folder containing the following:
 
-```yaml
+```bash
 CONFIG_NAME: interop
 PRESET_BASE: interop
 
