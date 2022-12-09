@@ -42,13 +42,6 @@ the switch to proof-of-stake, running an "Ethereum node" will require **two comp
 
 Prysm is an open source, Go implementation of the Ethereum proof-of-stake protocol. It can be used to run a node+validator on mainnet and testnet environments with ease, and is highly configurable to meet users’ needs. 
 
-The architecture looks something like this, thanks to the excellent graphic from the Besu team
-
-![Image](https://besu.hyperledger.org/en/stable/images/Execution-Consensus-Clients.png)
-
-This seems daunting if you want to set up a local Ethereum blockchain! However, this post will go over
-every detail you need to get up and running. Let's get started.
-
 # Easy setup using Docker
 
 To get started, install [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) for your system. If you are on MacOS, you should adjust your settings on Docker desktop
@@ -63,13 +56,13 @@ git clone https://github.com/rauljordan/eth-pos-devnet && cd eth-pos-devnet
 
 Finally, simply run docker compose inside of the repository above.
 ```
-docker compose up
+docker-compose up -d
 ```
 
 Boom! Your network is up and running.
 
 ```bash
-$ docker compose up -d
+$ docker-compose up -d
 [+] Running 7/7
  ⠿ Network eth-pos-devnet_default                          Created
  ⠿ Container eth-pos-devnet-geth-genesis-1                 Started
@@ -93,11 +86,7 @@ Your go-ethereum node should look as follows:
 
 ![Image](https://user-images.githubusercontent.com/5572669/186052301-dd487b50-183a-4fa6-bbec-216f32d6f03a.png)
 
-Your Prysm beacon node should show the following:
-
-![Image](https://user-images.githubusercontent.com/5572669/186052300-80d9e6d5-e2b7-4e1a-9113-1593e5a5872f.png)
-
-Your Prysm validator client should also be functional:
+Your Prysm beacon node and validator client should also be functional:
 
 ![Image](https://user-images.githubusercontent.com/5572669/186052298-54b82ff2-a901-482e-9e5a-a7c265605ad6.png)
 
@@ -122,7 +111,7 @@ with the different settings that make the system possible.
 
 # Manual setup built from source
 
-All you will need for a manual installation guide is the Go programming language and `git`. Install the latest version of Go [here](https://www.notion.so/How-we-work-e9237b3f750844a0ad3d12768a68d4d7) and confirm your installation by doing:
+All you will need for a manual installation guide is the Go programming language and `git`. Install the latest version of Go [here](https://go.dev/doc/install), and verify your installation with:
 
 ```bash
 go version
@@ -134,16 +123,16 @@ You should see an output showing you the version you have installed. Next, creat
 mkdir devnet && cd devnet
 ```
 
-The instructions below are running with Prysm commit [a65c670f5e4b08221e01e702cbd527684460c2e9](https://www.notion.so/How-we-work-e9237b3f750844a0ad3d12768a68d4d7) and go-ethereum commit [23ac8df15302bbde098cab6d711abdd24843d66a](https://www.notion.so/How-we-work-e9237b3f750844a0ad3d12768a68d4d7)
+The instructions below are running with Prysm commit [cb9b5e8f6e91adc8c6cdb2ca39708703e88c0b63](https://github.com/prysmaticlabs/prysm/commit/cb9b5e8f6e91adc8c6cdb2ca39708703e88c0b63) and go-ethereum commit [890e2efca2111c790c6d5eb55e29981816ee1fe9](https://github.com/ethereum/go-ethereum/commit/890e2efca2111c790c6d5eb55e29981816ee1fe9)
 
 Clone the Prysm repository and build the following binaries. We’ll be outputting them to the `devnet` folder:
 
 ```bash
 git clone https://github.com/prysmaticlabs/prysm && cd prysm
-git checkout a65c670f5e4b08221e01e702cbd527684460c2e9
+git checkout cb9b5e8f6e91adc8c6cdb2ca39708703e88c0b63
 go build -o=../beacon-chain ./cmd/beacon-chain
 go build -o=../validator ./cmd/validator
-go build -o=../generate-genesis ./tools/genesis-state-gen
+go build -o=../prysmctl ./cmd/prysmctl
 cd ..
 ```
 
@@ -167,7 +156,31 @@ You will need configuration files for setting up Prysm and Go-Ethereum.
 
 On the Prysm side, create a file called `config.yml` in your `devnet` folder containing the following:
 
-The configuration above contains information about the different hard-fork versions that are required for Prysm to run, and has some custom parameters to make running your devnet easier. It’s important to note that you can change any of these settings as desired. To see the full list of configuration options you can change, see [here](https://www.notion.so/How-we-work-e9237b3f750844a0ad3d12768a68d4d7). For example, in the devnet above, we will only have 4 seconds per slot and 4 slots per epoch, making it go faster than normal.
+```yaml
+CONFIG_NAME: interop
+PRESET_BASE: interop
+
+# Genesis
+GENESIS_FORK_VERSION: 0x20000089
+
+# Altair
+ALTAIR_FORK_EPOCH: 2
+ALTAIR_FORK_VERSION: 0x20000090
+
+# Merge
+BELLATRIX_FORK_EPOCH: 4
+BELLATRIX_FORK_VERSION: 0x20000091
+TERMINAL_TOTAL_DIFFICULTY: 50
+
+# Time parameters
+SECONDS_PER_SLOT: 12
+SLOTS_PER_EPOCH: 6
+
+# Deposit contract
+DEPOSIT_CONTRACT_ADDRESS: 0x4242424242424242424242424242424242424242
+```
+
+The configuration above contains information about the different hard-fork versions that are required for Prysm to run, and has some custom parameters to make running your devnet easier. It’s important to note that you can change any of these settings as desired. To see the full list of configuration options you can change, see [here](https://docs.prylabs.network/docs/prysm-usage/parameters/).
 
 ### Go-Ethereum
 
@@ -207,7 +220,7 @@ You can check the ETH balance in the geth console by typing in
 We will then need to run a Prysm beacon node and a validator client. Prysm will need a **genesis state** which is essentially some data that tells it the initial set of validators. We will be creating a genesis state from a deterministic set of keys below:
 
 ```bash
-./generate-genesis --num-validators=64 --output-ssz=genesis.ssz --chain-config-file=config.yml
+./prysmctl testnet generate-genesis --num-validators=64 --output-ssz=genesis.ssz --chain-config-file=config.yml
 ```
 
 This will out a file `genesis.ssz` in your `devnet` folder. Now, run the Prysm beacon node soon after:
