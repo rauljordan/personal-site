@@ -184,7 +184,28 @@ with the different settings that make the system possible.</p>
 <p>You will need configuration files for setting up Prysm and Go-Ethereum.</p>
 <h3>Prysm</h3>
 <p>On the Prysm side, create a file called <code>config.yml</code> in your <code>devnet</code> folder containing the following:</p>
-<p>The configuration above contains information about the different hard-fork versions that are required for Prysm to run, and has some custom parameters to make running your devnet easier. It’s important to note that you can change any of these settings as desired. To see the full list of configuration options you can change, see <a href="https://docs.prylabs.network/docs/prysm-usage/parameters/">here</a>.</p>
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>CONFIG_NAME: interop
+</span></span><span style="display:flex;"><span>PRESET_BASE: interop
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Genesis</span>
+</span></span><span style="display:flex;"><span>GENESIS_FORK_VERSION: 0x20000089
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Altair</span>
+</span></span><span style="display:flex;"><span>ALTAIR_FORK_EPOCH: <span style="color:#bd93f9">2</span>
+</span></span><span style="display:flex;"><span>ALTAIR_FORK_VERSION: 0x20000090
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Merge</span>
+</span></span><span style="display:flex;"><span>BELLATRIX_FORK_EPOCH: <span style="color:#bd93f9">4</span>
+</span></span><span style="display:flex;"><span>BELLATRIX_FORK_VERSION: 0x20000091
+</span></span><span style="display:flex;"><span>TERMINAL_TOTAL_DIFFICULTY: <span style="color:#bd93f9">50</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Time parameters</span>
+</span></span><span style="display:flex;"><span>SECONDS_PER_SLOT: <span style="color:#bd93f9">12</span>
+</span></span><span style="display:flex;"><span>SLOTS_PER_EPOCH: <span style="color:#bd93f9">6</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Deposit contract</span>
+</span></span><span style="display:flex;"><span>DEPOSIT_CONTRACT_ADDRESS: 0x4242424242424242424242424242424242424242
+</span></span></code></pre><p>The configuration above contains information about the different hard-fork versions that are required for Prysm to run, and has some custom parameters to make running your devnet easier. It’s important to note that you can change any of these settings as desired. To see the full list of configuration options you can change, see <a href="https://docs.prylabs.network/docs/prysm-usage/parameters/">here</a>.</p>
 <h3>Go-Ethereum</h3>
 <p>On the go-ethereum side, you will need to set-up a private key that will help advance the chain from genesis by mining up until it reaches <strong>proof-of-stake</strong> mode. Create a file called <code>secret.json</code> inside of your <code>devnet</code> folder with the following:</p>
 <pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622
@@ -201,7 +222,7 @@ with the different settings that make the system possible.</p>
 <p><code>eth.getBalance(&quot;0x123463a4b065722e99115d6c222f267d9cabb524&quot;)</code> which should show <code>2e+22</code></p>
 <h3>Prysm</h3>
 <p>We will then need to run a Prysm beacon node and a validator client. Prysm will need a <strong>genesis state</strong> which is essentially some data that tells it the initial set of validators. We will be creating a genesis state from a deterministic set of keys below:</p>
-<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>./generate-genesis --num-validators<span style="color:#ff79c6">=</span><span style="color:#bd93f9">64</span> --output-ssz<span style="color:#ff79c6">=</span>genesis.ssz --chain-config-file<span style="color:#ff79c6">=</span>config.yml
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>./prysmctl testnet generate-genesis --num-validators<span style="color:#ff79c6">=</span><span style="color:#bd93f9">64</span> --output-ssz<span style="color:#ff79c6">=</span>genesis.ssz --chain-config-file<span style="color:#ff79c6">=</span>config.yml
 </span></span></code></pre><p>This will out a file <code>genesis.ssz</code> in your <code>devnet</code> folder. Now, run the Prysm beacon node soon after:</p>
 <pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;"><code><span style="display:flex;"><span>./beacon-chain <span style="color:#f1fa8c">\
 </span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>  --datadir<span style="color:#ff79c6">=</span>beacondata <span style="color:#f1fa8c">\
