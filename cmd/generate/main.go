@@ -111,21 +111,12 @@ func main() {
 
 // Renders the index page for the website.
 func renderIndexPage(t *template.Template, page *Page, postsPath, outputPath string) error {
-	blogPostFiles, err := parseBlogPostFileNames(postsPath)
+	postPath := filepath.Join("blog", "2017-01-01-about-me.md")
+	post, err := generateBlogPostHtmlFromMarkdown(postPath)
 	if err != nil {
 		return err
 	}
-	posts := make([]*Post, 0)
-	for _, bp := range blogPostFiles {
-		post, err := generateBlogPostHtmlFromMarkdown(bp)
-		if err != nil {
-			return err
-		}
-		posts = append(posts, post)
-	}
-	sort.Slice(posts, func(i, j int) bool {
-		return posts[i].Date.After(posts[j].Date)
-	})
+	posts := []*Post{post}
 	indexContents := bytes.NewBuffer(nil)
 	if err := t.Lookup("index").Execute(indexContents, &Index{Posts: posts}); err != nil {
 		return err

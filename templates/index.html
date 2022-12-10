@@ -1,47 +1,9 @@
 {{ define "index" }}
-<h1>highlights</h1>
-<div class="post-links">
-	<div class="post-link-wrapper">
-		<a href="/2019/09/05/key-takeaways-from-a-harvard-education.html" class="post-link">10 Key Takeaways from a
-			Harvard Education</a>
-		<br />
-		What I learned from a few years with some of the most interesting classmates I could have ever imagined
-		<div class="post-meta">
-			<div class="post-tags">
-				<a class="tag" href="/tag/personal">personal</a>
-			</div>
-		</div>
-	</div>
-	<div class="post-link-wrapper">
-		<a href="/2019/09/23/how-to-write-an-event-feed-library.html" class="post-link">Writing an One-to-Many Event
-			Feed Library in Go</a>
-		<br />
-		Using the power of Go's concurrency model to recreate a library for one-to-many event subscriptions
-		<div class="post-meta">
-			<div class="post-tags">
-				<a class="tag" href="/tag/golang">golang</a>
-			</div>
-		</div>
-	</div>
+{{range $post := .Posts }}
+<div class="post">
+  <h1 class="post-title">{{ $post.Title }}</h1>
+  <div class="post-date">Published on {{ $post.DateString }}</div>
+  {{ $post.Contents }}
 </div>
-
-<h1>latest posts</h1>
-<div class="post-links">
-	{{range $post := .Posts }}
-	<div class="post-link-wrapper">
-		<a href="{{ $post.Url }}" class="post-link">{{ $post.Title }}</a>
-		<br />
-		{{ $post.Preview }}
-		<div class="post-meta">
-
-			<div class="post-tags">
-				{{range $tag := $post.Tags }}
-				<a class="tag" href="/tag/{{ $tag }}">{{ $tag }}</a>
-				{{ end }}
-			</div>
-			{{ $post.DateString }}
-		</div>
-	</div>
-	{{end}}
-</div>
+{{ end }}
 {{ end }}
