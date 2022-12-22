@@ -1,0 +1,48 @@
+# The URL the site will be built for
+base_url = "https://rauljordan.com"
+title = "rauljordan::blog"
+
+theme = "terminimal"
+
+# Whether to automatically compile all Sass files in the sass directory
+compile_sass = true
+
+# Whether to build a search index to be used later on by a JavaScript library
+build_search_index = true
+
+taxonomies = [
+    {name = "tags"}
+]
+
+[markdown]
+# Whether to do syntax highlighting
+# Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
+highlight_code = true
+highlight_theme = "ayu-dark"
+
+[extra]
+# Put all your custom variables here
+title = "rauljordan::blog"
+
+accent_color = "orange"
+background_color = "pink"
+
+logo_text = "rauljordan::blog"
+
+author = "Raul Jordan"
+menu_items = [
+    {name = "tags", url = "$BASE_URL/tags"},
+    {name = "archive", url = "$BASE_URL/archive"},
+    {name = "about me", url = "$BASE_URL/about-me"},
+    {name = "twitter", url = "https://twitter.com/rauljordaneth", newtab = true},
+    {name = "github", url = "https://github.com/rauljordan", newtab = true},
+]
+
+# Whether to show links to earlier and later (aka. higher/lower) posts
+# on each post page (defaults to true).
+enable_post_view_navigation = true
+
+# The text shown at the bottom of a post,
+# before earlier/later post links.
+# Defaults to "Thanks for reading! Read other posts?"
+post_view_navigation_prompt = "More posts"

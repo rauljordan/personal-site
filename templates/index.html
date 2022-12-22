@@ -1,9 +1,0 @@
-{{ define "index" }}
-{{range $post := .Posts }}
-<div class="post">
-  <h1 class="post-title">{{ $post.Title }}</h1>
-  <div class="post-date">Published on {{ $post.DateString }}</div>
-  {{ $post.Contents }}
-</div>
-{{ end }}
-{{ end }}
