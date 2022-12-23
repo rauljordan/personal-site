@@ -6,6 +6,8 @@ date = 2019-07-05
 tags = ["personal"]
 +++
 
+![image](/harvard1.jpg)
+
 Coming from Honduras, attending college in the U.S. felt an unattainable dream during my high school years. Emblazoned upon one of the entrances to Harvard University one can find the words:
 
 > "Enter to Grow in Wisdom, Depart to Serve Thy Country and Thy Kind"
@@ -13,8 +15,6 @@ Coming from Honduras, attending college in the U.S. felt an unattainable dream d
 This adage, although seemingly cliché, had its words weigh heavily on me as the years went on. I promised myself when starting my first year that I would not leave its walls an unchanged man. Despite its highs and lows, here is a final list of my major takeaways from my 4 years as an undergraduate at Harvard University.
 
 <!-- more -->
-
-![image](https://i.imgur.com/enaD1JG.jpg)
 
 ## Do something, do it passionately, and do it well
 
@@ -47,7 +47,7 @@ Good or bad, Harvard is a microcosm of the elite echelons of American society, r
 
 When I say higher education, I don't mean $50k a year degree-mills with subpar teaching and opportunities, but rather places that aggregate diverse perspectives, provide a comprehensive social + academic education, and prepare its students to be global citizens. One thing this type of higher education provides that the "street smarts" of Silicon Valley lacks in structure and a clear path for many students. Colleges like Harvard provide an environment where making mistakes and exploring varied interests doesn't have to come with a catch. That is, it is place of learning for the sake of learning, both from instructors and from one's peers. For many, this is still highly beneficial and I know many peers who greatly benefit from an environment like this. At the end of the day, people go to Harvard for networking and to be surrounded by high energy folks with sky-high aspirations, and it has kept its place as prime real-estate for such folk for hundreds of years.
 
-![image](https://i.imgur.com/1FNdt6I.jpg)
+![image](/harvard4.png)
 
 Regardless, a vast majority of my professors were not only eminent scholars, accomplished researchers, but also absolute legends in their field. Many had theorems or inventions named after them, and had left a radical mark in the encyclopedia of human knowledge. They say if you feel you're the smartest person in the room, you're in the wrong room. At Harvard, I felt like I was in the wrong universe. The amount of technical prowess, knowledge, acuity in thinking from my peers kept me on edge, and I truly felt 10x improvements in my academic + professional life by virtue of the presence of such peers. We are social animals, and we respond to social cues. Being in a place that exerts such tangible pressure by virtue of its competitiveness is something I'll never forget.
 
@@ -80,7 +80,7 @@ The façade every freshman puts up when meeting other students quickly fades awa
 
 Upon graduation, some may attempt to add more steps to their ladder of milestones, while the treadmill comes to an end for others. Freshman year, we're all sold these grandiose visions of our "responsibility to do big things", but what if "big" differs from student to student? Truth is, reality often fails to be as glamorous as its painted, and life plans change based on circumstance for many of us. As the years went on, it became more and more apparent that following one's identity is more important than the superficial goals society may instill upon us as students.
 
-![image](https://i.imgur.com/HbbCKyz.png)
+![image](/harvard3.jpg)
 
 Not every student graduates or drops out becoming the next Zuckerberg - for most, that's not matters nor what _should_ matter. Over the years we instead developed a peculiar resilience and appreciation of each other, and despite whichever path we choose, we'll be alright. Not everyone operates on the same clock, and I've been pleasantly surprised with the path many classmates have taken compared to what they wanted to do upon first meeting them. Just because one's plans may not pan out as expected doesn't mean they are still outside the realm of possibility.
 
@@ -109,7 +109,7 @@ Hidden away on the upper rafters of Memorial Church at Harvard University lies a
 
 > Adolf Sannwald, Divinity School, (Enemy Casualty)
 
-![image](https://i.imgur.com/50vUfx0.jpg)
+![image](/harvard2.jpg)
 
 Amidst all the students commemorated for their valiant effort in one of the darkest points of human history was the name of a very enemy they were fighting against. It is quite surreal to imagine that Sannwald and others on that list could have been walking the halls of Harvard together, eating together, learning together, and yet have been on opposite fronts with polar opposite ideologies. The decision to mark his name came with heavy controversy, marked as a critical mistake done by the administration and pushing the lines of what is considered ethical. Truth is, the name remained, and the real story of Sannwald did not materialize until years later when his wife penned a letter to the University full of comprehensive information about her deceased husband's life.
 

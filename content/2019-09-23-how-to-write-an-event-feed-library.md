@@ -6,6 +6,16 @@ date = 2019-09-23
 tags = ["golang"]
 +++
 
+```go
+type sub struct {
+    feed         *BoolFeed
+    channelIndex int
+    channel      chan bool
+    once         sync.Once
+    err          chan error
+}
+```
+
 This blog post explores the design rationale behind building a performant, simple, one-to-many event feed library in Go. We'll be recreating the event library from the [go-ethereum](https://github.com/ethereum/go-ethereum/blob/master/event/feed.go) project step by step, even explaining some of the tricky design decisions behind its robust concurrency approach. 
 
 <!-- more -->

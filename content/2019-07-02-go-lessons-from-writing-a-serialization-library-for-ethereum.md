@@ -6,7 +6,23 @@ date = 2019-07-02
 tags = ["golang"]
 +++
 
-# Background
+```go
+type Marshaler interface {
+    func MarshalType(
+      val reflect.Value, 
+      b []byte, 
+      lastWrittenIdx uint64,
+    ) (nextIdx uint64, error)
+}
+
+type Unmarshaler interface {
+    func UnmarshalType(
+      target reflect.Value, 
+      b []byte, 
+      lastReadIdx uint64,
+    ) (nextIdx uint64, error)
+}
+```
 
 [Techopedia](https://www.techopedia.com/definition/867/serialization-net) defines serialization as
 
@@ -21,8 +37,6 @@ The process of serializing data is called _Marshaling_, and the process of recov
 ## Why Serialize at All?
 
 Although all computers speak the same underlying language of 1s and 0s, data gathered from programs running on those computers might have different forms, such as when the username and password a user inputs on a website, or when you type in a Google search. Google needs to be able to take that information from your browser, and translate it into an efficient _format_ its servers can understand to serve your request. Serialized data doesn't _have_ to be in bytes, in fact, it simply needs to be in a format most efficient for the particular system the data will live in - bytes are just the most convenient format for computers to operate in. 
-
-![image](https://imgur.com/hMEUb3S.png)
 
 Back in WWII, we used to serialize data into morse code, as that was the most convenient, common format to transmit via voice radio systems [between ships](http://radiomarine.org)!
 
@@ -88,8 +102,6 @@ The rules for marshaling data should _only include what's necessary_ for a decod
 # The Task: Implement a New Serialization Algorithm in Go
 
 Now that we've looked at what serialization is and why it matters, let's get into the core of this post. The goal at hand is to create a compliant, [Golang](https://golang.org) implementation of the [Simple Serialize](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/simple-serialize.md) specification created by the official [Ethereum](https://ethereum.org) research team. Ethereum is a global, distributed network of nodes that runs decentralized applications. That is, anyone can use it to write computers that are not ran by any individual, entity, or corporation in a permissionless fashion. Similar to Bitcoin, Ethereum uses a distributed ledger known as a [blockchain](https://en.wikipedia.org/wiki/Blockchain) to maintain a state of the world and reach [consensus](https://en.wikipedia.org/wiki/Consensus_(computer_science)).
-
-![image](https://imgur.com/nwpmBLg.png)
 
 The way nodes across the network communicate is by sending packets of byte encoded data via [peer-to-peer (p2p) networking](https://en.wikipedia.org/wiki/Peer-to-peer) using some standard serialization algorithm. Ethereum is currently in the process of upgrading to its 2.0 version, which will contain radical improvements to its core protocol as well as its network architecture. Serialization for Ethereum 2.0 is being revamped, with the Simple Serialize algorithm, **known as SSZ**, having won as the _de facto_ standard for marshaling consensus data into bytes.
 
@@ -233,8 +245,6 @@ Once again telling us that there is a variable-sized element at index 10, one at
 ## The Limitations of Golang
 
 Go in particular is an interesting language to build a serialization library in due to its lack of generics - a very common trait of other languages. The lack of generics makes it really difficult to write functions that work on general types in Go, and instead Go has to rely on tricky approaches such as inspecting the metadata of values, which can lead to massive inefficiencies. One of the only safe options Go has for writing generic libraries is the ["reflect"](https://blog.golang.org/laws-of-reflection) package, which gives us a whole suite of utilities for doing [metaprogramming](https://en.wikipedia.org/wiki/Metaprogramming) - the notion of a computer program inferring details about its own structure.
-
-![image](https://imgur.com/tBAyMjn.png)
 
 The problem with using reflect in Go comes down to its speed. Go was not built in its current form to support generics underneath the hood, making it expensive to infer and operate on abstract types. The closest thing Go has to a generic type is the `interface{}` type, which is not _exactly_ like the generic types in other languages. In Python, for example, which is a dynamically-typed language, the following code is perfectly valid:
 
@@ -501,8 +511,6 @@ func (s *SliceMarshaler) marshalFixedSize(val reflect.Val, b []byte, idx uint64)
 Although it looks a bit intimidating, let's break it down into pieces. First, we create an instance of a slice marshaler that also contains a field which gives us access to a marshaler for that slice's individual elements. Then, we check if the slice has fixed-sized elements, for which we simply loop through the slice's length and call the element marshaler at each index of the slice.
 
 Otherwise, we perform a more complex, variable-sized element marshaling. As mentioned in how SSZ works, we need to keep track of particular _offset_ values which tell us the positional indices where variable sized elements begin in the serialization. We also need to keep track of the current writing position into the buffer accordingly. We loop through the slice's length, determine any offsets, write those offsets to the buffer, and update the positional trackers respectively. Voilà, that's pretty much the hardest part of writing an SSZ marshaler :). For container types, such as structs, we have to keep track of the marshalers for each of their fields, and simply loop over the struct's fields and perform the same logic as above.
-
-![image](https://imgur.com/6dvh6Jl.png)
 
 ## Unmarshaling
 
@@ -775,8 +783,6 @@ From [Techopedia](https://www.techopedia.com/definition/13625/fuzz-testing):
 > Fuzz testing is a means of stress test applications by feeding random data into them in order to spot any errors or hang-ups that may occur. The idea behind fuzz testing is that software applications and systems can have a lot of different bugs or glitches related to data input.
 
 Having fuzz tests can help us feed our round trip tests through all sorts of randomized data structures to ensure we catch those pesky panics and improve the robustness of our SSZ toolset.
-
-![image](https://imgur.com/N6HzyGm.png)
 
 For basic edge case, sanity-focused unit tests, we can opt for simple table-driven tests in Go to get the job done. We'll be doing a simple, round-trip marshal/unmarshal test to ensure we can recover data in its original form after passing through SSZ.
 

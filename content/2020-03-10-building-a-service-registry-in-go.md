@@ -6,6 +6,20 @@ date = 2020-03-10
 tags = ["golang"]
 +++
 
+```go
+func (s *ServiceRegistry) RegisterService(
+  service Service,
+) error {
+	kind := reflect.TypeOf(service)
+	if _, exists := s.services[kind]; exists {
+		return fmt.Errorf("exists: %v", kind)
+	}
+	s.services[kind] = service
+	s.serviceTypes = append(s.serviceTypes, kind)
+	return nil
+}
+```
+
 Thinking of building an application in Go that has multiple running parts? Say you have some server that needs to do a bunch of different things while it runs, such as perform some backround jobs, update caches, handle several requests, expose a REST API, perform outbound requests to other APIs, all without blocking the main thread - what do you do? Typically, this is a good task for creating a microservices architecture where you have multiple applications talking to each other over some network service mesh, each containerized in some nice docker environment, orchestrated through something like Kubernetes or docker-compose.
 
 <!-- more -->

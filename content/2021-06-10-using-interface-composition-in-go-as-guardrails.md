@@ -6,6 +6,8 @@ date = 2021-06-10
 tags = ["golang"]
 +++
 
+![Image](/gopher.jpg)
+
 > Composition over inheritance
 > - [Someone, somewhere](https://en.wikipedia.org/wiki/Composition_over_inheritance)
 
@@ -14,8 +16,6 @@ Go, as a programming language, favors simplicity. When writing abstractions in G
 <!-- more -->
 
 One underappreciated pattern of using interfaces in Go is the ability to _compose_ them to build up more complex abstractions. Interface composition allows developers to create small building blocks which only expose necessary methods. This pattern is a powerful way of restricting access to dangerous methods and helping to protect developers from biting their own tongue.
-
-![Image](https://i.imgur.com/ljUXRUz.png)
 
 ## Brief detour into interface composition
 

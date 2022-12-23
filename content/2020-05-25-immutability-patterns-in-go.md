@@ -6,11 +6,18 @@ date = 2020-05-25
 tags = ["golang"]
 +++
 
+```go
+for field, ref := range s.sharedFieldReferences {
+    ref.AddRef()
+    dst.sharedFieldReferences[field] = ref
+}
+```
+
 One of cons of Go as a modern programming language is the lack of native options for making certain data structures immutable. That is, we often have to make key software design decisions in our application just to ensure certain data is immutable throughout the code's runtime, and it may not look pretty. At my company, [Prysmatic Labs](https://prysmaticlabs.com), we often encounter the problem where we need to maintain certain large data structures in-memory for performance reasons and we also need to perform one-off, local computations on such data. That is, we have very intensive _read-heavy_ workloads in our application where we do not want to compromise data safety.
 
 <!-- more -->
 
-![image](https://raw.githubusercontent.com/ashleymcnamara/gophers/master/CouchPotatoGopher.png)
+![Image](https://raw.githubusercontent.com/ashleymcnamara/gophers/master/CouchPotatoGopher.png)
 
 A concrete example of this is in the field of distributed systems, where servers typically maintain some global "state" which other computers on the network also maintain through a consensus algorithm. An example of this is [Ethereum](https://ethereum.org), a popular blockchain my team [develops](https://github.com/prysmaticlabs/prysm), which maintains a global state of user accounts, balances and tons of other critical information. These applications are `state machines`, which update their state through a `state transition function`: a pure function which takes in some data, the global state, and outputs a new global state in a deterministic fashion.
 

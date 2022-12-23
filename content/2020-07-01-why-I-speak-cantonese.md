@@ -6,6 +6,8 @@ date = 2020-07-01
 tags = ["personal"]
 +++
 
+![image](/cantonese.jpg)
+
 Many folks that know me personally know how much time I dedicate each day towards becoming proficient at speaking, reading, and writing Cantonese, making it my favorite language and one I have developed a major personal goal of becoming proficient in. Cantonese, known as jyut6 jyuh5 (粵話), is one of the major languages of China and the Chinese diaspora abroad, spoken by around 100 million native speakers [1] today along the pearl river delta in the southern Chinese province of Gwongdung (廣東), Macao, Hong Kong, and Southeast Asia as a lingua franca. It is a language rich with tradition and a history spanning over 2000 years, retaining significant elements of Classical Chinese.
 
 <!-- more -->
@@ -27,8 +29,6 @@ Mandarin
 A mandarin speaker would understand the sentence "佢而家喺邊度呀" (keoi5 yi4 gaa1 hai2 bin1 douh6 aa, "where is he right now"?) as much as an english speaker would understand the spanish sentence "donde esta el ahora?" despite them being written in the same script / alphabet.
 
 Needless to say, further regional differences, slang, and even cultural differences between different Cantonese speaking regions add even more flavor to the language itself, with Hong Kong speakers including British English influence in their day to day spoken Cantonese with words such as 士多啤梨 (si6 do1 be1 lei2, a phonetic translation of “strawberry”). The richness of cantonese culture manifests in not only in its historical precedents but also its wealth of cinema, music, and theatre. Film stars such as Jackie Chan, Bruce Lee, and countless film stars + singers are all part of the Cantonese diaspora.
-
-![image](https://i.imgur.com/GkRLctw.jpg)
 
 Cantonese today, unfortunately, is losing influence in mainland China due to pressures from the Chinese Communist Party to ensure language conformity across provinces, many seeing it as an attack on people’s identity and culture as it has been repeatedly dismissed as nothing more than a dialect by the government, disregarding its identity as the main spoken language in the daily life in southern China.
 

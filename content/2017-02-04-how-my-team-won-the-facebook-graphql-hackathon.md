@@ -6,6 +6,26 @@ date = 2017-02-04
 tags = ["web-development"]
 +++
 
+```js
+links: {
+  type: new GraphQLList(HtmlPage),
+  resolve: async (root, args, context) => {
+    const res = await fetch(root.url);
+    const $ = cheerio.load(await res.text());
+    const links = $('a').map(function() {
+      if (!$(this).attr('href')) {
+        return;
+      }
+      if ($(this).attr('href') !== '#' && $(this).attr('href').indexOf('http') > -1) {
+        return $(this).attr('href');
+      }
+    }).get();
+
+    return links.map(url => ({ url }))
+  }
+},
+```
+
 A few months ago, my teammate Trey Granderson who worked with me at Kynplex, suggested we go to Facebook’s official GraphQL hackathon at their Cambridge headquarters, where we put together a simple project to try to use the awesomeness of the language to create something nifty and meet new people.
 
 <!-- more -->
@@ -18,7 +38,7 @@ With GraphQL, developers are able to write a simple query string for an endpoint
 
 For example, if you have a GraphQL endpoint that returns the currently signed in user, you can fetch it as follows:
 
-{% highlight javascript %}
+```js
 const query = gql`
   query MyExampleQuery {
     currentUser {
@@ -27,11 +47,11 @@ const query = gql`
     }
   }
 `;
-{% endhighlight %}
+```
 
 Then, we can plug it into a react component and render that data however we want.
 
-{% highlight javascript %}
+```js
 import { graphql, compose } from 'react-apollo';
 
 function UserProfile(props) {
@@ -39,11 +59,11 @@ function UserProfile(props) {
 }
 
 export default compose(graphql(query))(UserProfile);
-{% endhighlight %}
+```
 
 A cool thing about GraphQL is that it allows you to define how all of your models interact with each other and how they are connected. It basically gives you the ability to create an API Graph for your application. For example, the return type of the currentUser query is the User type, and the return type of the friends query is also a User type, allowing us to do fancy things like:
 
-{% highlight javascript %}
+```js
 const query = gql`
   query MyExampleQuery {
     currentUser {
@@ -60,7 +80,7 @@ const query = gql`
     }
   }
 `;
-{% endhighlight %}
+```
 
 The recursive properties of GraphQL make it incredibly powerful not just as a language to query stuff from a database, but also as an interesting tool that entire projects can be built upon.
 
@@ -70,7 +90,7 @@ After a lot of thought, we wanted to create a tool that would be useful to anyon
 
 We wanted to make this tool fun to use and allow anyone to query for complex pieces of the DOM of any website by using graphql queries that are generated on the fly. Ideally, we wanted to be able to do something like:
 
-{% highlight javascript %}
+```js
 {
   scrape(url: 'https://google.com') {
     div(id: 'header') {
@@ -85,11 +105,11 @@ We wanted to make this tool fun to use and allow anyone to query for complex pie
     }
   }
 }
-{% endhighlight %}
+```
 
 This gives us a very visual representation of what’s being scraped from the page. However, we wanted to go even one step further with recursiveness and see if we could directly scrape all of the hyperlinks on a given page and fetch their info as well.
 
-{% highlight javascript %}
+```js
 {
   scrape(url: 'https://google.com') {
     links {
@@ -100,7 +120,7 @@ This gives us a very visual representation of what’s being scraped from the pa
     }
   }
 }
-{% endhighlight %}
+```
 
 Giving us the ability to directly scrape the DOM from any external links in google’s home page! Extend this even more and we’d be able to scrape the entire Internet (well, not really but you get the idea :P)
 
@@ -110,7 +130,7 @@ We needed to leverage recursive types and some metaprogramming in the GraphQL.js
 
 First, we setup a simple express server that has a graphql endpoint over HTTP that we can access directly through REST or through GraphiQL (a handy IDE explorer that Facebook created for us).
 
-{% highlight javascript %}
+```js
 import express from 'express';
 import cors from 'cors';
 import graphqlHTTP from 'express-graphql';
@@ -133,11 +153,11 @@ const port = 3010;
 app.listen(port, () => {
  console.log(`app started on port ${port}`);
 });
-{% endhighlight %}
+```
 
 In the code above, we imported our schema that defines all the types and queries in our GraphQL API and attached it to a library called graphqlHTTP. Let’s take a look at this schema file.
 
-{% highlight javascript %}
+```js
 import {
   graphql,
   GraphQLSchema,
@@ -168,13 +188,13 @@ var schema = new GraphQLSchema({
 });
 
 export default schema;
-{% endhighlight %}
+```
 
 Here we define the main Query type, which contains a single resolver called scrape. This is a query that returns an entity of type HtmlPage, takes in a url string as an argument, and allows us to continue writing subqueries from there. This is basically all we needed to get this started, but the really awesome part is in the actual HtmlPage recursive type.
 
 Let’s see what fields and queries that HtmlPage has available to it by looking at our final file: the resolvers of our GraphQL API. We’ll take it one step at a time, starting with some basic imports.
 
-{% highlight javascript %}
+```js
 import cheerio from 'cheerio';
 import fetch from 'node-fetch';
 
@@ -186,11 +206,11 @@ import {
   GraphQLInt,
   GraphQLList
 } from 'graphql';
-{% endhighlight %}
+```
 
 We need to define the actual base return type of our scrape query, which is the HtmlPage type. Initially, we want it to have some basic fields such as the url of the page, the hostname, and the title.
 
-{% highlight javascript %}
+```js
 export const HtmlPage = new GraphQLObjectType({
   name: 'HtmlPage',
   fields: () => ({
@@ -217,11 +237,11 @@ export const HtmlPage = new GraphQLObjectType({
     }
   })
 });
-{% endhighlight %}
+```
 
 It would be cool if we could also fetch all the images on the page, so let’s add a field for that as well:
 
-{% highlight javascript %}
+```js
 export const HtmlPage = new GraphQLObjectType({
   name: 'HtmlPage',
   fields: () => ({
@@ -240,11 +260,11 @@ const getImgsForUrl = async (url) => {
   const $ = cheerio.load(await res.text());
   return $('img').map(function() { return $(this).attr('src'); }).get();
 };
-{% endhighlight %}
+```
 
 Now, we want to create a resolver for every valid DOM element that we can call on this HTMLPage type. For example, we want to be able to write:
 
-{% highlight javascript %}
+```js
 {
   scrape('https://facebook.com') {
     div {
@@ -254,11 +274,11 @@ Now, we want to create a resolver for every valid DOM element that we can call o
     }
   }
 }
-{% endhighlight %}
+```
 
 This will allow us keep nesting our queries as much as we need to extract any content from a page. So let’s define our HtmlNode type first.
 
-{% highlight javascript %}
+```js
 const validHtmlTags = [
   'div'
 ];
@@ -274,11 +294,11 @@ const HtmlNode = new GraphQLObjectType({
   name: 'HtmlNode',
   fields: htmlFields,
 });
-{% endhighlight %}
+```
 
 Now we need to define every field that the HtmlNode type will have, so we’ll do it by extending the validHtmlTags array to include any other tags we want and then converting that into an array of GraphQL resolvers as follows:
 
-{% highlight javascript %}
+```js
 const htmlFields = () => validHtmlTags.reduce((prev, tag) => ({
   ...prev,
   [`${tag}`]: {
@@ -298,7 +318,7 @@ const htmlFields = () => validHtmlTags.reduce((prev, tag) => ({
   // some more stuff...
   ...
 }), {});
-{% endhighlight %}
+```
 
 Let’s break down what’s going on here. We add a resolver for each tag in the validHtmlTags array that has a type of HtmlNode and a valid set of arguments (id, class, etc.) so we can do fancier and more specific DOM scraping. In order to finally fetch the content inside of this node, we need to keep track of all the other nodes above it so we can use tools such as Cheerio to recursively fetch their content.
 
@@ -306,7 +326,7 @@ We save the type of tag (div, span, etc.) and the arguments to its resolvers ins
 
 This means that when we query for
 
-{% highlight javascript %}
+```js
 {
   scrape(url: 'google.com')
     div {
@@ -318,17 +338,17 @@ This means that when we query for
     }
   }
 }
-{% endhighlight %}
+```
 
 We’ll be storing this nested query as an array that would look like:
 
-{% highlight javascript %}
+```js
 const tagHistory = [ { tag: 'div' }, { tag: 'div' }, { tag: 'span' }]
-{% endhighlight %}
+```
 
 Making it easy for us to parse this in our base case, a resolver called content that would return the text content inside of a certain HtmlNode. Let’s see how that would work.
 
-{% highlight javascript %}
+```js
 const htmlFields = () => validHtmlTags.reduce((prev, tag) => ({
   ...prev,
   [`${tag}`]: {
@@ -365,7 +385,7 @@ const htmlFields = () => validHtmlTags.reduce((prev, tag) => ({
     }
   }
 }), {});
-{% endhighlight %}
+```
 
 The content resolver is the base case of our recursion. Here, root is going to be the tagHistory array that we created through all the nested queries, so we simply use node-fetch to make a GET request to the root URL we want to scrape.
 
@@ -381,7 +401,7 @@ and if we passed in the ID parameter or class parameter, we would get something 
 
 At the very end, we simply call the JQuery function html() to fetch the inner content of the selector we created! It doesn’t stop there though…we finally need to plug this into the HtmlPage type we created in the beginning so that we’re able to query for these DOM elements. Here is the new HtmlPage type with its resolvers!
 
-{% highlight javascript %}
+```js
 export const HtmlPage = new GraphQLObjectType({
   name: 'HtmlPage',
   fields: () => ({
@@ -416,11 +436,11 @@ export const HtmlPage = new GraphQLObjectType({
     }
   })
 });
-{% endhighlight %}
+```
 
 To put a cherry on top, we added a resolver that would allow us to scrape all the hyperlinks in a page and return HtmlPage entities that we would also be able to run fancy queries on! Here’s how we did it:
 
-{% highlight javascript %}
+```js
 links: {
   type: new GraphQLList(HtmlPage),
   resolve: async (root, args, context) => {
@@ -438,11 +458,11 @@ links: {
     return links.map(url => ({ url }))
   }
 },
-{% endhighlight %}
+```
 
 Putting it all together, here’s our final resolver file:
 
-{% highlight javascript %}
+```js
 import cheerio from 'cheerio';
 import fetch from 'node-fetch';
 
@@ -580,7 +600,7 @@ export const HtmlPage = new GraphQLObjectType({
     }
   })
 });
-{% endhighlight %}
+```
 
 You can check out the full repo at GraphQL Hackathon Github and install the dependencies with npm install.
 
