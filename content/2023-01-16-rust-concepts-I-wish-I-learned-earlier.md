@@ -16,7 +16,7 @@ that are effective in our current age.
 
 Rust&rsquo;s numbers speak for themselves. As the [number 1 most loved language](<https://survey.stackoverflow.co/2022/?utm_source=so-owned&utm_medium=announcement-banner&utm_campaign=dev-survey-2022&utm_content=results#section-most-loved-dreaded-and-wanted-programming-scripting-and-markup-languages>) in
 the famous stack overflow survey for **seven years** in a row, it has also recently been
-released as part of Linux kernel - a feat that no language other than C has been able to
+released as part of Linux kernel - a feat no language other than C has been able to
 accomplish. What&rsquo;s exciting about the language, to me, is that it provides something truly new
 in the art of how software is built.
 
@@ -52,7 +52,7 @@ fn main() {
 Rust, having picked up incredible usage in systems programming at large, also has a
 reputation for being notoriously difficult to learn. Notwithstanding, there is a lot of
 excellent Rust content catering to beginners and advanced
-programmers alike. However, so many of them focus on the explaining the core mechanics the
+programmers alike. However, so many of them focus on the explaining the core mechanics of the
 language and the concept of ownership rather than architecting applications.
 
 As a Go developer writing highly concurrent programs and focusing on systems programming,
@@ -106,13 +106,13 @@ foo.increase() // ERROR: Foo not declared as mut
 
 In other languages with garbage collection, it&rsquo;s easy to define graph data structures or
 other types that contain references to some children, and those references could contain a reference
-to their parent. In Rust, this is hard to do without fully understanding the borrowing rules, however, it
+to their parent. In Rust, this is hard to do without fully understanding the borrowing rules. However, it
 is still possible with methods provided by the standard library.
 
 Let&rsquo;s say we have a struct called `Node` which contains a set of references to child nodes,
 and also a reference to a parent node. Normally, Rust would complain, but we can satisfy the borrow checker
 by wrapping the parent reference in something called a `Weak` pointer. This type tells Rust that
-a node going away, or its children, shouldn&rsquo;t mean that their parent should also be dropped.
+a node going away, or its children going away, shouldn&rsquo;t mean that its parent should also be dropped.
 
 ```rs
 use std::cell::RefCell;
@@ -245,7 +245,7 @@ impl<T: Clone> Clone for Sender<T> {
 
 Sometimes, you will need to use structures such as `Rc` or `Arc` in your code,
 or implement structs that wrap some data and then want to mutate the data that is
-being wrapped. Soon, you&rsquo;ll hit a wall with the compiler telling you that
+being wrapped. Soon, you will hit a wall with the compiler telling you that
 interior mutability is disallowed, which seems intractable at first sight.
 However, there are ways of allowing interior mutability in Rust that are even
 provided by the standard library.
@@ -280,9 +280,9 @@ The std::cell package even warns us about this with a helpful passage:
 
 ## Get and get mut methods are a thing
 
-Many types, including `vec` implement both get and `get_mut`methods, letting you borrow and mutate
+Many types, including `vec` implement both get and `get_mut` methods, letting you borrow and mutate
 elements in the structure (the former only possible if you have a mutable reference to the collection).
-It took me a while to know these options are available for many data structures and help make your life
+It took me a while to know these options are available for many data structures and they helped make my life easier by 
 writing clean code a lot easier!
 
 ```rs
