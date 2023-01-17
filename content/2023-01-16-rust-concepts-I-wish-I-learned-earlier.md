@@ -510,7 +510,7 @@ that developers can use just as easily as their normal counterparts. Using paral
 is as easy as using iterators in Rust thanks to Rayon&rsquo;s extension traits.
 
 In fact, there is a highly informative talk that explains how to use extension traits
-to develop a library that provides progress bars on iterators here:
+to develop a library that provides progress bars on iterators [here](https://www.youtube.com/watch?v=bnnacleqg6k)
 
 ## Embrace the monadic nature of Option and Result types
 
@@ -527,7 +527,7 @@ fn check_five(x: Option<i32>) -> bool {
 }
 ```
 
-Another example is to consider is one where we want to replace data inside of an option
+Another example is one where we want to replace data inside of an option
 with the None value, perhaps when interacting with some struct. We could write this
 in an imperative programming manner, and do things verbosely as follows:
 
