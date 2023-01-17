@@ -20,6 +20,17 @@
 
     {%- block extra_head %}
     {% endblock extra_head -%}
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@rauljordaneth">
+    <meta name="twitter:creator" content="@rauljordaneth">
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="{{config.base_url | safe}}" />
+    <meta property="og:site_name" content="rauljordan::blog" />
+
+    {% block meta_content %}
+    <meta name="twitter:title" content="rauljordan::blog">
+    <meta name="og:title" content="rauljordan::blog">
+    {% endblock meta_content %}
 </head>
 
 <body class="">

@@ -4,6 +4,9 @@ date = 2021-02-18
 
 [taxonomies]
 tags = ["golang"]
+
+[extra]
+photo = ""
 +++
 
 We had a crazy week debugging one of the trickiest issues we've seen in our software. This post showcases how we went down a rabbit hole of information only to conclude a resolution was far easier than we thought.

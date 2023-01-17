@@ -4,6 +4,9 @@ date = 2019-07-02
 
 [taxonomies]
 tags = ["golang"]
+
+[extra]
+photo = ""
 +++
 
 ```go

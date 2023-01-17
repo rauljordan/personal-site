@@ -4,6 +4,9 @@ date = 2017-02-04
 
 [taxonomies]
 tags = ["web-development"]
+
+[extra]
+photo = ""
 +++
 
 ```js

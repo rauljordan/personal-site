@@ -4,6 +4,9 @@ date = 2022-10-20
 
 [taxonomies]
 tags = ["ethereum"]
+
+[extra]
+photo = ""
 +++
 
 ![Image](https://user-images.githubusercontent.com/5572669/186052301-dd487b50-183a-4fa6-bbec-216f32d6f03a.png)

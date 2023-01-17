@@ -4,6 +4,9 @@ date = 2020-07-06
 
 [taxonomies]
 tags = ["golang"]
+
+[extra]
+photo = ""
 +++
 
 Go's [infamous error handling](https://github.com/golang/go/issues/32825) has caught quite the attention from outsiders to the programming language, often touted as one of the language's most questionable design decisions. If you look into any project on Github written in Go, it's almost a guarantee you'll see the lines more frequently than anything else in the codebase:

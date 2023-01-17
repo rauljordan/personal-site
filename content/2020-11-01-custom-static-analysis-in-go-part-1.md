@@ -4,6 +4,9 @@ date = 2020-11-01
 
 [taxonomies]
 tags = ["golang"]
+
+[extra]
+photo = ""
 +++
 
 ![Image](https://www.scylladb.com/wp-content/uploads/1200x628-fb-golang-scylla-gocqlx-package.png)

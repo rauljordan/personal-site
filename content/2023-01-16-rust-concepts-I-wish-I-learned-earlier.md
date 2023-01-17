@@ -4,11 +4,14 @@ date = 2023-01-16
 
 [taxonomies]
 tags = ["rust"]
+
+[extra]
+photo = "https://user-images.githubusercontent.com/689247/27258102-0ddeb2ec-53a6-11e7-91f1-72b01ca3e4a0.png"
 +++
 
 ![Image](https://user-images.githubusercontent.com/689247/27258102-0ddeb2ec-53a6-11e7-91f1-72b01ca3e4a0.png)
 
-These past month, I have been enthralled by the [Rust programming language](<https://www.rust-lang.org/>)
+This past month, I have been enthralled by the [Rust programming language](<https://www.rust-lang.org/>)
 given its unique edge for writing memory-safe, modern programs. Over the years, several languages have
 emerged as the most preferred by engineers to write resilient, backend software. The tides have shifted
 from Java/C++ into Go and Rust, which combine decades of programming language theory to build tools

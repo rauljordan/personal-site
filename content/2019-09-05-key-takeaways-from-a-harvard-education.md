@@ -4,6 +4,9 @@ date = 2019-07-05
 
 [taxonomies]
 tags = ["personal"]
+
+[extra]
+photo = ""
 +++
 
 ![image](/harvard1.jpg)

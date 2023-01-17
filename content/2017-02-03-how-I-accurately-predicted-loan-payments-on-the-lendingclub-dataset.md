@@ -4,6 +4,9 @@ date = 2017-02-03
 
 [taxonomies]
 tags = ["machine-learning"]
+
+[extra]
+photo = ""
 +++
 
 I had a blast at a hackathon where all sorts of beginners and experts got together for a 6 hour sprint to solve a Machine Learning problem. Personally, I had no idea what we would be doing...would we be coming up with our own data sets? Participating in a Kaggle competition on the spot?

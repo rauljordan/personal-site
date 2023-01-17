@@ -4,6 +4,9 @@ date = 2022-09-20
 
 [taxonomies]
 tags = ["ethereum"]
+
+[extra]
+photo = ""
 +++
 
 Back in late 2017, I was curious about a particular technology called Ethereum when I understood its incredible potential to change the world. I assembled a team of software engineers I met on the Internet that shared this vision and for 4 years, we have worked tirelessly to upgrade the system to one that is more economically and environmentally sustainable. 

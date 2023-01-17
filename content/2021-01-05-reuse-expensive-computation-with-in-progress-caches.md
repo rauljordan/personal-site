@@ -4,6 +4,9 @@ date = 2021-01-05
 
 [taxonomies]
 tags = ["golang"]
+
+[extra]
+photo = ""
 +++
 
 Caching is the go-to solution in applications to avoid repeating expensive computation and instead prefer some value that can be readily fetched in-memory. A simple caching strategy is to use a cache as a thin layer above database read access as follows:

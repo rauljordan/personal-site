@@ -1,4 +1,19 @@
 {% extends "index.html" %}
+{% block meta_content %}
+<meta property="og:title" content="{{ page.title }}" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:description" content="{{ page.description }}" />
+<meta property="og:site_name" content="rauljordan::blog" />
+<meta property="og:image" content="{{ page.extra.photo | safe }}" />
+<meta property="og:type" content="article" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="{{ page.title }}" />
+<meta property="twitter:image" content="{{ page.extra.photo | safe }}" />
+<meta property="twitter:description" content="{{ page.description }}" />
+<meta name="twitter:site" content="@rauljordaneth" />
+<meta name="twitter:creator" content="@rauljordaneth" />
+{% endblock meta_content %}
 
 {% block content %}
     <div class="post">

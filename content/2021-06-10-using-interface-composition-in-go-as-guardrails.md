@@ -4,6 +4,9 @@ date = 2021-06-10
 
 [taxonomies]
 tags = ["golang"]
+
+[extra]
+photo = ""
 +++
 
 ![Image](/gopher.jpg)
