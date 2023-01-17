@@ -298,8 +298,8 @@ assert_eq!(x, &[0, 42, 2]);
 
 As a Go developer, the &ldquo;unsafe&rdquo; package felt sacrilegeous and something I seldom touched. However, the notion
 of unsafety in Rust is *very* different. In fact, a lot of the standard library uses &ldquo;unsafe&rdquo; to great
-success! How is this possible? Although Rust&rsquo;s strict guarantees on borrow-checking and memory safety
-apply to all code blocks that are not marked as &ldquo;unsafe&rdquo;, a developer writing &ldquo;unsafe&rdquo; Rust
+success! How is this possible? Although Rust&rsquo;s makes undefined behavior impossible, this does not apply to
+code blocks that are marked as &ldquo;unsafe&rdquo;. Instead, a developer writing &ldquo;unsafe&rdquo; Rust
 simply needs to guarantee its usage is sound to reap all the benefits.
 
 Take the example below, where we have a function that returns the item at a specified
@@ -445,9 +445,17 @@ struct Foo<'a, T: 'a> {
 ```
 
 Tells the compiler that Foo *owns* T, despite only having a raw pointer to it. This is helpful
-for applications that need to deal with raw pointers and use unsafe Rust. However, they can also be a way
-to tell the compiler that your type does not implement the `Send` or `Sync` traits! If your type
-has a phantom data marker, it will not be `Send+Sync` automatically.
+for applications that need to deal with raw pointers and use unsafe Rust. 
+
+However, they can also be a way
+to tell the compiler that your type does not implement the `Send` or `Sync` traits! You can
+wrap the following types with PhantomData and use them in your structs as a way to tell the compiler
+that your struct is neither Send nor Sync.
+
+```rs
+pub type PhantomUnsync = PhantomData<Cell<()>>;
+pub type PhantomUnsend = PhantomData<MutexGuard<'static, ()>>;
+```
 
 ## Use rayon for incremental parallelism
 
