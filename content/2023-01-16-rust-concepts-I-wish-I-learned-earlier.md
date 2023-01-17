@@ -1,5 +1,5 @@
 +++
-title =  "Rust tips I wish I learned earlier"
+title =  "Rust concepts I wish I learned earlier"
 date = 2023-01-16
 
 [taxonomies]
