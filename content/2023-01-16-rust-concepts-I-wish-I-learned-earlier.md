@@ -588,7 +588,7 @@ We can zip and map options just like we can over arrays and vectors. This proper
 learn more about Monads [here](<https://stackoverflow.com/questions/2704652/monad-in-plain-english-for-the-oop-programmer-with-no-fp-background>).
 
 Embrace the monadic nature of the `Option` and `Result` types and don&rsquo;t just use
-unwrap and if x.is<sub>none</sub>() {} else everywhere. They have so many useful methods defined which you can read about in
+unwrap and if x.is_none() {} else everywhere. They have so many useful methods defined which you can read about in
 the standard library.
 
 ## Understand Drop how it should be implemented for different data structures
