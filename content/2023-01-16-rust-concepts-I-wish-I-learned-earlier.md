@@ -75,7 +75,7 @@ I started calling the latter an &ldquo;exclusive reference&rdquo;.
 Rust&rsquo;s reference model is fairly simple. Borrowers can have as many shared reference to something as
 they need, but there can only be a single exclusive reference at a time. Otherwise, you could have
 many callers trying to modify a value at the same time. If many borrowers could
-also hold exclusive references, you risk undefined behavior, which Rust tries to prevent.
+also hold exclusive references, you risk undefined behavior, which safe Rust makes impossible.
 
 Calling `&mut` &ldquo;exclusive&rdquo; references would have saved me some time while learning Rust.
 
@@ -912,3 +912,7 @@ std::collections. Here are some awesome tidbits I learned from it on my own:
 
 I hope this post was informative for folks coming into Rust and hitting some of its obstacles. Expect more Rust
 content to come soon, especially on more advanced topics!
+
+## Shoutout
+
+Shoutout to my colleagues at Offchain Labs, Rachel and Lee Bousfield for their incredible breadth of knowledge of the language. Some of their tips inspired this post
