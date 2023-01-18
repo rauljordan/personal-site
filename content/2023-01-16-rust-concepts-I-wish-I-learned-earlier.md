@@ -675,9 +675,7 @@ data structure.
 
 Pure, functional code in Rust is neat, but many times, one will need tail recursion to write
 code that is performant in this manner. However, be careful, as **tail-call optimization is not guaranteed
-by the Rust compiler**
-
-<https://stackoverflow.com/questions/59257543/when-is-tail-recursion-guaranteed-in-rust>
+by the Rust compiler**. See more on this [here](https://stackoverflow.com/questions/59257543/when-is-tail-recursion-guaranteed-in-rust)
 
 ## Blanket traits help reduce duplication
 
