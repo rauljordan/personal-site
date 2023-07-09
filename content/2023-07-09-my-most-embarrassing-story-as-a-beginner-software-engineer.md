@@ -37,7 +37,7 @@ A.strlen("abc")
 
 My project's boss, not knowing how big of a mess I had gotten myself into, soon worried about how long it was taking to integrate the two applications. He thought he could help me out, so he reached out to his sibling that was a professional software engineer at the time. His response was: 
 
-> "Is it that hard to make a REST API to your Python server? Monoliths are popular these days thanks to Ruby on Rails, yes, but I'd recommend running your Python server separately and talking to it via HTTP"
+> _"Is it that hard to make a REST API to your Python server? Monoliths are popular these days thanks to Ruby on Rails, yes, but I'd recommend running your Python server separately and talking to it via HTTP"_
 
 ...(_crickets_)
 
