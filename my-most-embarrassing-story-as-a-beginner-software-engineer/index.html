@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>rauljordan::blog</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="robots" content="noodp"/>
+
+    <link rel="stylesheet" href="https://rauljordan.com/style.css">
+    <link rel="stylesheet" href="https://rauljordan.com/color/orange.css">
+
+        <link rel="stylesheet" href="https://rauljordan.com/color/background_pink.css">
+    
+    <link rel="stylesheet" href="https://rauljordan.com/font-hack-subset.css">
+
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://rauljordan.com/rss.xml">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@rauljordaneth">
+    <meta name="twitter:creator" content="@rauljordaneth">
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://rauljordan.com" />
+    <meta property="og:site_name" content="rauljordan::blog" />
+
+    
+<meta property="og:title" content="My Most Embarrassing Story as a Beginner Software Engineer" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="rauljordan::blog" />
+<meta property="og:image" content="https://i.kym-cdn.com/entries/icons/facebook/000/008/342/ihave.jpg" />
+<meta property="og:type" content="article" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="My Most Embarrassing Story as a Beginner Software Engineer" />
+<meta property="twitter:image" content="https://i.kym-cdn.com/entries/icons/facebook/000/008/342/ihave.jpg" />
+<meta property="twitter:description" content="" />
+<meta name="twitter:site" content="@rauljordaneth" />
+<meta name="twitter:creator" content="@rauljordaneth" />
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-53062950-12"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-53062950-12');
+    </script>
+</head>
+
+<body class="">
+<div class="container">
+    
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__logo">
+                    
+                <a href="https://rauljordan.com" style="text-decoration: none;">
+                    <div class="logo">
+                      
+                            rauljordan::blog
+                        
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        
+        <nav class="menu">
+            <ul class="menu__inner">
+                <li><a href="https://rauljordan.com/tags">tags</a></li>
+            
+                <li><a href="https://rauljordan.com/archive">archive</a></li>
+            
+                <li><a href="https://rauljordan.com/about-me">about me</a></li>
+            
+                <li><a href="https://twitter.com/rauljordaneth" target="_blank" rel="noopener noreferrer">twitter</a></li>
+            
+                <li><a href="https://github.com/rauljordan" target="_blank" rel="noopener noreferrer">github</a></li>
+            </ul>
+        </nav>
+    
+    
+        
+    </header>
+    
+
+    <div class="content">
+        
+    <div class="post">
+        
+    <h1 class="post-title"><a href="https://rauljordan.com/my-most-embarrassing-story-as-a-beginner-software-engineer/">My Most Embarrassing Story as a Beginner Software Engineer</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2023-07-09
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/personal/">#personal</a>&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/software/">#software</a></span>
+    
+
+        
+        <div class="post-content">
+            <p>The beginner's curse of not knowing when to ask &quot;why&quot;</p>
+<p><img src="https://i.kym-cdn.com/entries/icons/facebook/000/008/342/ihave.jpg" alt="Image" /></p>
+<span id="continue-reading"></span>
+<p>We all have stories of our huge gaps in understanding we had as junior developers, and mine is so embarrassing that I used to hesitate sharing it. The beginner's journey in software is often marked by confusion, impostor syndrome, and endless tutorials that leave us no better in understanding computers than before. I was privileged enough to have studied a formal degree in computer science, and while I felt unstoppable when I first started coding 10 years ago, my hubris left a lingering sting felt to this day. </p>
+<p>Back in 2013, as a freshman in college, I had built a small reputation on campus for having programmed a web-app called <a href="https://www.thecrimson.com/flyby/article/2014/3/6/instanomz-brings-late-night-food/">Instanomz</a>, a food delivery app for our campus. I became really good at following tutorials on how to build simple apps with Ruby on Rails, not even understanding how it actually worked. Yet, it was just enough knowledge to put something together that others could use, and so was Instanomz born. Armed with my go-to set of tutorials and free web UI templates, I felt I could build <em>anything</em>. </p>
+<p>A few months later, I somehow landed a side-gig helping out in building a full-stack web application. It was composed of a machine learning model for a recommendation engine written in Python, and a full-stack app with a shopping frontend written in Ruby.  Me, being decently familiar with building rails applications thanks to endless Ruby on Rails videos online, naively felt up to the task at the time.  I had just completed <a href="https://pll.harvard.edu/course/cs50-introduction-computer-science">CS50</a>, Harvard's popular course on computer science, and was deep into functional programming in OCaml thanks to CS51, its follow-up course. At the time, we had already learned a lot about theory, but we never learned how to build <em>real</em> applications. </p>
+<p>The lead engineer had left the project and the team lead paid me to do the rest. My task was to get everything working by hooking up our ML model to the backend of our web app. <strong>Not knowing how naive I was</strong>, I began scouring the Internet for how a Ruby application could talk to Python code. Instead of writing a simple REST API between the two, and having the Python app as a separate server, I went off the deep end in reading about <strong>foreign-function interfaces (FFI)</strong>, CPython bindings, and even crazy concepts such as releasing the Ruby VM global lock during a Python function call context. All I wanted was for my backend to call some methods from Python to receive recommendations on user-submitted data, and had developed a one-track-mind into running both as the same process. In my mind, the fact that this was so <em>difficult</em> felt ridiculous, and suddenly I even became convinced there was a need in the market for deep expertise in Ruby &lt;&gt; Python integrations given their popularity.</p>
+<p>To add insult to injury, a few months before, <a href="https://news.ycombinator.com/item?id=6624468">maintenance stopped on the FFI Ruby gem</a>. I felt I was fighting a losing battle. I not only spent days working on understanding opaque type-passing, C native types, callback patterns to interact between the different bindings of the Python and Ruby applications, but also had never heard of those concepts before. When I reached my limit, I posted about my problem on various forums: <strong>&quot;How can I call Python code from Ruby?&quot;</strong>, and not a single person asked &quot;why&quot; I was trying to do this. In retrospect, they likely thought I was an expert exploring deep integrations between programming languages. Then again, my question did not provide any context of my problem, as one of my biggest flaws at the time was how easy I developed tunnel vision into the &quot;how&quot; and not the &quot;why&quot;.</p>
+<pre data-lang="ruby" style="background-color:#0f1419;color:#bfbab0;" class="language-ruby "><code class="language-ruby" data-lang="ruby"><span style="color:#ff7733;">module </span><span style="color:#59c2ff;">A
+</span><span>  </span><span style="color:#ff7733;">extend </span><span style="font-style:italic;color:#39bae6;">FFI</span><span style="color:#f29668;">::</span><span>Library
+</span><span>  ffi_lib </span><span style="color:#c2d94c;">&#39;c&#39;
+</span><span>  attach_function </span><span style="color:#c2d94c;">:strlen</span><span style="color:#bfbab0cc;">, </span><span>[</span><span style="color:#c2d94c;">:string</span><span>]</span><span style="color:#bfbab0cc;">, </span><span style="color:#c2d94c;">:int
+</span><span style="color:#ff7733;">end
+</span><span style="font-style:italic;color:#39bae6;">A</span><span style="color:#f29668;">.</span><span>strlen(</span><span style="color:#c2d94c;">&quot;abc&quot;</span><span>)
+</span><span style="font-style:italic;color:#5c6773;"># 3
+</span></code></pre>
+<p>My project's boss, not knowing how big of a mess I had gotten myself into, soon worried about how long it was taking to integrate the two applications. He thought he could help me out, so he reached out to his sibling that was a professional software engineer at the time. His response was: </p>
+<blockquote>
+<p><em>&quot;Is it that hard to make a REST API to your Python server? Monoliths are popular these days thanks to Ruby on Rails, yes, but I'd recommend running your Python server separately and talking to it via HTTP&quot;</em></p>
+</blockquote>
+<p>...(<em>crickets</em>)</p>
+<p>My brain turned to mush, and there was nothing else I wanted to do than to dig a hole in the ground and bury my head in it. In that span of time, I:</p>
+<ul>
+<li>Read almost an entire book on foreign function interfaces</li>
+<li>Explored endless forums on adding foreign library bindings to Ruby code</li>
+<li>Went down the rabbit hole of CPython's internals</li>
+<li>Thought I was going crazy and that this was an untapped, market opportunity</li>
+<li>Thought about starting a <em>company</em> that helps Ruby on Rails apps interact with other language apps</li>
+</ul>
+<p>...when all I had to do was send a JSON POST request to my Python app, have it do its thingamajig, and respond with its recommendation data. At the time, however, I neither took a step back and framed my question in context to others, <em>nor</em> did I evaluate alternatives to my problem before going deep into it. Was the fact that computer science programs do not teach practical knowledge part of the problem? I'd say yes, but it's not entirely their fault compared to my own. If there's anything to takeaway from this story, it's that <strong>knowing when to ask &quot;why&quot;</strong> was my biggest asset in growing from a naive beginner into somebody that understands computers a little bit better today.</p>
+
+        </div>
+
+        
+        <div class="pagination">
+            <div class="pagination__title">
+                <span class="pagination__title-h">More posts</span>
+                <hr />
+            </div>
+            <div class="pagination__buttons">
+                    <span class="button previous">
+                        <a href="https://rauljordan.com/rust-concepts-i-wish-i-learned-earlier/">
+                            <span class="button__icon">←</span>&nbsp;
+                            <span class="button__text">Rust concepts I wish I learned earlier</span>
+                        </a>
+                    </span>
+                
+                </div>
+        </div>
+    
+    </div>
+
+    </div>
+
+    
+    <footer class="footer">
+        <div class="footer__inner">
+                <div class="copyright">
+                        <span>© 
+    2023
+ Raul Jordan</span>
+                    <span class="copyright-theme">
+                        <span class="copyright-theme-sep">:: </span>
+                        Theme: <a href="https://github.com/pawroman/zola-theme-terminimal/">Terminimal</a> by pawroman
+                    </span>
+                </div>
+            </div>
+    </footer>
+    
+
+</div>
+</body>
+
+</html>

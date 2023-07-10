@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>rauljordan::blog</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="robots" content="noodp"/>
+
+    <link rel="stylesheet" href="https://rauljordan.com/style.css">
+    <link rel="stylesheet" href="https://rauljordan.com/color/orange.css">
+
+        <link rel="stylesheet" href="https://rauljordan.com/color/background_pink.css">
+    
+    <link rel="stylesheet" href="https://rauljordan.com/font-hack-subset.css">
+
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://rauljordan.com/rss.xml">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@rauljordaneth">
+    <meta name="twitter:creator" content="@rauljordaneth">
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://rauljordan.com" />
+    <meta property="og:site_name" content="rauljordan::blog" />
+
+    
+<meta property="og:title" content="How to Set Up an Ethereum Proof-of-Stake Devnet in Minutes " />
+<meta property="og:locale" content="en_US" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="rauljordan::blog" />
+<meta property="og:image" content="" />
+<meta property="og:type" content="article" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="How to Set Up an Ethereum Proof-of-Stake Devnet in Minutes " />
+<meta property="twitter:image" content="" />
+<meta property="twitter:description" content="" />
+<meta name="twitter:site" content="@rauljordaneth" />
+<meta name="twitter:creator" content="@rauljordaneth" />
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-53062950-12"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-53062950-12');
+    </script>
+</head>
+
+<body class="">
+<div class="container">
+    
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__logo">
+                    
+                <a href="https://rauljordan.com" style="text-decoration: none;">
+                    <div class="logo">
+                      
+                            rauljordan::blog
+                        
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        
+        <nav class="menu">
+            <ul class="menu__inner">
+                <li><a href="https://rauljordan.com/tags">tags</a></li>
+            
+                <li><a href="https://rauljordan.com/archive">archive</a></li>
+            
+                <li><a href="https://rauljordan.com/about-me">about me</a></li>
+            
+                <li><a href="https://twitter.com/rauljordaneth" target="_blank" rel="noopener noreferrer">twitter</a></li>
+            
+                <li><a href="https://github.com/rauljordan" target="_blank" rel="noopener noreferrer">github</a></li>
+            </ul>
+        </nav>
+    
+    
+        
+    </header>
+    
+
+    <div class="content">
+        
+    <div class="post">
+        
+    <h1 class="post-title"><a href="https://rauljordan.com/how-to-setup-a-proof-of-stake-devnet/">How to Set Up an Ethereum Proof-of-Stake Devnet in Minutes </a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2022-10-20
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/ethereum/">#ethereum</a></span>
+    
+
+        
+        <div class="post-content">
+            <p><img src="https://user-images.githubusercontent.com/5572669/186052301-dd487b50-183a-4fa6-bbec-216f32d6f03a.png" alt="Image" /></p>
+<p>With Ethereum having finally transitioned to proof-of-stake, many people are wondering how to set up a local testing environment given so much has changed.</p>
+<span id="continue-reading"></span>
+<p>Running nodes has become easier over the past year, with go-ethereum taking around 2 days to sync and some
+hyper-optimized clients such as Akula or Erigon taking a week to sync an entire, <em>archival</em> node. It is true that
+setting up a node on mainnet today is easier than ever. However, developers often want to set up their own,
+local blockchain for testing purposes. We call these <strong>development networks</strong> or <strong>devnets</strong>.</p>
+<p>Devnets are critical for developers working on the protocol as well as smart contract developers that want to run their own chain using their own initial state. However, the latter need can be satisfied by tools such as 
+<a href="https://github.com/foundry-rs/foundry/">Foundry</a> which runs a “simulated” Ethereum environment that is 
+enough for testing many contract interactions. </p>
+<p>Notwithstanding, more complex applications may want an environment that is closer to a <strong>real Ethereum blockchain</strong>,
+and setting up a local chain from scratch is the best approach. This blog post will help you understand 
+how to set up your own, <strong>local Ethereum chain</strong> from scratch that migrates to proof-of-stake in <strong>minutes</strong>.</p>
+<h1 id="setting-up">Setting up</h1>
+<p>With Ethereum switching to proof-of-stake, there are a bunch of buzzwords flying around:</p>
+<blockquote>
+<p>&quot;Consensus&quot;, &quot;Execution&quot;, &quot;the Merge&quot;, What does it all mean???</p>
+</blockquote>
+<p>Today, running an Ethereum node means simply installing a client such as 
+<a href="https://github.com/ethereum/go-ethereum">go-ethereum</a> and running a simple command to sync the chain. After
+the switch to proof-of-stake, running an &quot;Ethereum node&quot; will require <strong>two components</strong>:</p>
+<ol>
+<li><strong>execution client software</strong> in charge of processing transactions and smart contracts. This is go-ethereum</li>
+<li><strong>consensus client software</strong> in charge of running the proof-of-stake logic. This tutorial will use the
+<a href="https://github.com/prysmaticlabs/prysm">Prysm</a> implemntation, which my team develops.</li>
+</ol>
+<p>Prysm is an open source, Go implementation of the Ethereum proof-of-stake protocol. It can be used to run a node+validator on mainnet and testnet environments with ease, and is highly configurable to meet users’ needs. </p>
+<h1 id="easy-setup-using-docker">Easy setup using Docker</h1>
+<p>To get started, install <a href="https://docs.docker.com/get-docker/">Docker</a> and <a href="https://docs.docker.com/compose/install/">Docker Compose</a> for your system. If you are on MacOS, you should adjust your settings on Docker desktop
+to provide more resources to your Docker containers. Go to Preferences -&gt; Resources and
+give around 4 CPUs and 8Gb of memory if possible for a smooth installation.</p>
+<p>Next, clone a repository containing the configuration needed to run a local devnet with Docker here:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>git clone https://github.com/rauljordan/eth-pos-devnet &amp;&amp; cd eth-pos-devnet
+</span></code></pre>
+<p>Finally, simply run docker compose inside of the repository above.</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>docker-compose up -d
+</span></code></pre>
+<p>Boom! Your network is up and running.</p>
+<pre data-lang="bash" style="background-color:#0f1419;color:#bfbab0;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#ffb454;">$</span><span> docker-compose up</span><span style="color:#f29718;"> -d
+</span><span style="color:#ffb454;">[+]</span><span> Running 7/7
+</span><span> </span><span style="color:#ffb454;">⠿</span><span> Network eth-pos-devnet_default                          Created
+</span><span> </span><span style="color:#ffb454;">⠿</span><span> Container eth-pos-devnet-geth-genesis-1                 Started
+</span><span> </span><span style="color:#ffb454;">⠿</span><span> Container eth-pos-devnet-create-beacon-chain-genesis-1  Started
+</span><span> </span><span style="color:#ffb454;">⠿</span><span> Container eth-pos-devnet-geth-account-1                 Started
+</span><span> </span><span style="color:#ffb454;">⠿</span><span> Container eth-pos-devnet-geth-1                         Started
+</span><span> </span><span style="color:#ffb454;">⠿</span><span> Container eth-pos-devnet-beacon-chain-1                 Started
+</span><span> </span><span style="color:#ffb454;">⠿</span><span> Container eth-pos-devnet-validator-1                    Started
+</span></code></pre>
+<p>You will now be running a <strong>go-ethereum</strong> execution client, Prysm <strong>consensus client</strong> and a Prysm
+<strong>validator client</strong> in the background using Docker.</p>
+<p>Next, you can inspect the logs of the different services launched.</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>docker logs eth-pos-devnet-geth-1 -f
+</span></code></pre>
+<p>Your go-ethereum node should look as follows:</p>
+<p><img src="https://user-images.githubusercontent.com/5572669/186052301-dd487b50-183a-4fa6-bbec-216f32d6f03a.png" alt="Image" /></p>
+<p>Your Prysm beacon node and validator client should also be functional:</p>
+<p><img src="https://user-images.githubusercontent.com/5572669/186052298-54b82ff2-a901-482e-9e5a-a7c265605ad6.png" alt="Image" /></p>
+<p>This sets up a single node development network with 64 deterministically-generated validator keys to 
+drive the creation of blocks in an Ethereum proof-of-stake chain. Here's how it works:</p>
+<ol>
+<li>We initialize a <strong>go-ethereum</strong>, proof-of-work development node from a <a href="https://github.com/rauljordan/eth-pos-devnet/blob/master/execution/genesis.json">genesis config</a></li>
+<li>We initialize a <strong>Prysm beacon chain</strong>, proof-of-stake development node from a <a href="https://github.com/rauljordan/eth-pos-devnet/blob/master/consensus/config.yml">genesis config</a></li>
+<li>We then start mining in <strong>go-ethereum</strong>, and concurrently run proof-of-stake using Prysm</li>
+<li>Once the mining difficulty of the go-ethereum node reaches 50, the <strong>node switches to proof-of-stake mode</strong> by 
+letting Prysm drive the consensus of blocks</li>
+</ol>
+<p>The development net is fully functional and allows for the deployment of smart contracts and all the features 
+that also come with the Prysm consensus client such as its rich set of APIs for retrieving data from the blockchain. </p>
+<p>You now have access to the normal, Ethereum JSON-RPC APIs on http://localhost:8545 and
+the new consensus client APIs for the beacon chain on http://localhost:3500. You can see a list of available
+API endpoints for the beacon chain client <a href="https://ethereum.github.io/beacon-APIs/">here</a></p>
+<p>This development net is a great way to understand the internals of Ethereum proof-of-stake and to mess around 
+with the different settings that make the system possible.</p>
+<h1 id="manual-setup-built-from-source">Manual setup built from source</h1>
+<p>All you will need for a manual installation guide is the Go programming language and <code>git</code>. Install the latest version of Go <a href="https://go.dev/doc/install">here</a>, and verify your installation with:</p>
+<pre data-lang="bash" style="background-color:#0f1419;color:#bfbab0;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#ffb454;">go</span><span> version
+</span></code></pre>
+<p>You should see an output showing you the version you have installed. Next, create a folder called <code>devnet</code> and change directory into it</p>
+<pre data-lang="bash" style="background-color:#0f1419;color:#bfbab0;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#ffb454;">mkdir</span><span> devnet </span><span style="color:#f29668;">&amp;&amp; </span><span style="color:#f07178;">cd</span><span> devnet
+</span></code></pre>
+<p>The instructions below are running with Prysm commit <a href="https://github.com/prysmaticlabs/prysm/commit/cb9b5e8f6e91adc8c6cdb2ca39708703e88c0b63">cb9b5e8f6e91adc8c6cdb2ca39708703e88c0b63</a> and go-ethereum commit <a href="https://github.com/ethereum/go-ethereum/commit/890e2efca2111c790c6d5eb55e29981816ee1fe9">890e2efca2111c790c6d5eb55e29981816ee1fe9</a></p>
+<p>Clone the Prysm repository and build the following binaries. We’ll be outputting them to the <code>devnet</code> folder:</p>
+<pre data-lang="bash" style="background-color:#0f1419;color:#bfbab0;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#ffb454;">git</span><span> clone https://github.com/prysmaticlabs/prysm </span><span style="color:#f29668;">&amp;&amp; </span><span style="color:#f07178;">cd</span><span> prysm
+</span><span style="color:#ffb454;">git</span><span> checkout cb9b5e8f6e91adc8c6cdb2ca39708703e88c0b63
+</span><span style="color:#ffb454;">go</span><span> build</span><span style="color:#f29718;"> -o</span><span style="color:#f29668;">=</span><span>../beacon-chain ./cmd/beacon-chain
+</span><span style="color:#ffb454;">go</span><span> build</span><span style="color:#f29718;"> -o</span><span style="color:#f29668;">=</span><span>../validator ./cmd/validator
+</span><span style="color:#ffb454;">go</span><span> build</span><span style="color:#f29718;"> -o</span><span style="color:#f29668;">=</span><span>../prysmctl ./cmd/prysmctl
+</span><span style="color:#f07178;">cd</span><span> ..
+</span></code></pre>
+<p>Clone the go-ethereum repository and build it:</p>
+<pre data-lang="bash" style="background-color:#0f1419;color:#bfbab0;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#ffb454;">git</span><span> clone https://github.com/ethereum/go-ethereum </span><span style="color:#f29668;">&amp;&amp; </span><span style="color:#f07178;">cd</span><span> go-ethereum
+</span><span style="color:#ffb454;">git</span><span> checkout 23ac8df15302bbde098cab6d711abdd24843d66a
+</span><span style="color:#ffb454;">make</span><span> geth
+</span><span style="color:#ffb454;">cp</span><span> ./build/bin/geth ../geth
+</span><span style="color:#f07178;">cd</span><span> ..
+</span></code></pre>
+<p>You will now have all the executables you need to run the the software for the devnet.</p>
+<h2 id="configuration-files">Configuration files</h2>
+<p>You will need configuration files for setting up Prysm and Go-Ethereum.</p>
+<h3 id="prysm">Prysm</h3>
+<p>On the Prysm side, create a file called <code>config.yml</code> in your <code>devnet</code> folder containing the following:</p>
+<pre data-lang="bash" style="background-color:#0f1419;color:#bfbab0;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#ffb454;">CONFIG_NAME:</span><span> interop
+</span><span style="color:#ffb454;">PRESET_BASE:</span><span> interop
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;"># Genesis
+</span><span style="color:#ffb454;">GENESIS_FORK_VERSION:</span><span> 0x20000089
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;"># Altair
+</span><span style="color:#ffb454;">ALTAIR_FORK_EPOCH:</span><span> 2
+</span><span style="color:#ffb454;">ALTAIR_FORK_VERSION:</span><span> 0x20000090
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;"># Merge
+</span><span style="color:#ffb454;">BELLATRIX_FORK_EPOCH:</span><span> 4
+</span><span style="color:#ffb454;">BELLATRIX_FORK_VERSION:</span><span> 0x20000091
+</span><span style="color:#ffb454;">TERMINAL_TOTAL_DIFFICULTY:</span><span> 50
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;"># Time parameters
+</span><span style="color:#ffb454;">SECONDS_PER_SLOT:</span><span> 12
+</span><span style="color:#ffb454;">SLOTS_PER_EPOCH:</span><span> 6
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;"># Deposit contract
+</span><span style="color:#ffb454;">DEPOSIT_CONTRACT_ADDRESS:</span><span> 0x4242424242424242424242424242424242424242
+</span></code></pre>
+<p>The configuration above contains information about the different hard-fork versions that are required for Prysm to run, and has some custom parameters to make running your devnet easier. It’s important to note that you can change any of these settings as desired. To see the full list of configuration options you can change, see <a href="https://docs.prylabs.network/docs/prysm-usage/parameters/">here</a>.</p>
+<h3 id="go-ethereum">Go-Ethereum</h3>
+<p>On the go-ethereum side, you will need to set-up a private key that will help advance the chain from genesis by mining up until it reaches <strong>proof-of-stake</strong> mode. Create a file called <code>secret.json</code> inside of your <code>devnet</code> folder with the following:</p>
+<pre data-lang="bash" style="background-color:#0f1419;color:#bfbab0;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#ffb454;">2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622
+</span></code></pre>
+<p>Next, save the following file as <code>genesis.json</code> inside of your devnet folder as well:</p>
+<p>The file above sets up the genesis configuration for go-ethereum, which seeds certain accounts with an ETH balance and deploys a validator deposit contract at address <code>0x4242424242424242424242424242424242424242</code> which is used for new validators to deposit 32 ETH and join the proof-of-stake chain. The account that we are running go-ethereum with, <code>0x123463a4b065722e99115d6c222f267d9cabb524</code>, will have an ETH balance you can use to submit transactions on your devnet.</p>
+<h2 id="running-the-devnet">Running the devnet</h2>
+<h3 id="go-ethereum-1">Go-Ethereum</h3>
+<p>Next, we will start by running <strong>go-ethereum</strong> in our <code>devnet</code> folder:</p>
+<pre data-lang="bash" style="background-color:#0f1419;color:#bfbab0;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#ffb454;">./geth</span><span style="color:#f29718;"> --datadir</span><span style="color:#f29668;">=</span><span>gethdata init genesis.json
+</span><span style="color:#ffb454;">./geth</span><span style="color:#f29718;"> --datadir</span><span style="color:#f29668;">=</span><span>gethdata account import sk.json
+</span></code></pre>
+<p>The last command will ask you to input a password for your secret key. You can just hit enter twice to leave it empty. Next, run geth using the command below</p>
+<pre data-lang="bash" style="background-color:#0f1419;color:#bfbab0;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#ffb454;">./geth</span><span style="color:#f29718;"> --http --http</span><span>.api </span><span style="color:#c2d94c;">&quot;eth,engine&quot;</span><span style="color:#f29718;"> --datadir</span><span style="color:#f29668;">=</span><span>gethdata</span><span style="color:#f29718;"> --allow-insecure-unlock --unlock</span><span style="color:#f29668;">=</span><span style="color:#c2d94c;">&quot;0x123463a4b065722e99115d6c222f267d9cabb524&quot;</span><span style="color:#f29718;"> --password</span><span style="color:#f29668;">=</span><span style="color:#c2d94c;">&quot;&quot;</span><span style="color:#f29718;"> --nodiscover</span><span> console</span><span style="color:#f29718;"> --syncmode</span><span style="color:#f29668;">=</span><span>full</span><span style="color:#f29718;"> --mine
+</span></code></pre>
+<p>You can check the ETH balance in the geth console by typing in</p>
+<p><code>eth.getBalance(&quot;0x123463a4b065722e99115d6c222f267d9cabb524&quot;)</code> which should show <code>2e+22</code></p>
+<h3 id="prysm-1">Prysm</h3>
+<p>We will then need to run a Prysm beacon node and a validator client. Prysm will need a <strong>genesis state</strong> which is essentially some data that tells it the initial set of validators. We will be creating a genesis state from a deterministic set of keys below:</p>
+<pre data-lang="bash" style="background-color:#0f1419;color:#bfbab0;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#ffb454;">./prysmctl</span><span> testnet generate-genesis</span><span style="color:#f29718;"> --num-validators</span><span style="color:#f29668;">=</span><span>64</span><span style="color:#f29718;"> --output-ssz</span><span style="color:#f29668;">=</span><span>genesis.ssz</span><span style="color:#f29718;"> --chain-config-file</span><span style="color:#f29668;">=</span><span>config.yml
+</span></code></pre>
+<p>This will out a file <code>genesis.ssz</code> in your <code>devnet</code> folder. Now, run the Prysm beacon node soon after:</p>
+<pre data-lang="bash" style="background-color:#0f1419;color:#bfbab0;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#ffb454;">./beacon-chain </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --datadir</span><span style="color:#f29668;">=</span><span>beacondata </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --min-sync-peers</span><span style="color:#f29668;">=</span><span>0 </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --interop-genesis-state</span><span style="color:#f29668;">=</span><span>genesis.ssz </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --interop-eth1data-votes </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --bootstrap-node</span><span style="color:#f29668;">= </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --chain-config-file</span><span style="color:#f29668;">=</span><span>config.yml </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --config-file</span><span style="color:#f29668;">=</span><span>config.yml </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --chain-id</span><span style="color:#f29668;">=</span><span>32382 </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --execution-endpoint</span><span style="color:#f29668;">=</span><span>http://localhost:8551 </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --accept-terms-of-use </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --jwt-secret</span><span style="color:#f29668;">=</span><span>gethdata/geth/jwtsecret
+</span></code></pre>
+<p>and the Prysm validator client soon after:</p>
+<pre data-lang="bash" style="background-color:#0f1419;color:#bfbab0;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#ffb454;">./validator </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --datadir</span><span style="color:#f29668;">=</span><span>validatordata </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --accept-terms-of-use </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --interop-num-validators</span><span style="color:#f29668;">=</span><span>64 </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --interop-start-index</span><span style="color:#f29668;">=</span><span>0 </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --force-clear-db </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --chain-config-file</span><span style="color:#f29668;">=</span><span>config.yml </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --config-file</span><span style="color:#f29668;">=</span><span>config.yml
+</span></code></pre>
+<h2 id="expected-output">Expected output</h2>
+<p>Your go-ethereum node should look as follows:</p>
+<p><img src="https://user-images.githubusercontent.com/5572669/186052301-dd487b50-183a-4fa6-bbec-216f32d6f03a.png" alt="Image" /></p>
+<p>Your Prysm beacon node should show the following:</p>
+<p><img src="https://user-images.githubusercontent.com/5572669/186052300-80d9e6d5-e2b7-4e1a-9113-1593e5a5872f.png" alt="Image" /></p>
+<p>The errors are normal, cosmetic, and present on all devnet environments. We are working on making the output more aesthetically pleasing in the future.</p>
+<p>Your Prysm validator client should also be functional:</p>
+<p><img src="https://user-images.githubusercontent.com/5572669/186052298-54b82ff2-a901-482e-9e5a-a7c265605ad6.png" alt="Image" /></p>
+<p>Upon entering proof-of-stake mode, once the mining difficulty hits <strong>50</strong> in go-ethereum, you will see our special panda in your Prysm beacon chain below:</p>
+<p><img src="https://user-images.githubusercontent.com/5572669/186052296-03c18e6f-17f2-4d94-830d-ba7522cc09c8.png" alt="Image" /></p>
+<h2 id="adding-prysm-peers-to-your-network">Adding Prysm peers to your network</h2>
+<p>You can add additional, Prysm beacon chain peers to your proof-of-stake devnet by running the similar command as your first beacon node, but with a few tweaks. In a terminal window, use the following command:</p>
+<pre data-lang="bash" style="background-color:#0f1419;color:#bfbab0;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#ffb454;">curl</span><span> localhost:8080/p2p
+</span></code></pre>
+<p>You should get output similar to this:</p>
+<pre data-lang="bash" style="background-color:#0f1419;color:#bfbab0;" class="language-bash "><code class="language-bash" data-lang="bash"><span>bootnode</span><span style="color:#f29668;">=</span><span style="color:#ff7733;">[]
+</span><span>self</span><span style="color:#f29668;">=</span><span style="color:#c2d94c;">enr:-MK4QCxV5SEkUO1chqZDSqMChX5fTbqeas4PEJqZtzmcWqZOKpZN8ABVrQFTqHI74M9TKNjE6DPAAgyv5JydsQ6NfPqGAYKxymm8h2F0dG5ldHOI-7v9vd4GdE2EZXRoMpCMkQYoIAAAkf__________gmlkgnY0gmlwhAoAAEqJc2VjcDI1NmsxoQNZcfvPnVEfnKz-mFv285nkDzgRXRVujloXQ_tjuCNEbYhzeW5jbmV0cw-DdGNwgjLIg3VkcIIu4A,/ip4/10.0.0.74/tcp/13000/p2p/16Uiu2HAmJg9Sfy8bX4wyjZNTi8soJrdPt9E9pPzJSmewN5rLoRM6
+</span><span>
+</span><span style="color:#ffb454;">0</span><span> peers
+</span></code></pre>
+<p>Copy the part that starts with <code>/ip4</code> after the comma, so in the example above, </p>
+<p><code>/ip4/10.0.0.74/tcp/13000/p2p/16Uiu2HAmJg9Sfy8bX4wyjZNTi8soJrdPt9E9pPzJSmewN5rLoRM6</code></p>
+<p>then set this as an environment variable:</p>
+<pre data-lang="bash" style="background-color:#0f1419;color:#bfbab0;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#ff7733;">export </span><span>PEER</span><span style="color:#f29668;">=</span><span style="color:#c2d94c;">/ip4/10.0.0.74/tcp/13000/p2p/16Uiu2HAmJg9Sfy8bX4wyjZNTi8soJrdPt9E9pPzJSmewN5rLoRM6
+</span></code></pre>
+<p>Then, run a second Prysm beacon node as follows:</p>
+<pre data-lang="bash" style="background-color:#0f1419;color:#bfbab0;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#ffb454;">./beacon-chain </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --datadir</span><span style="color:#f29668;">=</span><span>beacondata2 </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --min-sync-peers</span><span style="color:#f29668;">=</span><span>1 </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --interop-genesis-state</span><span style="color:#f29668;">=</span><span>genesis.ssz </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --interop-eth1data-votes </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --bootstrap-node</span><span style="color:#f29668;">= </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --chain-config-file</span><span style="color:#f29668;">=</span><span>config.yml </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --config-file</span><span style="color:#f29668;">=</span><span>config.yml </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --chain-id</span><span style="color:#f29668;">=</span><span>32382 </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --execution-endpoint</span><span style="color:#f29668;">=</span><span>http://localhost:8551 </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --accept-terms-of-use </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --rpc-port</span><span style="color:#f29668;">=</span><span>4001 </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --p2p-tcp-port</span><span style="color:#f29668;">=</span><span>13001 </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --p2p-udp-port</span><span style="color:#f29668;">=</span><span>12001 </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --grpc-gateway-port</span><span style="color:#f29668;">=</span><span>3501 </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --monitoring-port</span><span style="color:#f29668;">=</span><span>8001 </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --jwt-secret</span><span style="color:#f29668;">=</span><span>gethdata/geth/jwtsecret </span><span style="color:#bfbab0cc;">\
+</span><span style="color:#f29718;">  --peer</span><span style="color:#f29668;">=</span><span>$PEER
+</span></code></pre>
+<p>You will see the node start to synchronize with the chain as expected!</p>
+<p><img src="https://user-images.githubusercontent.com/5572669/186052294-70909835-210f-4b13-86a3-cf1f568bb8a3.png" alt="Image" /></p>
+
+        </div>
+
+        
+        <div class="pagination">
+            <div class="pagination__title">
+                <span class="pagination__title-h">More posts</span>
+                <hr />
+            </div>
+            <div class="pagination__buttons">
+                    <span class="button previous">
+                        <a href="https://rauljordan.com/when-years-of-work-materialize/">
+                            <span class="button__icon">←</span>&nbsp;
+                            <span class="button__text">When Years of Work Finally Materialize</span>
+                        </a>
+                    </span>
+                
+                
+                    <span class="button next">
+                        <a href="https://rauljordan.com/rust-concepts-i-wish-i-learned-earlier/">
+                            <span class="button__text">Rust concepts I wish I learned earlier</span>&nbsp;
+                            <span class="button__icon">→</span>
+                        </a>
+                    </span>
+                </div>
+        </div>
+    
+    </div>
+
+    </div>
+
+    
+    <footer class="footer">
+        <div class="footer__inner">
+                <div class="copyright">
+                        <span>© 
+    2023
+ Raul Jordan</span>
+                    <span class="copyright-theme">
+                        <span class="copyright-theme-sep">:: </span>
+                        Theme: <a href="https://github.com/pawroman/zola-theme-terminimal/">Terminimal</a> by pawroman
+                    </span>
+                </div>
+            </div>
+    </footer>
+    
+
+</div>
+</body>
+
+</html>

@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>rauljordan::blog</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="robots" content="noodp"/>
+
+    <link rel="stylesheet" href="https://rauljordan.com/style.css">
+    <link rel="stylesheet" href="https://rauljordan.com/color/orange.css">
+
+        <link rel="stylesheet" href="https://rauljordan.com/color/background_pink.css">
+    
+    <link rel="stylesheet" href="https://rauljordan.com/font-hack-subset.css">
+
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://rauljordan.com/rss.xml">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@rauljordaneth">
+    <meta name="twitter:creator" content="@rauljordaneth">
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://rauljordan.com" />
+    <meta property="og:site_name" content="rauljordan::blog" />
+
+    
+<meta property="og:title" content="How My Team Won the Facebook GraphQL Hackathon" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="rauljordan::blog" />
+<meta property="og:image" content="" />
+<meta property="og:type" content="article" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="How My Team Won the Facebook GraphQL Hackathon" />
+<meta property="twitter:image" content="" />
+<meta property="twitter:description" content="" />
+<meta name="twitter:site" content="@rauljordaneth" />
+<meta name="twitter:creator" content="@rauljordaneth" />
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-53062950-12"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-53062950-12');
+    </script>
+</head>
+
+<body class="">
+<div class="container">
+    
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__logo">
+                    
+                <a href="https://rauljordan.com" style="text-decoration: none;">
+                    <div class="logo">
+                      
+                            rauljordan::blog
+                        
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        
+        <nav class="menu">
+            <ul class="menu__inner">
+                <li><a href="https://rauljordan.com/tags">tags</a></li>
+            
+                <li><a href="https://rauljordan.com/archive">archive</a></li>
+            
+                <li><a href="https://rauljordan.com/about-me">about me</a></li>
+            
+                <li><a href="https://twitter.com/rauljordaneth" target="_blank" rel="noopener noreferrer">twitter</a></li>
+            
+                <li><a href="https://github.com/rauljordan" target="_blank" rel="noopener noreferrer">github</a></li>
+            </ul>
+        </nav>
+    
+    
+        
+    </header>
+    
+
+    <div class="content">
+        
+    <div class="post">
+        
+    <h1 class="post-title"><a href="https://rauljordan.com/how-my-team-won-the-facebook-graphql-hackathon/">How My Team Won the Facebook GraphQL Hackathon</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2017-02-04
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/web-development/">#web-development</a></span>
+    
+
+        
+        <div class="post-content">
+            <pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#59c2ff;">links</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>  </span><span style="color:#59c2ff;">type</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">new </span><span style="color:#59c2ff;">GraphQLList</span><span>(HtmlPage)</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#59c2ff;">resolve</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">async </span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>{
+</span><span>    </span><span style="color:#ff7733;">const </span><span>res </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">await </span><span style="color:#ffb454;">fetch</span><span>(root</span><span style="color:#f29668;">.</span><span>url)</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">const </span><span>$ </span><span style="color:#f29668;">= </span><span>cheerio</span><span style="color:#f29668;">.</span><span style="color:#f07178;">load</span><span>(</span><span style="color:#ff7733;">await </span><span>res</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">text</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">const </span><span>links </span><span style="color:#f29668;">= </span><span style="color:#ffb454;">$</span><span>(</span><span style="color:#c2d94c;">&#39;a&#39;</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">map</span><span>(</span><span style="color:#ff7733;">function</span><span>() {
+</span><span>      </span><span style="color:#ff7733;">if </span><span>(</span><span style="color:#f29668;">!</span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;href&#39;</span><span>)) {
+</span><span>        </span><span style="color:#ff7733;">return</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>      </span><span style="color:#ff7733;">if </span><span>(</span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;href&#39;</span><span>) </span><span style="color:#f29668;">!== </span><span style="color:#c2d94c;">&#39;#&#39; </span><span style="color:#f29668;">&amp;&amp; </span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;href&#39;</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">indexOf</span><span>(</span><span style="color:#c2d94c;">&#39;http&#39;</span><span>) </span><span style="color:#f29668;">&gt; -</span><span style="color:#f29718;">1</span><span>) {
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;href&#39;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>    })</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="color:#ff7733;">return </span><span>links</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">map</span><span>(</span><span style="color:#f29718;">url </span><span style="color:#ff7733;">=&gt; </span><span>({ url }))
+</span><span>  }
+</span><span>}</span><span style="color:#bfbab0cc;">,
+</span></code></pre>
+<p>A few months ago, my teammate Trey Granderson who worked with me at Kynplex, suggested we go to Facebook’s official GraphQL hackathon at their Cambridge headquarters, where we put together a simple project to try to use the awesomeness of the language to create something nifty and meet new people.</p>
+<span id="continue-reading"></span>
+<p>GraphQL is a specification created by Facebook for a query language that makes it easy to load data into any application. It was developed by the Facebook team to easily write API calls in a way that makes sense with how social networks are structured.</p>
+<p>For example, a user on Facebook can have many friends, and those friends each have more friends, likes, followers, photos, and more. Having to do tons of nested API calls for each of these entities and also having to parse those responses is an incredibly annoying pain point for many similar webapps. GraphQL completely changed that landscape!</p>
+<p>With GraphQL, developers are able to write a simple query string for an endpoint that reads kinda like simplified JSON according to a functions called resolvers that interact with a database and contain the business logic that actually fetches the data.</p>
+<p>For example, if you have a GraphQL endpoint that returns the currently signed in user, you can fetch it as follows:</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#ff7733;">const </span><span>query </span><span style="color:#f29668;">= </span><span style="color:#ffb454;">gql</span><span style="color:#c2d94c;">`
+</span><span style="color:#c2d94c;">  query MyExampleQuery {
+</span><span style="color:#c2d94c;">    currentUser {
+</span><span style="color:#c2d94c;">      name
+</span><span style="color:#c2d94c;">      photo
+</span><span style="color:#c2d94c;">    }
+</span><span style="color:#c2d94c;">  }
+</span><span style="color:#c2d94c;">`</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>Then, we can plug it into a react component and render that data however we want.</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#ff7733;">import </span><span>{ graphql</span><span style="color:#bfbab0cc;">, </span><span>compose } </span><span style="color:#ff7733;">from </span><span style="color:#c2d94c;">&#39;react-apollo&#39;</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">function </span><span style="color:#ffb454;">UserProfile</span><span>(</span><span style="color:#f29718;">props</span><span>) {
+</span><span>  </span><span style="color:#ff7733;">return </span><span style="color:#c2d94c;">&#39;Your Name is: {props.data.currentUser.name}&#39;</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">export default </span><span style="color:#ffb454;">compose</span><span>(</span><span style="color:#ffb454;">graphql</span><span>(query))(UserProfile)</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>A cool thing about GraphQL is that it allows you to define how all of your models interact with each other and how they are connected. It basically gives you the ability to create an API Graph for your application. For example, the return type of the currentUser query is the User type, and the return type of the friends query is also a User type, allowing us to do fancy things like:</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#ff7733;">const </span><span>query </span><span style="color:#f29668;">= </span><span style="color:#ffb454;">gql</span><span style="color:#c2d94c;">`
+</span><span style="color:#c2d94c;">  query MyExampleQuery {
+</span><span style="color:#c2d94c;">    currentUser {
+</span><span style="color:#c2d94c;">      name
+</span><span style="color:#c2d94c;">      photo
+</span><span style="color:#c2d94c;">      friends(limit: 10) {
+</span><span style="color:#c2d94c;">        name
+</span><span style="color:#c2d94c;">        photo
+</span><span style="color:#c2d94c;">        friends(limit: 10) {
+</span><span style="color:#c2d94c;">          name
+</span><span style="color:#c2d94c;">          photo
+</span><span style="color:#c2d94c;">        }
+</span><span style="color:#c2d94c;">      }
+</span><span style="color:#c2d94c;">    }
+</span><span style="color:#c2d94c;">  }
+</span><span style="color:#c2d94c;">`</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>The recursive properties of GraphQL make it incredibly powerful not just as a language to query stuff from a database, but also as an interesting tool that entire projects can be built upon.</p>
+<h2 id="we-decided-to-build-a-web-scraper">We Decided to Build a Web Scraper</h2>
+<p>After a lot of thought, we wanted to create a tool that would be useful to anyone and would leverage the recursive power of GraphQL to solve a problem in an interesting way. So we figured, why not build a web scraper that uses GraphQL? You could have a single query resolver called scrape that takes in a URL as a parameter and returns a generic defined entity such as an HtmlNode.</p>
+<p>We wanted to make this tool fun to use and allow anyone to query for complex pieces of the DOM of any website by using graphql queries that are generated on the fly. Ideally, we wanted to be able to do something like:</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span>{
+</span><span>  </span><span style="color:#ffb454;">scrape</span><span>(url: </span><span style="color:#c2d94c;">&#39;https://google.com&#39;</span><span>) {
+</span><span>    </span><span style="color:#ffb454;">div</span><span>(id: </span><span style="color:#c2d94c;">&#39;header&#39;</span><span>) {
+</span><span>      ul {
+</span><span>        li {
+</span><span>          a {
+</span><span>            href
+</span><span>            content
+</span><span>          }
+</span><span>        }
+</span><span>      }
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p>This gives us a very visual representation of what’s being scraped from the page. However, we wanted to go even one step further with recursiveness and see if we could directly scrape all of the hyperlinks on a given page and fetch their info as well.</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span>{
+</span><span>  </span><span style="color:#ffb454;">scrape</span><span>(url: </span><span style="color:#c2d94c;">&#39;https://google.com&#39;</span><span>) {
+</span><span>    links {
+</span><span>      title
+</span><span>      footer {
+</span><span>        content
+</span><span>      }
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p>Giving us the ability to directly scrape the DOM from any external links in google’s home page! Extend this even more and we’d be able to scrape the entire Internet (well, not really but you get the idea :P)</p>
+<h2 id="so-how-did-we-do-it">So How Did We Do It?</h2>
+<p>We needed to leverage recursive types and some metaprogramming in the GraphQL.js npm package to get this working (link to the full repo is at the end).</p>
+<p>First, we setup a simple express server that has a graphql endpoint over HTTP that we can access directly through REST or through GraphiQL (a handy IDE explorer that Facebook created for us).</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#ff7733;">import </span><span>express </span><span style="color:#ff7733;">from </span><span style="color:#c2d94c;">&#39;express&#39;</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">import </span><span>cors </span><span style="color:#ff7733;">from </span><span style="color:#c2d94c;">&#39;cors&#39;</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">import </span><span>graphqlHTTP </span><span style="color:#ff7733;">from </span><span style="color:#c2d94c;">&#39;express-graphql&#39;</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">import </span><span>schema </span><span style="color:#ff7733;">from </span><span style="color:#c2d94c;">&#39;./schema&#39;</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">const </span><span>app </span><span style="color:#f29668;">= </span><span style="color:#ffb454;">express</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>app</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">use</span><span>(</span><span style="color:#ffb454;">cors</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>app</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">use</span><span>(</span><span style="color:#c2d94c;">&#39;/&#39;</span><span style="color:#bfbab0cc;">, </span><span>(</span><span style="color:#f29718;">req</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">res</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>{
+</span><span> </span><span style="color:#ffb454;">graphqlHTTP</span><span>({
+</span><span>   schema</span><span style="color:#bfbab0cc;">: </span><span>schema</span><span style="color:#bfbab0cc;">,
+</span><span>   pretty</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29718;">true</span><span style="color:#bfbab0cc;">,
+</span><span>   graphiql</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29718;">true</span><span style="color:#bfbab0cc;">,
+</span><span> })(req</span><span style="color:#bfbab0cc;">, </span><span>res)</span><span style="color:#bfbab0cc;">;
+</span><span>})</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">const </span><span>port </span><span style="color:#f29668;">= </span><span style="color:#f29718;">3010</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>app</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">listen</span><span>(port</span><span style="color:#bfbab0cc;">, </span><span>() </span><span style="color:#ff7733;">=&gt; </span><span>{
+</span><span> </span><span style="font-style:italic;color:#39bae6;">console</span><span style="color:#f29668;">.</span><span style="color:#f07178;">log</span><span>(</span><span style="color:#c2d94c;">`app started on port ${</span><span>port</span><span style="color:#c2d94c;">}`</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>})</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>In the code above, we imported our schema that defines all the types and queries in our GraphQL API and attached it to a library called graphqlHTTP. Let’s take a look at this schema file.</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#ff7733;">import </span><span>{
+</span><span>  graphql</span><span style="color:#bfbab0cc;">,
+</span><span>  GraphQLSchema</span><span style="color:#bfbab0cc;">,
+</span><span>  GraphQLObjectType</span><span style="color:#bfbab0cc;">,
+</span><span>  GraphQLString
+</span><span>} </span><span style="color:#ff7733;">from </span><span style="color:#c2d94c;">&#39;graphql&#39;</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">import </span><span>{ HtmlPage } </span><span style="color:#ff7733;">from </span><span style="color:#c2d94c;">&#39;./resolvers&#39;</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">var </span><span>schema </span><span style="color:#f29668;">= new </span><span style="color:#59c2ff;">GraphQLSchema</span><span>({
+</span><span>  query</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">new </span><span style="color:#59c2ff;">GraphQLObjectType</span><span>({
+</span><span>    name</span><span style="color:#bfbab0cc;">: </span><span style="color:#c2d94c;">&#39;Query&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>    fields</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      scrape</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>        type</span><span style="color:#bfbab0cc;">: </span><span>HtmlPage</span><span style="color:#bfbab0cc;">,
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// `args` describes the arguments that the `scrape` query accepts
+</span><span>        args</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>          url</span><span style="color:#bfbab0cc;">: </span><span>{ type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString }
+</span><span>        }</span><span style="color:#bfbab0cc;">,
+</span><span>        </span><span style="color:#ffb454;">resolve</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">function </span><span>(</span><span style="color:#f29718;">_</span><span style="color:#bfbab0cc;">, </span><span>{ </span><span style="color:#f29718;">url </span><span>}) {
+</span><span>          </span><span style="color:#ff7733;">return </span><span>{
+</span><span>            url
+</span><span>          }</span><span style="color:#bfbab0cc;">;
+</span><span>        }
+</span><span>      }
+</span><span>    }
+</span><span>  })</span><span style="color:#bfbab0cc;">,
+</span><span>})</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">export default </span><span>schema</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>Here we define the main Query type, which contains a single resolver called scrape. This is a query that returns an entity of type HtmlPage, takes in a url string as an argument, and allows us to continue writing subqueries from there. This is basically all we needed to get this started, but the really awesome part is in the actual HtmlPage recursive type.</p>
+<p>Let’s see what fields and queries that HtmlPage has available to it by looking at our final file: the resolvers of our GraphQL API. We’ll take it one step at a time, starting with some basic imports.</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#ff7733;">import </span><span>cheerio </span><span style="color:#ff7733;">from </span><span style="color:#c2d94c;">&#39;cheerio&#39;</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">import </span><span>fetch </span><span style="color:#ff7733;">from </span><span style="color:#c2d94c;">&#39;node-fetch&#39;</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">import </span><span>{
+</span><span>  graphql</span><span style="color:#bfbab0cc;">,
+</span><span>  GraphQLSchema</span><span style="color:#bfbab0cc;">,
+</span><span>  GraphQLObjectType</span><span style="color:#bfbab0cc;">,
+</span><span>  GraphQLString</span><span style="color:#bfbab0cc;">,
+</span><span>  GraphQLInt</span><span style="color:#bfbab0cc;">,
+</span><span>  GraphQLList
+</span><span>} </span><span style="color:#ff7733;">from </span><span style="color:#c2d94c;">&#39;graphql&#39;</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>We need to define the actual base return type of our scrape query, which is the HtmlPage type. Initially, we want it to have some basic fields such as the url of the page, the hostname, and the title.</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#ff7733;">export const </span><span>HtmlPage </span><span style="color:#f29668;">= new </span><span style="color:#59c2ff;">GraphQLObjectType</span><span>({
+</span><span>  name</span><span style="color:#bfbab0cc;">: </span><span style="color:#c2d94c;">&#39;HtmlPage&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#ffb454;">fields</span><span style="color:#bfbab0cc;">: </span><span>() </span><span style="color:#ff7733;">=&gt; </span><span>({
+</span><span>    url</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#ffb454;">resolve</span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) {
+</span><span>        </span><span style="color:#ff7733;">return </span><span>root</span><span style="color:#f29668;">.</span><span>url</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>    }</span><span style="color:#bfbab0cc;">,
+</span><span>    hostname</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#ffb454;">resolve</span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) {
+</span><span>        </span><span style="color:#ff7733;">const </span><span>match </span><span style="color:#f29668;">= </span><span>root</span><span style="color:#f29668;">.</span><span>url</span><span style="color:#f29668;">.</span><span style="color:#f07178;">match</span><span>(</span><span style="color:#95e6cb;">/</span><span style="color:#ff7733;">^</span><span style="color:#95e6cb;">(https</span><span style="color:#f29668;">?</span><span style="color:#95e6cb;">\:)\/\/((</span><span style="color:#f29718;">[</span><span style="color:#f29668;">^</span><span style="color:#f29718;">:</span><span style="color:#95e6cb;">\/</span><span style="color:#f29718;">?#]</span><span style="color:#f29668;">*</span><span style="color:#95e6cb;">)(?:\:(</span><span style="color:#f29718;">[0-9]</span><span style="color:#f29668;">+</span><span style="color:#95e6cb;">))</span><span style="color:#f29668;">?</span><span style="color:#95e6cb;">)(</span><span style="color:#f29718;">[</span><span style="color:#95e6cb;">\/</span><span style="color:#f29718;">]</span><span style="color:#f29668;">{0,1}</span><span style="color:#f29718;">[</span><span style="color:#f29668;">^</span><span style="color:#f29718;">?#]</span><span style="color:#f29668;">*</span><span style="color:#95e6cb;">)(\?</span><span style="color:#f29718;">[</span><span style="color:#f29668;">^</span><span style="color:#f29718;">#]</span><span style="color:#f29668;">*|</span><span style="color:#95e6cb;">)(#</span><span style="color:#f29718;">.</span><span style="color:#f29668;">*|</span><span style="color:#95e6cb;">)</span><span style="color:#ff7733;">$</span><span style="color:#95e6cb;">/</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">return </span><span>match </span><span style="color:#f29668;">&amp;&amp; </span><span>match[</span><span style="color:#f29718;">3</span><span>]</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>    }</span><span style="color:#bfbab0cc;">,
+</span><span>    title</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#ffb454;">resolve</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">async </span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>{
+</span><span>        </span><span style="color:#ff7733;">const </span><span>res </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">await </span><span style="color:#ffb454;">fetch</span><span>(root</span><span style="color:#f29668;">.</span><span>url)</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">const </span><span>$ </span><span style="color:#f29668;">= </span><span>cheerio</span><span style="color:#f29668;">.</span><span style="color:#f07178;">load</span><span>(</span><span style="color:#ff7733;">await </span><span>res</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">text</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">$</span><span>(</span><span style="color:#c2d94c;">&#39;title&#39;</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">text</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>    }
+</span><span>  })
+</span><span>})</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>It would be cool if we could also fetch all the images on the page, so let’s add a field for that as well:</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#ff7733;">export const </span><span>HtmlPage </span><span style="color:#f29668;">= new </span><span style="color:#59c2ff;">GraphQLObjectType</span><span>({
+</span><span>  name</span><span style="color:#bfbab0cc;">: </span><span style="color:#c2d94c;">&#39;HtmlPage&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#ffb454;">fields</span><span style="color:#bfbab0cc;">: </span><span>() </span><span style="color:#ff7733;">=&gt; </span><span>({
+</span><span>    images</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      type</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">new </span><span style="color:#59c2ff;">GraphQLList</span><span>(GraphQLString)</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#ffb454;">resolve</span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) {
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">getImgsForUrl</span><span>(root</span><span style="color:#f29668;">.</span><span>url)</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>    }</span><span style="color:#bfbab0cc;">,
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// all other fields below...
+</span><span>    </span><span style="color:#f29668;">...
+</span><span>});
+</span><span>
+</span><span>const </span><span style="color:#ffb454;">getImgsForUrl </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">async </span><span>(</span><span style="color:#f29718;">url</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>{
+</span><span>  </span><span style="color:#ff7733;">const </span><span>res </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">await </span><span style="color:#ffb454;">fetch</span><span>(url)</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">const </span><span>$ </span><span style="color:#f29668;">= </span><span>cheerio</span><span style="color:#f29668;">.</span><span style="color:#f07178;">load</span><span>(</span><span style="color:#ff7733;">await </span><span>res</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">text</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">$</span><span>(</span><span style="color:#c2d94c;">&#39;img&#39;</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">map</span><span>(</span><span style="color:#ff7733;">function</span><span>() { </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;src&#39;</span><span>)</span><span style="color:#bfbab0cc;">; </span><span>})</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>};
+</span></code></pre>
+<p>Now, we want to create a resolver for every valid DOM element that we can call on this HTMLPage type. For example, we want to be able to write:</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span>{
+</span><span>  </span><span style="color:#ffb454;">scrape</span><span>(</span><span style="color:#c2d94c;">&#39;https://facebook.com&#39;</span><span>) {
+</span><span>    div {
+</span><span>      span {
+</span><span>        content
+</span><span>      }
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p>This will allow us keep nesting our queries as much as we need to extract any content from a page. So let’s define our HtmlNode type first.</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#ff7733;">const </span><span>validHtmlTags </span><span style="color:#f29668;">= </span><span>[
+</span><span>  </span><span style="color:#c2d94c;">&#39;div&#39;
+</span><span>]</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">const </span><span>validAttributes </span><span style="color:#f29668;">= </span><span>{
+</span><span>  id</span><span style="color:#bfbab0cc;">: </span><span>{ type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString }</span><span style="color:#bfbab0cc;">,
+</span><span>  class</span><span style="color:#bfbab0cc;">: </span><span>{ type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString }</span><span style="color:#bfbab0cc;">,
+</span><span>  src</span><span style="color:#bfbab0cc;">: </span><span>{ type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString }</span><span style="color:#bfbab0cc;">,
+</span><span>  content</span><span style="color:#bfbab0cc;">: </span><span>{ type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString }</span><span style="color:#bfbab0cc;">,
+</span><span>}</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">const </span><span>HtmlNode </span><span style="color:#f29668;">= new </span><span style="color:#59c2ff;">GraphQLObjectType</span><span>({
+</span><span>  name</span><span style="color:#bfbab0cc;">: </span><span style="color:#c2d94c;">&#39;HtmlNode&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  fields</span><span style="color:#bfbab0cc;">: </span><span>htmlFields</span><span style="color:#bfbab0cc;">,
+</span><span>})</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>Now we need to define every field that the HtmlNode type will have, so we’ll do it by extending the validHtmlTags array to include any other tags we want and then converting that into an array of GraphQL resolvers as follows:</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#ff7733;">const </span><span style="color:#ffb454;">htmlFields </span><span style="color:#f29668;">= </span><span>() </span><span style="color:#ff7733;">=&gt; </span><span>validHtmlTags</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">reduce</span><span>((</span><span style="color:#f29718;">prev</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">tag</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>({
+</span><span>  </span><span style="color:#f29668;">...</span><span>prev</span><span style="color:#bfbab0cc;">,
+</span><span>  [</span><span style="color:#c2d94c;">`${</span><span>tag</span><span style="color:#c2d94c;">}`</span><span>]</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>    type</span><span style="color:#bfbab0cc;">: </span><span>HtmlNode</span><span style="color:#bfbab0cc;">,
+</span><span>    args</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      </span><span style="color:#f29668;">...</span><span>validAttributes</span><span style="color:#bfbab0cc;">,
+</span><span>    }</span><span style="color:#bfbab0cc;">,
+</span><span>    </span><span style="color:#ffb454;">resolve</span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) {
+</span><span>      </span><span style="color:#ff7733;">const </span><span>tagHistory </span><span style="color:#f29668;">= </span><span>{
+</span><span>        tag</span><span style="color:#bfbab0cc;">,
+</span><span>        args</span><span style="color:#bfbab0cc;">,
+</span><span>        url</span><span style="color:#bfbab0cc;">: </span><span>root</span><span style="color:#f29668;">.</span><span>url </span><span style="color:#f29668;">|| </span><span>root[</span><span style="color:#f29718;">0</span><span>]</span><span style="color:#f29668;">.</span><span>url</span><span style="color:#bfbab0cc;">,
+</span><span>      }
+</span><span>      </span><span style="color:#ff7733;">return </span><span>[</span><span style="color:#f29668;">...</span><span>root</span><span style="color:#bfbab0cc;">, </span><span>here]</span><span style="color:#bfbab0cc;">;
+</span><span>    }
+</span><span>  }</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// some more stuff...
+</span><span>  </span><span style="color:#f29668;">...
+</span><span>})</span><span style="color:#bfbab0cc;">, </span><span>{})</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>Let’s break down what’s going on here. We add a resolver for each tag in the validHtmlTags array that has a type of HtmlNode and a valid set of arguments (id, class, etc.) so we can do fancier and more specific DOM scraping. In order to finally fetch the content inside of this node, we need to keep track of all the other nodes above it so we can use tools such as Cheerio to recursively fetch their content.</p>
+<p>We save the type of tag (div, span, etc.) and the arguments to its resolvers inside of an array called tagHistory that we then return in our resolver.</p>
+<p>This means that when we query for</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span>{
+</span><span>  </span><span style="color:#ffb454;">scrape</span><span>(url: </span><span style="color:#c2d94c;">&#39;google.com&#39;</span><span>)
+</span><span>    div {
+</span><span>      div {
+</span><span>        span {
+</span><span>          content
+</span><span>        }
+</span><span>      }
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p>We’ll be storing this nested query as an array that would look like:</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#ff7733;">const </span><span>tagHistory </span><span style="color:#f29668;">= </span><span>[ { tag</span><span style="color:#bfbab0cc;">: </span><span style="color:#c2d94c;">&#39;div&#39; </span><span>}</span><span style="color:#bfbab0cc;">, </span><span>{ tag</span><span style="color:#bfbab0cc;">: </span><span style="color:#c2d94c;">&#39;div&#39; </span><span>}</span><span style="color:#bfbab0cc;">, </span><span>{ tag</span><span style="color:#bfbab0cc;">: </span><span style="color:#c2d94c;">&#39;span&#39; </span><span>}]
+</span></code></pre>
+<p>Making it easy for us to parse this in our base case, a resolver called content that would return the text content inside of a certain HtmlNode. Let’s see how that would work.</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#ff7733;">const </span><span style="color:#ffb454;">htmlFields </span><span style="color:#f29668;">= </span><span>() </span><span style="color:#ff7733;">=&gt; </span><span>validHtmlTags</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">reduce</span><span>((</span><span style="color:#f29718;">prev</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">tag</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>({
+</span><span>  </span><span style="color:#f29668;">...</span><span>prev</span><span style="color:#bfbab0cc;">,
+</span><span>  [</span><span style="color:#c2d94c;">`${</span><span>tag</span><span style="color:#c2d94c;">}`</span><span>]</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>    type</span><span style="color:#bfbab0cc;">: </span><span>HtmlNode</span><span style="color:#bfbab0cc;">,
+</span><span>    args</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      </span><span style="color:#f29668;">...</span><span>validAttributes</span><span style="color:#bfbab0cc;">,
+</span><span>    }</span><span style="color:#bfbab0cc;">,
+</span><span>    </span><span style="color:#ffb454;">resolve</span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) {
+</span><span>      </span><span style="color:#ff7733;">const </span><span>tagHistory </span><span style="color:#f29668;">= </span><span>{
+</span><span>        tag</span><span style="color:#bfbab0cc;">,
+</span><span>        args</span><span style="color:#bfbab0cc;">,
+</span><span>        url</span><span style="color:#bfbab0cc;">: </span><span>root</span><span style="color:#f29668;">.</span><span>url </span><span style="color:#f29668;">|| </span><span>root[</span><span style="color:#f29718;">0</span><span>]</span><span style="color:#f29668;">.</span><span>url</span><span style="color:#bfbab0cc;">,
+</span><span>      }
+</span><span>      </span><span style="color:#ff7733;">return </span><span>[</span><span style="color:#f29668;">...</span><span>root</span><span style="color:#bfbab0cc;">, </span><span>here]</span><span style="color:#bfbab0cc;">;
+</span><span>    }
+</span><span>  }</span><span style="color:#bfbab0cc;">,
+</span><span>  content</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>    type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString</span><span style="color:#bfbab0cc;">,
+</span><span>    </span><span style="color:#ffb454;">resolve</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">async </span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>{
+</span><span>      </span><span style="color:#ff7733;">const </span><span>res </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">await </span><span style="color:#ffb454;">fetch</span><span>(root[</span><span style="color:#f29718;">0</span><span>]</span><span style="color:#f29668;">.</span><span>url)</span><span style="color:#bfbab0cc;">;
+</span><span>      </span><span style="color:#ff7733;">const </span><span>$ </span><span style="color:#f29668;">= </span><span>cheerio</span><span style="color:#f29668;">.</span><span style="color:#f07178;">load</span><span>(</span><span style="color:#ff7733;">await </span><span>res</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">text</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>      </span><span style="color:#ff7733;">const </span><span>selector </span><span style="color:#f29668;">= </span><span>root</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">reduce</span><span>((</span><span style="color:#f29718;">prev</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">curr</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>{
+</span><span>        </span><span style="color:#ff7733;">let </span><span>arg </span><span style="color:#f29668;">= </span><span style="color:#c2d94c;">&#39;&#39;</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">if</span><span>(curr</span><span style="color:#f29668;">.</span><span>args</span><span style="color:#f29668;">.</span><span>id) {
+</span><span>          arg </span><span style="color:#f29668;">= </span><span style="color:#c2d94c;">`#${</span><span>curr</span><span style="color:#f29668;">.</span><span>args</span><span style="color:#f29668;">.</span><span style="color:#c2d94c;">id}`</span><span style="color:#bfbab0cc;">;
+</span><span>        } </span><span style="color:#ff7733;">else if </span><span>(curr</span><span style="color:#f29668;">.</span><span>args</span><span style="color:#f29668;">.</span><span>class) {
+</span><span>          arg </span><span style="color:#f29668;">= </span><span style="color:#c2d94c;">`.${</span><span>curr</span><span style="color:#f29668;">.</span><span>args</span><span style="color:#f29668;">.</span><span>class</span><span style="color:#c2d94c;">}`</span><span style="color:#bfbab0cc;">;
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="color:#ff7733;">const </span><span>ret </span><span style="color:#f29668;">= </span><span style="color:#c2d94c;">`${</span><span>prev</span><span style="color:#c2d94c;">} ${</span><span>curr</span><span style="color:#f29668;">.</span><span>tag</span><span style="color:#c2d94c;">}${</span><span>arg</span><span style="color:#c2d94c;">}`</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">return </span><span>ret</span><span style="color:#bfbab0cc;">;
+</span><span>      }</span><span style="color:#bfbab0cc;">, </span><span style="color:#c2d94c;">&#39;&#39;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>      </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">$</span><span>(selector)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">html</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>    }
+</span><span>  }
+</span><span>})</span><span style="color:#bfbab0cc;">, </span><span>{})</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>The content resolver is the base case of our recursion. Here, root is going to be the tagHistory array that we created through all the nested queries, so we simply use node-fetch to make a GET request to the root URL we want to scrape.</p>
+<p>Then, we load it into cheerio, which is a JQuery library that works on the server. This reduce basically reduce the entire tagHistory array into a single JQuery selector string.</p>
+<p>In this case, reducing the tagHistory array would give us the following string</p>
+<p><code>'div div span'</code></p>
+<p>and if we passed in the ID parameter or class parameter, we would get something like</p>
+<p><code>'div.navbar-container div.navbar-wrapper span.brand-logo'</code></p>
+<p>At the very end, we simply call the JQuery function html() to fetch the inner content of the selector we created! It doesn’t stop there though…we finally need to plug this into the HtmlPage type we created in the beginning so that we’re able to query for these DOM elements. Here is the new HtmlPage type with its resolvers!</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#ff7733;">export const </span><span>HtmlPage </span><span style="color:#f29668;">= new </span><span style="color:#59c2ff;">GraphQLObjectType</span><span>({
+</span><span>  name</span><span style="color:#bfbab0cc;">: </span><span style="color:#c2d94c;">&#39;HtmlPage&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#ffb454;">fields</span><span style="color:#bfbab0cc;">: </span><span>() </span><span style="color:#ff7733;">=&gt; </span><span>({
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// We add the htmlFields resolvers and types that we defined above
+</span><span>    </span><span style="color:#f29668;">...</span><span style="color:#ffb454;">htmlFields</span><span>()</span><span style="color:#bfbab0cc;">,
+</span><span>    images</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      type</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">new </span><span style="color:#59c2ff;">GraphQLList</span><span>(GraphQLString)</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#ffb454;">resolve</span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) {
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">getImgForUrl</span><span>(root</span><span style="color:#f29668;">.</span><span>url)</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>    }</span><span style="color:#bfbab0cc;">,
+</span><span>    url</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#ffb454;">resolve</span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) {
+</span><span>        </span><span style="color:#ff7733;">return </span><span>root</span><span style="color:#f29668;">.</span><span>url</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>    }</span><span style="color:#bfbab0cc;">,
+</span><span>    hostname</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#ffb454;">resolve</span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) {
+</span><span>        </span><span style="color:#ff7733;">const </span><span>match </span><span style="color:#f29668;">= </span><span>root</span><span style="color:#f29668;">.</span><span>url</span><span style="color:#f29668;">.</span><span style="color:#f07178;">match</span><span>(</span><span style="color:#95e6cb;">/</span><span style="color:#ff7733;">^</span><span style="color:#95e6cb;">(https</span><span style="color:#f29668;">?</span><span style="color:#95e6cb;">\:)\/\/((</span><span style="color:#f29718;">[</span><span style="color:#f29668;">^</span><span style="color:#f29718;">:</span><span style="color:#95e6cb;">\/</span><span style="color:#f29718;">?#]</span><span style="color:#f29668;">*</span><span style="color:#95e6cb;">)(?:\:(</span><span style="color:#f29718;">[0-9]</span><span style="color:#f29668;">+</span><span style="color:#95e6cb;">))</span><span style="color:#f29668;">?</span><span style="color:#95e6cb;">)(</span><span style="color:#f29718;">[</span><span style="color:#95e6cb;">\/</span><span style="color:#f29718;">]</span><span style="color:#f29668;">{0,1}</span><span style="color:#f29718;">[</span><span style="color:#f29668;">^</span><span style="color:#f29718;">?#]</span><span style="color:#f29668;">*</span><span style="color:#95e6cb;">)(\?</span><span style="color:#f29718;">[</span><span style="color:#f29668;">^</span><span style="color:#f29718;">#]</span><span style="color:#f29668;">*|</span><span style="color:#95e6cb;">)(#</span><span style="color:#f29718;">.</span><span style="color:#f29668;">*|</span><span style="color:#95e6cb;">)</span><span style="color:#ff7733;">$</span><span style="color:#95e6cb;">/</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">return </span><span>match </span><span style="color:#f29668;">&amp;&amp; </span><span>match[</span><span style="color:#f29718;">3</span><span>]</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>    }</span><span style="color:#bfbab0cc;">,
+</span><span>    title</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#ffb454;">resolve</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">async </span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>{
+</span><span>        </span><span style="color:#ff7733;">const </span><span>res </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">await </span><span style="color:#ffb454;">fetch</span><span>(root</span><span style="color:#f29668;">.</span><span>url)</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">const </span><span>$ </span><span style="color:#f29668;">= </span><span>cheerio</span><span style="color:#f29668;">.</span><span style="color:#f07178;">load</span><span>(</span><span style="color:#ff7733;">await </span><span>res</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">text</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">$</span><span>(</span><span style="color:#c2d94c;">&#39;title&#39;</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">text</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>    }
+</span><span>  })
+</span><span>})</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>To put a cherry on top, we added a resolver that would allow us to scrape all the hyperlinks in a page and return HtmlPage entities that we would also be able to run fancy queries on! Here’s how we did it:</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#59c2ff;">links</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>  </span><span style="color:#59c2ff;">type</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">new </span><span style="color:#59c2ff;">GraphQLList</span><span>(HtmlPage)</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#59c2ff;">resolve</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">async </span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>{
+</span><span>    </span><span style="color:#ff7733;">const </span><span>res </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">await </span><span style="color:#ffb454;">fetch</span><span>(root</span><span style="color:#f29668;">.</span><span>url)</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">const </span><span>$ </span><span style="color:#f29668;">= </span><span>cheerio</span><span style="color:#f29668;">.</span><span style="color:#f07178;">load</span><span>(</span><span style="color:#ff7733;">await </span><span>res</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">text</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">const </span><span>links </span><span style="color:#f29668;">= </span><span style="color:#ffb454;">$</span><span>(</span><span style="color:#c2d94c;">&#39;a&#39;</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">map</span><span>(</span><span style="color:#ff7733;">function</span><span>() {
+</span><span>      </span><span style="color:#ff7733;">if </span><span>(</span><span style="color:#f29668;">!</span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;href&#39;</span><span>)) {
+</span><span>        </span><span style="color:#ff7733;">return</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>      </span><span style="color:#ff7733;">if </span><span>(</span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;href&#39;</span><span>) </span><span style="color:#f29668;">!== </span><span style="color:#c2d94c;">&#39;#&#39; </span><span style="color:#f29668;">&amp;&amp; </span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;href&#39;</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">indexOf</span><span>(</span><span style="color:#c2d94c;">&#39;http&#39;</span><span>) </span><span style="color:#f29668;">&gt; -</span><span style="color:#f29718;">1</span><span>) {
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;href&#39;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>    })</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="color:#ff7733;">return </span><span>links</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">map</span><span>(</span><span style="color:#f29718;">url </span><span style="color:#ff7733;">=&gt; </span><span>({ url }))
+</span><span>  }
+</span><span>}</span><span style="color:#bfbab0cc;">,
+</span></code></pre>
+<p>Putting it all together, here’s our final resolver file:</p>
+<pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#ff7733;">import </span><span>cheerio </span><span style="color:#ff7733;">from </span><span style="color:#c2d94c;">&#39;cheerio&#39;</span><span style="color:#bfbab0cc;">;
+</span><span style="color:#ff7733;">import </span><span>fetch </span><span style="color:#ff7733;">from </span><span style="color:#c2d94c;">&#39;node-fetch&#39;</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">import </span><span>{
+</span><span>  graphql</span><span style="color:#bfbab0cc;">,
+</span><span>  GraphQLSchema</span><span style="color:#bfbab0cc;">,
+</span><span>  GraphQLObjectType</span><span style="color:#bfbab0cc;">,
+</span><span>  GraphQLString</span><span style="color:#bfbab0cc;">,
+</span><span>  GraphQLInt</span><span style="color:#bfbab0cc;">,
+</span><span>  GraphQLList
+</span><span>} </span><span style="color:#ff7733;">from </span><span style="color:#c2d94c;">&#39;graphql&#39;</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">const </span><span>validAttributes </span><span style="color:#f29668;">= </span><span>{
+</span><span>  id</span><span style="color:#bfbab0cc;">: </span><span>{ type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString }</span><span style="color:#bfbab0cc;">,
+</span><span>  class</span><span style="color:#bfbab0cc;">: </span><span>{ type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString }</span><span style="color:#bfbab0cc;">,
+</span><span>  src</span><span style="color:#bfbab0cc;">: </span><span>{ type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString }</span><span style="color:#bfbab0cc;">,
+</span><span>  content</span><span style="color:#bfbab0cc;">: </span><span>{ type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString }</span><span style="color:#bfbab0cc;">,
+</span><span>}</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">export const </span><span>validHTMLTags </span><span style="color:#f29668;">= </span><span>[
+</span><span>  </span><span style="color:#c2d94c;">&#39;div&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#c2d94c;">&#39;span&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#c2d94c;">&#39;img&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#c2d94c;">&#39;body&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#c2d94c;">&#39;a&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#c2d94c;">&#39;b&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#c2d94c;">&#39;i&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#c2d94c;">&#39;p&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#c2d94c;">&#39;h1&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#c2d94c;">&#39;h2&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#c2d94c;">&#39;h3&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#c2d94c;">&#39;article&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#c2d94c;">&#39;footer&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#c2d94c;">&#39;form&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#c2d94c;">&#39;input&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#c2d94c;">&#39;ul&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#c2d94c;">&#39;li&#39;
+</span><span>]</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">const </span><span style="color:#ffb454;">htmlFields </span><span style="color:#f29668;">= </span><span>() </span><span style="color:#ff7733;">=&gt; </span><span>validHTMLTags</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">reduce</span><span>((</span><span style="color:#f29718;">prev</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">tag</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>({
+</span><span>  </span><span style="color:#f29668;">...</span><span>prev</span><span style="color:#bfbab0cc;">,
+</span><span>  [</span><span style="color:#c2d94c;">`${</span><span>tag</span><span style="color:#c2d94c;">}`</span><span>]</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>    type</span><span style="color:#bfbab0cc;">: </span><span>HtmlNode</span><span style="color:#bfbab0cc;">,
+</span><span>    args</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      </span><span style="color:#f29668;">...</span><span>validAttributes</span><span style="color:#bfbab0cc;">,
+</span><span>    }</span><span style="color:#bfbab0cc;">,
+</span><span>    </span><span style="color:#ffb454;">resolve</span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) {
+</span><span>      </span><span style="color:#ff7733;">const </span><span>here </span><span style="color:#f29668;">= </span><span>{
+</span><span>        tag</span><span style="color:#bfbab0cc;">,
+</span><span>        args</span><span style="color:#bfbab0cc;">,
+</span><span>        url</span><span style="color:#bfbab0cc;">: </span><span>root</span><span style="color:#f29668;">.</span><span>url </span><span style="color:#f29668;">|| </span><span>root[</span><span style="color:#f29718;">0</span><span>]</span><span style="color:#f29668;">.</span><span>url</span><span style="color:#bfbab0cc;">,
+</span><span>      }
+</span><span>      </span><span style="color:#ff7733;">return </span><span>[</span><span style="color:#f29668;">...</span><span>root</span><span style="color:#bfbab0cc;">, </span><span>here]</span><span style="color:#bfbab0cc;">;
+</span><span>    }
+</span><span>  }</span><span style="color:#bfbab0cc;">,
+</span><span>  content</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>    type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString</span><span style="color:#bfbab0cc;">,
+</span><span>    </span><span style="color:#ffb454;">resolve</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">async </span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>{
+</span><span>      </span><span style="color:#ff7733;">const </span><span>res </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">await </span><span style="color:#ffb454;">fetch</span><span>(root[</span><span style="color:#f29718;">0</span><span>]</span><span style="color:#f29668;">.</span><span>url)</span><span style="color:#bfbab0cc;">;
+</span><span>      </span><span style="color:#ff7733;">const </span><span>$ </span><span style="color:#f29668;">= </span><span>cheerio</span><span style="color:#f29668;">.</span><span style="color:#f07178;">load</span><span>(</span><span style="color:#ff7733;">await </span><span>res</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">text</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>      </span><span style="color:#ff7733;">const </span><span>selector </span><span style="color:#f29668;">= </span><span>root</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">reduce</span><span>((</span><span style="color:#f29718;">prev</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">curr</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>{
+</span><span>        </span><span style="color:#ff7733;">let </span><span>arg </span><span style="color:#f29668;">= </span><span style="color:#c2d94c;">&#39;&#39;</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">if</span><span>(curr</span><span style="color:#f29668;">.</span><span>args</span><span style="color:#f29668;">.</span><span>id) {
+</span><span>          arg </span><span style="color:#f29668;">= </span><span style="color:#c2d94c;">`#${</span><span>curr</span><span style="color:#f29668;">.</span><span>args</span><span style="color:#f29668;">.</span><span style="color:#c2d94c;">id}`</span><span style="color:#bfbab0cc;">;
+</span><span>        } </span><span style="color:#ff7733;">else if </span><span>(curr</span><span style="color:#f29668;">.</span><span>args</span><span style="color:#f29668;">.</span><span>class) {
+</span><span>          arg </span><span style="color:#f29668;">= </span><span style="color:#c2d94c;">`.${</span><span>curr</span><span style="color:#f29668;">.</span><span>args</span><span style="color:#f29668;">.</span><span>class</span><span style="color:#c2d94c;">}`</span><span style="color:#bfbab0cc;">;
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="color:#ff7733;">const </span><span>ret </span><span style="color:#f29668;">= </span><span style="color:#c2d94c;">`${</span><span>prev</span><span style="color:#c2d94c;">} ${</span><span>curr</span><span style="color:#f29668;">.</span><span>tag</span><span style="color:#c2d94c;">}${</span><span>arg</span><span style="color:#c2d94c;">}`</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">return </span><span>ret</span><span style="color:#bfbab0cc;">;
+</span><span>      }</span><span style="color:#bfbab0cc;">, </span><span style="color:#c2d94c;">&#39;&#39;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>      </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">$</span><span>(selector)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">html</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>    }
+</span><span>  }
+</span><span>})</span><span style="color:#bfbab0cc;">, </span><span>{})</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">const </span><span>HtmlNode </span><span style="color:#f29668;">= new </span><span style="color:#59c2ff;">GraphQLObjectType</span><span>({
+</span><span>  name</span><span style="color:#bfbab0cc;">: </span><span style="color:#c2d94c;">&#39;HtmlNode&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  fields</span><span style="color:#bfbab0cc;">: </span><span>htmlFields</span><span style="color:#bfbab0cc;">,
+</span><span>})</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">const </span><span style="color:#ffb454;">getImgsForUrl </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">async </span><span>(</span><span style="color:#f29718;">url</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>{
+</span><span>  </span><span style="color:#ff7733;">const </span><span>res </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">await </span><span style="color:#ffb454;">fetch</span><span>(url)</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">const </span><span>$ </span><span style="color:#f29668;">= </span><span>cheerio</span><span style="color:#f29668;">.</span><span style="color:#f07178;">load</span><span>(</span><span style="color:#ff7733;">await </span><span>res</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">text</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>  </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">$</span><span>(</span><span style="color:#c2d94c;">&#39;img&#39;</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">map</span><span>(</span><span style="color:#ff7733;">function</span><span>() { </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;src&#39;</span><span>)</span><span style="color:#bfbab0cc;">; </span><span>})</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>}</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span style="color:#ff7733;">export const </span><span>HtmlPage </span><span style="color:#f29668;">= new </span><span style="color:#59c2ff;">GraphQLObjectType</span><span>({
+</span><span>  name</span><span style="color:#bfbab0cc;">: </span><span style="color:#c2d94c;">&#39;HtmlPage&#39;</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#ffb454;">fields</span><span style="color:#bfbab0cc;">: </span><span>() </span><span style="color:#ff7733;">=&gt; </span><span>({
+</span><span>    </span><span style="color:#f29668;">...</span><span style="color:#ffb454;">htmlFields</span><span>()</span><span style="color:#bfbab0cc;">,
+</span><span>    images</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      type</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">new </span><span style="color:#59c2ff;">GraphQLList</span><span>(GraphQLString)</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#ffb454;">resolve</span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) {
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">getImgsForUrl</span><span>(root</span><span style="color:#f29668;">.</span><span>url)</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>    }</span><span style="color:#bfbab0cc;">,
+</span><span>    links</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      type</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">new </span><span style="color:#59c2ff;">GraphQLList</span><span>(HtmlPage)</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#ffb454;">resolve</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">async </span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>{
+</span><span>        </span><span style="color:#ff7733;">const </span><span>res </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">await </span><span style="color:#ffb454;">fetch</span><span>(root</span><span style="color:#f29668;">.</span><span>url)</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">const </span><span>$ </span><span style="color:#f29668;">= </span><span>cheerio</span><span style="color:#f29668;">.</span><span style="color:#f07178;">load</span><span>(</span><span style="color:#ff7733;">await </span><span>res</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">text</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">const </span><span>links </span><span style="color:#f29668;">= </span><span style="color:#ffb454;">$</span><span>(</span><span style="color:#c2d94c;">&#39;a&#39;</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">map</span><span>(</span><span style="color:#ff7733;">function</span><span>() {
+</span><span>          </span><span style="color:#ff7733;">if </span><span>(</span><span style="color:#f29668;">!</span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;href&#39;</span><span>)) {
+</span><span>            </span><span style="color:#ff7733;">return</span><span style="color:#bfbab0cc;">;
+</span><span>          }
+</span><span>          </span><span style="color:#ff7733;">if </span><span>(</span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;href&#39;</span><span>) </span><span style="color:#f29668;">!== </span><span style="color:#c2d94c;">&#39;#&#39; </span><span style="color:#f29668;">&amp;&amp; </span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;href&#39;</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">indexOf</span><span>(</span><span style="color:#c2d94c;">&#39;http&#39;</span><span>) </span><span style="color:#f29668;">&gt; -</span><span style="color:#f29718;">1</span><span>) {
+</span><span>            </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;href&#39;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>          }
+</span><span>        })</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>        </span><span style="color:#ff7733;">return </span><span>links</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">map</span><span>(</span><span style="color:#f29718;">url </span><span style="color:#ff7733;">=&gt; </span><span>({ url }))
+</span><span>      }
+</span><span>    }</span><span style="color:#bfbab0cc;">,
+</span><span>    url</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#ffb454;">resolve</span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) {
+</span><span>        </span><span style="color:#ff7733;">return </span><span>root</span><span style="color:#f29668;">.</span><span>url</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>    }</span><span style="color:#bfbab0cc;">,
+</span><span>    hostname</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#ffb454;">resolve</span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) {
+</span><span>        </span><span style="color:#ff7733;">const </span><span>match </span><span style="color:#f29668;">= </span><span>root</span><span style="color:#f29668;">.</span><span>url</span><span style="color:#f29668;">.</span><span style="color:#f07178;">match</span><span>(</span><span style="color:#95e6cb;">/</span><span style="color:#ff7733;">^</span><span style="color:#95e6cb;">(https</span><span style="color:#f29668;">?</span><span style="color:#95e6cb;">\:)\/\/((</span><span style="color:#f29718;">[</span><span style="color:#f29668;">^</span><span style="color:#f29718;">:</span><span style="color:#95e6cb;">\/</span><span style="color:#f29718;">?#]</span><span style="color:#f29668;">*</span><span style="color:#95e6cb;">)(?:\:(</span><span style="color:#f29718;">[0-9]</span><span style="color:#f29668;">+</span><span style="color:#95e6cb;">))</span><span style="color:#f29668;">?</span><span style="color:#95e6cb;">)(</span><span style="color:#f29718;">[</span><span style="color:#95e6cb;">\/</span><span style="color:#f29718;">]</span><span style="color:#f29668;">{0,1}</span><span style="color:#f29718;">[</span><span style="color:#f29668;">^</span><span style="color:#f29718;">?#]</span><span style="color:#f29668;">*</span><span style="color:#95e6cb;">)(\?</span><span style="color:#f29718;">[</span><span style="color:#f29668;">^</span><span style="color:#f29718;">#]</span><span style="color:#f29668;">*|</span><span style="color:#95e6cb;">)(#</span><span style="color:#f29718;">.</span><span style="color:#f29668;">*|</span><span style="color:#95e6cb;">)</span><span style="color:#ff7733;">$</span><span style="color:#95e6cb;">/</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">return </span><span>match </span><span style="color:#f29668;">&amp;&amp; </span><span>match[</span><span style="color:#f29718;">3</span><span>]</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>    }</span><span style="color:#bfbab0cc;">,
+</span><span>    title</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>      type</span><span style="color:#bfbab0cc;">: </span><span>GraphQLString</span><span style="color:#bfbab0cc;">,
+</span><span>      </span><span style="color:#ffb454;">resolve</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">async </span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>{
+</span><span>        </span><span style="color:#ff7733;">const </span><span>res </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">await </span><span style="color:#ffb454;">fetch</span><span>(root</span><span style="color:#f29668;">.</span><span>url)</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">const </span><span>$ </span><span style="color:#f29668;">= </span><span>cheerio</span><span style="color:#f29668;">.</span><span style="color:#f07178;">load</span><span>(</span><span style="color:#ff7733;">await </span><span>res</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">text</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">$</span><span>(</span><span style="color:#c2d94c;">&#39;title&#39;</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">text</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>    }
+</span><span>  })
+</span><span>})</span><span style="color:#bfbab0cc;">;
+</span></code></pre>
+<p>You can check out the full repo at GraphQL Hackathon Github and install the dependencies with npm install.</p>
+<p>Then, run the code with npm start and navigate to http://localhost:3010/graphiql. There, you can try running the scrape query I showed in the exampled above.</p>
+<p>Like this post? Please share any thoughts or feedback below.</p>
+
+        </div>
+
+        
+        <div class="pagination">
+            <div class="pagination__title">
+                <span class="pagination__title-h">More posts</span>
+                <hr />
+            </div>
+            <div class="pagination__buttons">
+                    <span class="button previous">
+                        <a href="https://rauljordan.com/how-i-accurately-predicted-loan-payments-on-the-lendingclub-dataset/">
+                            <span class="button__icon">←</span>&nbsp;
+                            <span class="button__text">How I Accurately Predicted Loan Payments on the LendingClub Dataset</span>
+                        </a>
+                    </span>
+                
+                
+                    <span class="button next">
+                        <a href="https://rauljordan.com/go-lessons-from-writing-a-serialization-library-for-ethereum/">
+                            <span class="button__text">Go Lessons from Writing a Serialization Library for Ethereum</span>&nbsp;
+                            <span class="button__icon">→</span>
+                        </a>
+                    </span>
+                </div>
+        </div>
+    
+    </div>
+
+    </div>
+
+    
+    <footer class="footer">
+        <div class="footer__inner">
+                <div class="copyright">
+                        <span>© 
+    2023
+ Raul Jordan</span>
+                    <span class="copyright-theme">
+                        <span class="copyright-theme-sep">:: </span>
+                        Theme: <a href="https://github.com/pawroman/zola-theme-terminimal/">Terminimal</a> by pawroman
+                    </span>
+                </div>
+            </div>
+    </footer>
+    
+
+</div>
+</body>
+
+</html>

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>rauljordan::blog</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="robots" content="noodp"/>
+
+    <link rel="stylesheet" href="https://rauljordan.com/style.css">
+    <link rel="stylesheet" href="https://rauljordan.com/color/orange.css">
+
+        <link rel="stylesheet" href="https://rauljordan.com/color/background_pink.css">
+    
+    <link rel="stylesheet" href="https://rauljordan.com/font-hack-subset.css">
+
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://rauljordan.com/rss.xml">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@rauljordaneth">
+    <meta name="twitter:creator" content="@rauljordaneth">
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://rauljordan.com" />
+    <meta property="og:site_name" content="rauljordan::blog" />
+
+    
+<meta property="og:title" content="Immutability Patterns in Go" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="rauljordan::blog" />
+<meta property="og:image" content="" />
+<meta property="og:type" content="article" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="Immutability Patterns in Go" />
+<meta property="twitter:image" content="" />
+<meta property="twitter:description" content="" />
+<meta name="twitter:site" content="@rauljordaneth" />
+<meta name="twitter:creator" content="@rauljordaneth" />
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-53062950-12"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-53062950-12');
+    </script>
+</head>
+
+<body class="">
+<div class="container">
+    
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__logo">
+                    
+                <a href="https://rauljordan.com" style="text-decoration: none;">
+                    <div class="logo">
+                      
+                            rauljordan::blog
+                        
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        
+        <nav class="menu">
+            <ul class="menu__inner">
+                <li><a href="https://rauljordan.com/tags">tags</a></li>
+            
+                <li><a href="https://rauljordan.com/archive">archive</a></li>
+            
+                <li><a href="https://rauljordan.com/about-me">about me</a></li>
+            
+                <li><a href="https://twitter.com/rauljordaneth" target="_blank" rel="noopener noreferrer">twitter</a></li>
+            
+                <li><a href="https://github.com/rauljordan" target="_blank" rel="noopener noreferrer">github</a></li>
+            </ul>
+        </nav>
+    
+    
+        
+    </header>
+    
+
+    <div class="content">
+        
+    <div class="post">
+        
+    <h1 class="post-title"><a href="https://rauljordan.com/immutability-patterns-in-go/">Immutability Patterns in Go</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2020-05-25
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/golang/">#golang</a></span>
+    
+
+        
+        <div class="post-content">
+            <pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">for </span><span>field</span><span style="color:#bfbab0cc;">, </span><span>ref </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>s</span><span style="color:#f29668;">.</span><span>sharedFieldReferences {
+</span><span>    ref</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">AddRef</span><span>()
+</span><span>    dst</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[field] </span><span style="color:#f29668;">= </span><span>ref
+</span><span>}
+</span></code></pre>
+<p>One of cons of Go as a modern programming language is the lack of native options for making certain data structures immutable. That is, we often have to make key software design decisions in our application just to ensure certain data is immutable throughout the code's runtime, and it may not look pretty. At my company, <a href="https://prysmaticlabs.com">Prysmatic Labs</a>, we often encounter the problem where we need to maintain certain large data structures in-memory for performance reasons and we also need to perform one-off, local computations on such data. That is, we have very intensive <em>read-heavy</em> workloads in our application where we do not want to compromise data safety.</p>
+<span id="continue-reading"></span>
+<p><img src="https://raw.githubusercontent.com/ashleymcnamara/gophers/master/CouchPotatoGopher.png" alt="Image" /></p>
+<p>A concrete example of this is in the field of distributed systems, where servers typically maintain some global &quot;state&quot; which other computers on the network also maintain through a consensus algorithm. An example of this is <a href="https://ethereum.org">Ethereum</a>, a popular blockchain my team <a href="https://github.com/prysmaticlabs/prysm">develops</a>, which maintains a global state of user accounts, balances and tons of other critical information. These applications are <code>state machines</code>, which update their state through a <code>state transition function</code>: a pure function which takes in some data, the global state, and outputs a new global state in a deterministic fashion.</p>
+<p>Let's give a basic example:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">State </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>    AccountAddresses []</span><span style="font-style:italic;color:#39bae6;">string
+</span><span>    Balances         []</span><span style="font-style:italic;color:#39bae6;">uint64
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">InputData </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>    Transfers           []</span><span style="color:#f29668;">*</span><span style="color:#ff7733;">Transfer
+</span><span>    NewAccountAddresses []</span><span style="font-style:italic;color:#39bae6;">string
+</span><span>    NewAccountBalances  []</span><span style="font-style:italic;color:#39bae6;">uint64
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Transfer </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>    From   </span><span style="font-style:italic;color:#39bae6;">string
+</span><span>    To     </span><span style="font-style:italic;color:#39bae6;">string
+</span><span>    Amount </span><span style="font-style:italic;color:#39bae6;">uint64
+</span><span>}
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// ExecuteStateTransition is a pure function which received some input data,
+</span><span style="font-style:italic;color:#5c6773;">// a pre-state, and outputs a deterministic post-state if the inputs are valid.
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">ExecuteStateTransition</span><span>(</span><span style="color:#f29718;">data </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">InputData</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">preState </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">State</span><span>) (</span><span style="color:#f29668;">*</span><span style="color:#ff7733;">State</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>    </span><span style="color:#ff7733;">var </span><span>err </span><span style="font-style:italic;color:#39bae6;">error
+</span><span>    </span><span style="color:#ff7733;">for </span><span style="font-style:italic;color:#39bae6;">_</span><span style="color:#bfbab0cc;">, </span><span>transfer </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>data</span><span style="color:#f29668;">.</span><span>Transfers {
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Apply a transfer to the state.
+</span><span>        preState</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">= </span><span style="color:#ffb454;">applyTransfer</span><span>(preState</span><span style="color:#bfbab0cc;">, </span><span>transfer)
+</span><span>        </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>            </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil</span><span style="color:#bfbab0cc;">, </span><span>fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Errorf</span><span>(</span><span style="color:#c2d94c;">&quot;could not apply transfer to accounts: </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>err)
+</span><span>        }
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">if </span><span style="color:#f07178;">len</span><span>(data</span><span style="color:#f29668;">.</span><span>NewAccountAddresses) </span><span style="color:#f29668;">!= </span><span style="color:#f07178;">len</span><span>(data</span><span style="color:#f29668;">.</span><span>NewAccountBalances) {
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil</span><span style="color:#bfbab0cc;">, </span><span>errors</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">New</span><span>(</span><span style="color:#c2d94c;">&quot;different number of new account addresses and balances&quot;</span><span>)
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">for </span><span>i</span><span style="color:#bfbab0cc;">, </span><span>address </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>data</span><span style="color:#f29668;">.</span><span>NewAccountAddresses {
+</span><span>        balance </span><span style="color:#f29668;">:= </span><span>data</span><span style="color:#f29668;">.</span><span>NewAccountBalances[i]
+</span><span>        preState</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">= </span><span style="color:#ffb454;">addAccount</span><span>(preState</span><span style="color:#bfbab0cc;">, </span><span>address</span><span style="color:#bfbab0cc;">, </span><span>balance)
+</span><span>        </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>            </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil</span><span style="color:#bfbab0cc;">, </span><span>fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Errorf</span><span>(</span><span style="color:#c2d94c;">&quot;could not create new account in state: </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>err)
+</span><span>        }
+</span><span>    }
+</span><span>    </span><span style="color:#f29668;">...
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// Do some other fancy stuff...
+</span><span>    </span><span style="color:#ff7733;">return </span><span>preState</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>}
+</span></code></pre>
+<p>In these applications, a state transition may fail, which will leave the state object in an inconsistent state! For example, your code might fail:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">if </span><span style="color:#f07178;">len</span><span>(data</span><span style="color:#f29668;">.</span><span>NewAccountAddresses) </span><span style="color:#f29668;">!= </span><span style="color:#f07178;">len</span><span>(data</span><span style="color:#f29668;">.</span><span>NewAccountBalances) {
+</span><span>    </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil</span><span style="color:#bfbab0cc;">, </span><span>errors</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">New</span><span>(</span><span style="color:#c2d94c;">&quot;different number of new account addresses and balances&quot;</span><span>)
+</span><span>}
+</span></code></pre>
+<p>Despite already having mutated accounts in the state in the preceding lines:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">var </span><span>err </span><span style="font-style:italic;color:#39bae6;">error
+</span><span style="color:#ff7733;">for </span><span style="font-style:italic;color:#39bae6;">_</span><span style="color:#bfbab0cc;">, </span><span>transfer </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>data</span><span style="color:#f29668;">.</span><span>Transfers {
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// Apply a transfer to the state.
+</span><span>    preState</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">= </span><span style="color:#ffb454;">applyTransfer</span><span>(preState</span><span style="color:#bfbab0cc;">, </span><span>transfer)
+</span><span>    </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil</span><span style="color:#bfbab0cc;">, </span><span>fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Errorf</span><span>(</span><span style="color:#c2d94c;">&quot;could not apply transfer to accounts: </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>err)
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<h2 id="naive-solution-full-copy">Naive Solution: Full Copy</h2>
+<p>A simple, yet naïve way to solve the problem is to enforce full <code>copying</code> of data before the function runs. For example:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">Server</span><span>) </span><span style="color:#ffb454;">NaiveCopy</span><span>() </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">State </span><span>{
+</span><span>    newAccountAddresses </span><span style="color:#f29668;">:= </span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">string</span><span style="color:#bfbab0cc;">, </span><span style="color:#f07178;">len</span><span>(s</span><span style="color:#f29668;">.</span><span>accountAddresses))
+</span><span>    </span><span style="color:#f07178;">copy</span><span>(newAccountAddresses</span><span style="color:#bfbab0cc;">, </span><span>s</span><span style="color:#f29668;">.</span><span>accountAddresses)
+</span><span>    newBalances </span><span style="color:#f29668;">:= </span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="color:#f07178;">len</span><span>(s</span><span style="color:#f29668;">.</span><span>balances))
+</span><span>    </span><span style="color:#f07178;">copy</span><span>(newBalances</span><span style="color:#bfbab0cc;">, </span><span>s</span><span style="color:#f29668;">.</span><span>balances)
+</span><span>    </span><span style="color:#ff7733;">return </span><span style="color:#f29668;">&amp;</span><span>State{
+</span><span>        accountAddresses</span><span style="color:#bfbab0cc;">: </span><span>newAccountAddresses</span><span style="color:#bfbab0cc;">,
+</span><span>        balances</span><span style="color:#bfbab0cc;">:         </span><span>newBalances</span><span style="color:#bfbab0cc;">,
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="color:#f29668;">...
+</span><span style="font-style:italic;color:#5c6773;">// Retrieve a copy of the current application state.
+</span><span>preState </span><span style="color:#f29668;">:= </span><span>s</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">NaiveCopy</span><span>()
+</span><span>postState</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">:= </span><span style="color:#ffb454;">ExecuteStateTransition</span><span>(data</span><span style="color:#bfbab0cc;">, </span><span>preState)
+</span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>    </span><span style="color:#ff7733;">return </span><span>fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Errorf</span><span>(</span><span style="color:#c2d94c;">&quot;could not process state transition: </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>err)
+</span><span>}
+</span><span style="color:#f29668;">...
+</span></code></pre>
+<p>This means the state transition function will be operating on a locally scoped, 100% copied instance of the data instead of mutating our precious, real state. However, this is a bad choice when the state might be a massive data structure and also a bad choice depending on how many times the state transition function might run. The fact that we need to copy the entire data structure is a bad pattern that will not scale to real applications. Deep copies might take a long time to run, use a ton of memory, and will very quickly <strong>become your major bottleneck</strong>. Despite this, there are lots of other design patterns in Go that can help solve this problem.</p>
+<h2 id="copy-on-read">Copy on Read</h2>
+<p>What if we want to be able to access a state safely without doing a full copy? Instead, we can copy only the data we need for our functions. For example, say you have a function that just adds up the account balances:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">func </span><span style="color:#ffb454;">TotalBalance</span><span>(</span><span style="color:#f29718;">state </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">State</span><span>) </span><span style="font-style:italic;color:#39bae6;">uint64 </span><span>{
+</span><span>    total </span><span style="color:#f29668;">:= </span><span style="font-style:italic;color:#39bae6;">uint64</span><span>(</span><span style="color:#f29718;">0</span><span>)
+</span><span>    </span><span style="color:#ff7733;">for </span><span style="font-style:italic;color:#39bae6;">_</span><span style="color:#bfbab0cc;">, </span><span>balance </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>state</span><span style="color:#f29668;">.</span><span>Balances {
+</span><span>        total </span><span style="color:#f29668;">+= </span><span>balance
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">return </span><span>total
+</span><span>}
+</span><span>
+</span><span style="color:#f29668;">...
+</span><span style="font-style:italic;color:#5c6773;">// Get a copy of the current state.
+</span><span>currentState </span><span style="color:#f29668;">:= </span><span>s</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Copy</span><span>()
+</span><span>total </span><span style="color:#f29668;">:= </span><span style="color:#ffb454;">TotalBalance</span><span>(currentState)
+</span><span>fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Printf</span><span>(</span><span style="color:#c2d94c;">&quot;Total balance: </span><span style="color:#f29718;">%d</span><span style="color:#95e6cb;">\n</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>total)
+</span></code></pre>
+<p>Even for such a simple computation, you still have to copy the entire state data structure! This is absolutely inefficient. You can probably get around this by <em>not</em> copying the state but instead just using the raw value of state.AccountBalances given you're not modifying it, you're just reading from it. However, this is dangerous! You don't want <em>anyone</em> to accidentally modify this value, so you want to be strict around data access and modification. A simple pattern in Go is to instead leverage unexported struct fields with getters and setters to prevent unwanted data mutation. For example, we can restructure our state to look like this:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">State </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>    accountAddresses []</span><span style="font-style:italic;color:#39bae6;">string
+</span><span>    balances         []</span><span style="font-style:italic;color:#39bae6;">uint64
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">State</span><span>) </span><span style="color:#ffb454;">AccountAddresses</span><span>() []</span><span style="font-style:italic;color:#39bae6;">string </span><span>{
+</span><span>    </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">DeepCopy</span><span>(s</span><span style="color:#f29668;">.</span><span>accountAddresses)
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">State</span><span>) </span><span style="color:#ffb454;">SetAccountAddresses</span><span>(</span><span style="color:#f29718;">addresses </span><span>[]</span><span style="font-style:italic;color:#39bae6;">string</span><span>) {
+</span><span>    s</span><span style="color:#f29668;">.</span><span>accountAddresses </span><span style="color:#f29668;">= </span><span style="color:#ffb454;">DeepCopy</span><span>(addresses)
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">State</span><span>) </span><span style="color:#ffb454;">Balances</span><span>() []</span><span style="font-style:italic;color:#39bae6;">uint64 </span><span>{
+</span><span>    </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">DeepCopy</span><span>(s</span><span style="color:#f29668;">.</span><span>balances)
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">State</span><span>) </span><span style="color:#ffb454;">SetBalances</span><span>(</span><span style="color:#f29718;">balances </span><span>[]</span><span style="font-style:italic;color:#39bae6;">uint64</span><span>) {
+</span><span>    s</span><span style="color:#f29668;">.</span><span>balances </span><span style="color:#f29668;">= </span><span style="color:#ffb454;">DeepCopy</span><span>(balances)
+</span><span>}
+</span></code></pre>
+<p>Now, you can still pass around references to your state, but any function that uses it will <em>only</em> copy as much data as it needs. Instead of copying the entire state every time you just want to add up account balances, you will only copy the accounts balances list.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">func </span><span style="color:#ffb454;">TotalBalance</span><span>(</span><span style="color:#f29718;">state </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">State</span><span>) </span><span style="font-style:italic;color:#39bae6;">uint64 </span><span>{
+</span><span>    total </span><span style="color:#f29668;">:= </span><span style="font-style:italic;color:#39bae6;">uint64</span><span>(</span><span style="color:#f29718;">0</span><span>)
+</span><span>    </span><span style="color:#ff7733;">for </span><span style="font-style:italic;color:#39bae6;">_</span><span style="color:#bfbab0cc;">, </span><span>balance </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>state</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Balances</span><span>() {
+</span><span>        total </span><span style="color:#f29668;">+= </span><span>balance
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">return </span><span>total
+</span><span>}
+</span></code></pre>
+<p>This pattern will prevent anyone, including yourself, from accidentally mutating a field of this state in your application outside of its defined package. This approach works for most use-cases, however, if we have a function that needs every field of the state, such as the state transition function, we are not improving at all upon the naïve case of doing a full copy every single time. Moreover, your application might do a lot more frequent <em>data reads</em> than <em>writes</em>, or vice-versa. If you're calling the <code>TotalBalance</code> function thousands of times per second, this pattern has a trade-off compared to no copying at all.</p>
+<p>Can we do better than <em>always</em> copying...? Let's take a look.</p>
+<h2 id="copy-on-write">Copy on Write</h2>
+<p>An advanced pattern for efficient memory usage while maintaining immutability guarantees is doing a <code>copy on write</code> approach. The general idea is that we have multiple copies of the state, but each of their inner fields point to a single, shared reference for all of them <em>until</em> one copy requires a mutation. A bit confusing, but let's take a look at an image to clear it up:</p>
+<p><img src="https://i.imgur.com/k5Z7DlU.png" alt="image" /></p>
+<p>This means we can have multiple copies of <code>State</code> objects, but their inner fields, namely <code>AccountAddresses</code> and <code>Balances</code> both point to a shared reference. Each of these copies can read as much as they want from this single reference, but if they <em>want</em> to modify them, a copy will be created:</p>
+<p><img src="https://i.imgur.com/HCZLiYn.png" alt="image" /></p>
+<p>Using this approach, we can intelligently reuse allocations that already exist for old data and ensure we can perform really fast operations such as computing total balance or doing other computation that should not require a full copy. There are two approaches to enforcing copy on write.</p>
+<ol>
+<li>We <em>always</em> perform a copy on write. That is, we maintain shared references by default and whenever any field is mutated, we copy it and perform a new allocation.</li>
+<li>We keep track of allocated references by field. We only perform a copy on write if there exists a shared reference, otherwise we simply mutate the field as is, giving us a more advanced behavior than required.</li>
+</ol>
+<p>Let's take a look at how we would implement (2) in our examples, as it is a more flexible solution.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">fieldIndex </span><span style="font-style:italic;color:#39bae6;">int
+</span><span>
+</span><span style="color:#ff7733;">const </span><span>(
+</span><span>    accountAddressesField </span><span style="color:#ff7733;">fieldIndex </span><span style="color:#f29668;">= </span><span style="color:#f29718;">iota
+</span><span>    balancesField
+</span><span>)
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">State </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>    sharedFieldReferences </span><span style="color:#ff7733;">map</span><span>[</span><span style="color:#ff7733;">fieldIndex</span><span>]</span><span style="color:#f29668;">*</span><span style="color:#ff7733;">reference
+</span><span>    accountAddresses      []</span><span style="font-style:italic;color:#39bae6;">string
+</span><span>    balances              []</span><span style="font-style:italic;color:#39bae6;">uint64
+</span><span>}
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">reference </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>    refs </span><span style="font-style:italic;color:#39bae6;">uint
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">r </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">reference</span><span>) </span><span style="color:#ffb454;">Refs</span><span>() </span><span style="font-style:italic;color:#39bae6;">uint </span><span>{
+</span><span>    </span><span style="color:#ff7733;">return </span><span>r</span><span style="color:#f29668;">.</span><span>refs
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">r </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">reference</span><span>) </span><span style="color:#ffb454;">AddRef</span><span>() {
+</span><span>    r</span><span style="color:#f29668;">.</span><span>refs</span><span style="color:#f29668;">++
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">r </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">reference</span><span>) </span><span style="color:#ffb454;">MinusRef</span><span>() {
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// Prevent underflow.
+</span><span>    </span><span style="color:#ff7733;">if </span><span>r</span><span style="color:#f29668;">.</span><span>refs </span><span style="color:#f29668;">== </span><span style="color:#f29718;">0 </span><span>{
+</span><span>        </span><span style="color:#ff7733;">return
+</span><span>    }
+</span><span>    r</span><span style="color:#f29668;">.</span><span>refs</span><span style="color:#f29668;">--
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">State</span><span>) </span><span style="color:#ffb454;">SetBalances</span><span>(</span><span style="color:#f29718;">balances </span><span>[]</span><span style="font-style:italic;color:#39bae6;">uint64</span><span>) {
+</span><span>    </span><span style="color:#ff7733;">if </span><span>s</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[balancesField]</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Refs</span><span>() </span><span style="color:#f29668;">== </span><span style="color:#f29718;">1 </span><span>{ </span><span style="font-style:italic;color:#5c6773;">// Only this struct has a reference.
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Mutate in place...
+</span><span>        s</span><span style="color:#f29668;">.</span><span>balances </span><span style="color:#f29668;">= </span><span>balances
+</span><span>    } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Decrement reference, allocate full copy, and update.
+</span><span>        s</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[balancesField]</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">MinusRef</span><span>()
+</span><span>        s</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[balancesField] </span><span style="color:#f29668;">= &amp;</span><span>reference{refs</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29718;">1</span><span>}
+</span><span>        newBalances </span><span style="color:#f29668;">:= </span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="color:#f07178;">len</span><span>(balances))
+</span><span>        </span><span style="color:#f07178;">copy</span><span>(newBalances</span><span style="color:#bfbab0cc;">, </span><span>balances)
+</span><span>        s</span><span style="color:#f29668;">.</span><span>balances </span><span style="color:#f29668;">= </span><span>newBalances
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">State</span><span>) </span><span style="color:#ffb454;">SetAccountAddresses</span><span>(</span><span style="color:#f29718;">addresses </span><span>[]</span><span style="font-style:italic;color:#39bae6;">string</span><span>) {
+</span><span>    </span><span style="color:#ff7733;">if </span><span>s</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[accountAddressesField]</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Refs</span><span>() </span><span style="color:#f29668;">== </span><span style="color:#f29718;">1 </span><span>{ </span><span style="font-style:italic;color:#5c6773;">// Only this struct has a reference.
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Mutate in place...
+</span><span>        s</span><span style="color:#f29668;">.</span><span>accountAddresses </span><span style="color:#f29668;">= </span><span>addresses
+</span><span>    } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Decrement reference, allocate full copy, and update.
+</span><span>        s</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[accountAddressesField]</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">MinusRef</span><span>()
+</span><span>        s</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[accountAddressesField] </span><span style="color:#f29668;">= &amp;</span><span>reference{refs</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29718;">1</span><span>}
+</span><span>        newAddresses </span><span style="color:#f29668;">:= </span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">string</span><span style="color:#bfbab0cc;">, </span><span style="color:#f07178;">len</span><span>(addresses))
+</span><span>        </span><span style="color:#f07178;">copy</span><span>(newAddresses</span><span style="color:#bfbab0cc;">, </span><span>addresses)
+</span><span>        s</span><span style="color:#f29668;">.</span><span>accountAddresses </span><span style="color:#f29668;">= </span><span>newAddresses
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>Now, upon creation of a new state copy, we will be incrementing the shared field references for the new object as needed. </p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">State</span><span>) </span><span style="color:#ffb454;">Copy</span><span>() </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">State </span><span>{
+</span><span>    dst </span><span style="color:#f29668;">:= &amp;</span><span>State{
+</span><span>        accountAddresses</span><span style="color:#bfbab0cc;">:      </span><span>s</span><span style="color:#f29668;">.</span><span>accountAddresses</span><span style="color:#bfbab0cc;">,
+</span><span>        balances</span><span style="color:#bfbab0cc;">:              </span><span>s</span><span style="color:#f29668;">.</span><span>balances</span><span style="color:#bfbab0cc;">,
+</span><span>        sharedFieldReferences</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">make</span><span>(</span><span style="color:#ff7733;">map</span><span>[</span><span style="color:#ff7733;">fieldIndex</span><span>]</span><span style="color:#f29668;">*</span><span style="color:#ff7733;">reference</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">2</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#ff7733;">for </span><span>field</span><span style="color:#bfbab0cc;">, </span><span>ref </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>s</span><span style="color:#f29668;">.</span><span>sharedFieldReferences {
+</span><span>        ref</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">AddRef</span><span>()
+</span><span>        dst</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[field] </span><span style="color:#f29668;">= </span><span>ref
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// Finalizer runs when the destination object is being
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// destroyed in garbage collection.
+</span><span>    runtime</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">SetFinalizer</span><span>(dst</span><span style="color:#bfbab0cc;">, </span><span style="color:#ff7733;">func</span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">State</span><span>) {
+</span><span>    </span><span style="color:#ff7733;">for </span><span style="font-style:italic;color:#39bae6;">_</span><span style="color:#bfbab0cc;">, </span><span>v </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>s</span><span style="color:#f29668;">.</span><span>sharedFieldReferences {
+</span><span>        v</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">MinusRef</span><span>()
+</span><span>    }
+</span><span>    })
+</span><span>    </span><span style="color:#ff7733;">return </span><span>dst
+</span><span>}
+</span></code></pre>
+<p>In the code above, we leverage a special function from the Go standard library called <a href="https://golang.org/pkg/runtime/#SetFinalizer">runtime.SetFinalizer</a>. From its godoc definition:</p>
+<blockquote>
+<p>SetFinalizer sets the finalizer associated with obj to the provided finalizer function. When the garbage collector finds an unreachable block with an associated finalizer, it clears the association and runs finalizer(obj) in a separate goroutine.</p>
+</blockquote>
+<p>This basically tells the garbage collector what action to perform when destroying the object's allocated memory once  it is no longer needed.</p>
+<p>Let's try this out and prove it for ourselves with a unit test:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">func </span><span style="color:#ffb454;">TestStateReferenceSharing_GarbageCollectionFinalizer</span><span>(</span><span style="color:#f29718;">t </span><span style="color:#f29668;">*</span><span>testing</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">T</span><span>) {
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// First, we initialize a state with some basic values
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// and shared field reference counts of 1 for each field.
+</span><span>    a </span><span style="color:#f29668;">:= &amp;</span><span>State{
+</span><span>        accountAddresses</span><span style="color:#bfbab0cc;">:      </span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">string</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">1000</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>        balances</span><span style="color:#bfbab0cc;">:              </span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">1000</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>        sharedFieldReferences</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">make</span><span>(</span><span style="color:#ff7733;">map</span><span>[</span><span style="color:#ff7733;">fieldIndex</span><span>]</span><span style="color:#f29668;">*</span><span style="color:#ff7733;">reference</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">2</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>    }
+</span><span>    a</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[accountAddressesField] </span><span style="color:#f29668;">= &amp;</span><span>reference{refs</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29718;">1</span><span>}
+</span><span>    a</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[balancesField] </span><span style="color:#f29668;">= &amp;</span><span>reference{refs</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29718;">1</span><span>}
+</span><span>
+</span><span>    </span><span style="color:#ff7733;">func</span><span>() {
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Create object in a different scope for garbage collection.
+</span><span>        b </span><span style="color:#f29668;">:= </span><span>a</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Copy</span><span>()
+</span><span>        </span><span style="color:#ff7733;">if </span><span>a</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[balancesField]</span><span style="color:#f29668;">.</span><span>refs </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">2 </span><span>{
+</span><span>            t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Error</span><span>(</span><span style="color:#c2d94c;">&quot;Expected 2 references to balances&quot;</span><span>)
+</span><span>        }
+</span><span>        </span><span style="font-style:italic;color:#39bae6;">_ </span><span style="color:#f29668;">= </span><span>b
+</span><span>    }()
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// Now, we trigger garbage collection which will call the
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// RunFinalizer function on object b.
+</span><span>    runtime</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">GC</span><span>()
+</span><span>    </span><span style="color:#ff7733;">if </span><span>a</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[balancesField]</span><span style="color:#f29668;">.</span><span>refs </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">1 </span><span>{
+</span><span>        t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Errorf</span><span>(</span><span style="color:#c2d94c;">&quot;Expected 1 shared reference to balances&quot;</span><span>)
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// We initialize b again, which will cause the shared reference count
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// for both objects to go up to 2.
+</span><span>    b </span><span style="color:#f29668;">:= </span><span>a</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Copy</span><span>()
+</span><span>    </span><span style="color:#ff7733;">if </span><span>a</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[balancesField]</span><span style="color:#f29668;">.</span><span>refs </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">2 </span><span>{
+</span><span>        t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Error</span><span>(</span><span style="color:#c2d94c;">&quot;Expected 2 shared references to balances in a&quot;</span><span>)
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">if </span><span>b</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[balancesField]</span><span style="color:#f29668;">.</span><span>refs </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">2 </span><span>{
+</span><span>        t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Error</span><span>(</span><span style="color:#c2d94c;">&quot;Expected 2 shared references to balances in b&quot;</span><span>)
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// Now, we write to b, which will cause the balances field to be copied
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// and decrement the shared field reference for both objects.
+</span><span>    b</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">SetBalances</span><span>(</span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">2000</span><span>))
+</span><span>    </span><span style="color:#ff7733;">if </span><span>b</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[balancesField]</span><span style="color:#f29668;">.</span><span>refs </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">1 </span><span style="color:#f29668;">|| </span><span>a</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[balancesField]</span><span style="color:#f29668;">.</span><span>refs </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">1 </span><span>{
+</span><span>        t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Error</span><span>(</span><span style="color:#c2d94c;">&quot;Expected 1 shared reference to balances for both a and b&quot;</span><span>)
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>Now running the test...</p>
+<pre data-lang="text" style="background-color:#0f1419;color:#bfbab0;" class="language-text "><code class="language-text" data-lang="text"><span>ok      github.com/rauljordan/experiment 0.281s
+</span></code></pre>
+<p>Let's see how much of a difference it actually makes compared to the naïve full copy approach with a benchmark:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">State</span><span>) </span><span style="color:#ffb454;">NaiveCopy</span><span>() </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">State </span><span>{
+</span><span>    newAccountAddresses </span><span style="color:#f29668;">:= </span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">string</span><span style="color:#bfbab0cc;">, </span><span style="color:#f07178;">len</span><span>(s</span><span style="color:#f29668;">.</span><span>accountAddresses))
+</span><span>    </span><span style="color:#f07178;">copy</span><span>(newAccountAddresses</span><span style="color:#bfbab0cc;">, </span><span>s</span><span style="color:#f29668;">.</span><span>accountAddresses)
+</span><span>    newBalances </span><span style="color:#f29668;">:= </span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="color:#f07178;">len</span><span>(s</span><span style="color:#f29668;">.</span><span>balances))
+</span><span>    </span><span style="color:#f07178;">copy</span><span>(newBalances</span><span style="color:#bfbab0cc;">, </span><span>s</span><span style="color:#f29668;">.</span><span>balances)
+</span><span>    </span><span style="color:#ff7733;">return </span><span style="color:#f29668;">&amp;</span><span>State{
+</span><span>        accountAddresses</span><span style="color:#bfbab0cc;">: </span><span>newAccountAddresses</span><span style="color:#bfbab0cc;">,
+</span><span>        balances</span><span style="color:#bfbab0cc;">:         </span><span>newBalances</span><span style="color:#bfbab0cc;">,
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">BenchmarkCopy_SharedReferences</span><span>(</span><span style="color:#f29718;">b </span><span style="color:#f29668;">*</span><span>testing</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">B</span><span>) {
+</span><span>    st1 </span><span style="color:#f29668;">:= &amp;</span><span>State{
+</span><span>        accountAddresses</span><span style="color:#bfbab0cc;">:      </span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">string</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">1000</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>        balances</span><span style="color:#bfbab0cc;">:              </span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">1000</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>        sharedFieldReferences</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">make</span><span>(</span><span style="color:#ff7733;">map</span><span>[</span><span style="color:#ff7733;">fieldIndex</span><span>]</span><span style="color:#f29668;">*</span><span style="color:#ff7733;">reference</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">2</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">for </span><span>i </span><span style="color:#f29668;">:= </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">; </span><span>i </span><span style="color:#f29668;">&lt; </span><span>b</span><span style="color:#f29668;">.</span><span>N</span><span style="color:#bfbab0cc;">; </span><span>i</span><span style="color:#f29668;">++ </span><span>{
+</span><span>        st1</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Copy</span><span>()
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">BenchmarkCopy_Naive</span><span>(</span><span style="color:#f29718;">b </span><span style="color:#f29668;">*</span><span>testing</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">B</span><span>) {
+</span><span>    st1 </span><span style="color:#f29668;">:= &amp;</span><span>State{
+</span><span>        accountAddresses</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">string</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">1000</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>        balances</span><span style="color:#bfbab0cc;">:         </span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">1000</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">for </span><span>i </span><span style="color:#f29668;">:= </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">; </span><span>i </span><span style="color:#f29668;">&lt; </span><span>b</span><span style="color:#f29668;">.</span><span>N</span><span style="color:#bfbab0cc;">; </span><span>i</span><span style="color:#f29668;">++ </span><span>{
+</span><span>        st1</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">NaiveCopy</span><span>()
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>Now running the benchmark...</p>
+<pre data-lang="text" style="background-color:#0f1419;color:#bfbab0;" class="language-text "><code class="language-text" data-lang="text"><span>$ go test -bench=. -benchmem
+</span><span>goos: darwin
+</span><span>goarch: amd64
+</span><span>pkg: github.com/rauljordan/experiment
+</span><span>BenchmarkCopy_SharedReferences-6         3249732               451 ns/op             112 B/op          2 allocs/op
+</span><span>BenchmarkCopy_Naive-6                     350588              3279 ns/op           24576 B/op          2 allocs/op
+</span><span>PASS
+</span><span>ok      github.com/rauljordan/experiment 3.348s
+</span></code></pre>
+<p>Wow, we get almost <em>free</em> copies of the full state! This means we can have thousands of full state copies and all of them will be using a single shared reference for their fields. We can comfortably use them in our application having confidence that they are safe to mutate, as any mutation will create a copy and decrease the shared reference of the field. We might not have default immutability, but this is a great compromise if your application requires safe, immutable types and you perform a significant amount of reads in your application, making it <em>super</em> cheap to copy data for use :).</p>
+<h2 id="resources">Resources</h2>
+<p>You may wonder, why doesn't Go just support immutability of structs and other custom types as a default feature in the language? Dave Cheney, a prominent Go developer, has an <a href="https://dave.cheney.net/tag/immutability">excellent post</a> on what would happen to Go as a language if items such as generics or immutability would be added as primitives. Go is an excellent language with numerous merits albeit with some clear problems at times. Nonetheless, it is still possible to follow sound software engineering principles to be able to get around Go's weaknesses and achieve good results.</p>
+<p>Fun fact, here is Go's list of immutable types:</p>
+<ul>
+<li>interfaces</li>
+<li>booleans, numeric values (including values of type int)</li>
+<li>strings</li>
+<li>pointers</li>
+<li>function pointers, and closures which can be reduced to function pointers</li>
+<li>structs having a single field</li>
+</ul>
+
+        </div>
+
+        
+        <div class="pagination">
+            <div class="pagination__title">
+                <span class="pagination__title-h">More posts</span>
+                <hr />
+            </div>
+            <div class="pagination__buttons">
+                    <span class="button previous">
+                        <a href="https://rauljordan.com/building-a-service-registry-in-go/">
+                            <span class="button__icon">←</span>&nbsp;
+                            <span class="button__text">Building a Service Registry in Go</span>
+                        </a>
+                    </span>
+                
+                
+                    <span class="button next">
+                        <a href="https://rauljordan.com/why-i-speak-cantonese/">
+                            <span class="button__text">Why I Speak Cantonese</span>&nbsp;
+                            <span class="button__icon">→</span>
+                        </a>
+                    </span>
+                </div>
+        </div>
+    
+    </div>
+
+    </div>
+
+    
+    <footer class="footer">
+        <div class="footer__inner">
+                <div class="copyright">
+                        <span>© 
+    2023
+ Raul Jordan</span>
+                    <span class="copyright-theme">
+                        <span class="copyright-theme-sep">:: </span>
+                        Theme: <a href="https://github.com/pawroman/zola-theme-terminimal/">Terminimal</a> by pawroman
+                    </span>
+                </div>
+            </div>
+    </footer>
+    
+
+</div>
+</body>
+
+</html>

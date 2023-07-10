@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>rauljordan::blog</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="robots" content="noodp"/>
+
+    <link rel="stylesheet" href="https://rauljordan.com/style.css">
+    <link rel="stylesheet" href="https://rauljordan.com/color/orange.css">
+
+        <link rel="stylesheet" href="https://rauljordan.com/color/background_pink.css">
+    
+    <link rel="stylesheet" href="https://rauljordan.com/font-hack-subset.css">
+
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://rauljordan.com/rss.xml">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@rauljordaneth">
+    <meta name="twitter:creator" content="@rauljordaneth">
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://rauljordan.com" />
+    <meta property="og:site_name" content="rauljordan::blog" />
+
+    
+<meta property="og:title" content="Go Lessons from Writing a Serialization Library for Ethereum" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="rauljordan::blog" />
+<meta property="og:image" content="" />
+<meta property="og:type" content="article" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="Go Lessons from Writing a Serialization Library for Ethereum" />
+<meta property="twitter:image" content="" />
+<meta property="twitter:description" content="" />
+<meta name="twitter:site" content="@rauljordaneth" />
+<meta name="twitter:creator" content="@rauljordaneth" />
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-53062950-12"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-53062950-12');
+    </script>
+</head>
+
+<body class="">
+<div class="container">
+    
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__logo">
+                    
+                <a href="https://rauljordan.com" style="text-decoration: none;">
+                    <div class="logo">
+                      
+                            rauljordan::blog
+                        
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        
+        <nav class="menu">
+            <ul class="menu__inner">
+                <li><a href="https://rauljordan.com/tags">tags</a></li>
+            
+                <li><a href="https://rauljordan.com/archive">archive</a></li>
+            
+                <li><a href="https://rauljordan.com/about-me">about me</a></li>
+            
+                <li><a href="https://twitter.com/rauljordaneth" target="_blank" rel="noopener noreferrer">twitter</a></li>
+            
+                <li><a href="https://github.com/rauljordan" target="_blank" rel="noopener noreferrer">github</a></li>
+            </ul>
+        </nav>
+    
+    
+        
+    </header>
+    
+
+    <div class="content">
+        
+    <div class="post">
+        
+    <h1 class="post-title"><a href="https://rauljordan.com/go-lessons-from-writing-a-serialization-library-for-ethereum/">Go Lessons from Writing a Serialization Library for Ethereum</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2019-07-02
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/golang/">#golang</a></span>
+    
+
+        
+        <div class="post-content">
+            <pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Marshaler </span><span style="color:#ff7733;">interface </span><span>{
+</span><span>    </span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">MarshalType</span><span>(
+</span><span>      </span><span style="color:#f29718;">val </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span style="color:#bfbab0cc;">, 
+</span><span>      </span><span style="color:#f29718;">b </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, 
+</span><span>      </span><span style="color:#f29718;">lastWrittenIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">,
+</span><span>    ) (</span><span style="color:#f29718;">nextIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">error</span><span>)
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Unmarshaler </span><span style="color:#ff7733;">interface </span><span>{
+</span><span>    </span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">UnmarshalType</span><span>(
+</span><span>      </span><span style="color:#f29718;">target </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span style="color:#bfbab0cc;">, 
+</span><span>      </span><span style="color:#f29718;">b </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, 
+</span><span>      </span><span style="color:#f29718;">lastReadIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">,
+</span><span>    ) (</span><span style="color:#f29718;">nextIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">error</span><span>)
+</span><span>}
+</span></code></pre>
+<p><a href="https://www.techopedia.com/definition/867/serialization-net">Techopedia</a> defines serialization as</p>
+<blockquote>
+<p>The process of converting the state information of an object instance into a binary or textual form to persist into storage medium or transported over a network.</p>
+</blockquote>
+<p>In simple words, it is the task of <strong>translating</strong> data using a common set of rules a standard system can understand, as well as the task of <strong>decoding</strong> translated data back into its original form using the same set of rules. All computers function around the notion of 1s and 0s, otherwise known as bits, which give us a convenient, common format we can serialize <em>into</em>.</p>
+<p>The process of serializing data is called <em>Marshaling</em>, and the process of recovering original data from some serialized bytes is known as <em>Unmarshaling</em>. We will be using the two terms extensively throughout this post.</p>
+<span id="continue-reading"></span><h2 id="why-serialize-at-all">Why Serialize at All?</h2>
+<p>Although all computers speak the same underlying language of 1s and 0s, data gathered from programs running on those computers might have different forms, such as when the username and password a user inputs on a website, or when you type in a Google search. Google needs to be able to take that information from your browser, and translate it into an efficient <em>format</em> its servers can understand to serve your request. Serialized data doesn't <em>have</em> to be in bytes, in fact, it simply needs to be in a format most efficient for the particular system the data will live in - bytes are just the most convenient format for computers to operate in. </p>
+<p>Back in WWII, we used to serialize data into morse code, as that was the most convenient, common format to transmit via voice radio systems <a href="http://radiomarine.org">between ships</a>!</p>
+<h2 id="serialization-in-current-software-systems">Serialization in Current Software Systems</h2>
+<p>Serialization is the backbone of data transmission on the Internet. In HTTP, the most common serialization format is JSON (JavaScript Object Notation), making it easy to parse user input and is also incredibly supported by the core tools of JavaScript as a language. JSON's benefits come from readability, standardization, and support, although it is not the most compact nor the most efficient way for software systems to transport data. Another alternative is <a href="http://bsonspec.org/">BSON</a>, standing for Binary JSON, which has more efficient serialization rules than JSON and is more flexible for usage as a binary data transmission format.</p>
+<p>For real world, scalable systems, companies such as Google opt for the much more robust <a href="https://developers.google.com/protocol-buffers/">Protocol Buffer</a> specification, another type of serialization language. Protocol Buffers, or protobufs, are used for their powerful <strong>schema-like</strong> property, which allows projects to specify data structures in a common proto language, which can then be used generate data structures across all types of programming languages which are compliant with the protobuf serialization rules.</p>
+<p>A common use-case for protobufs is for <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">Remote Procedure Calls</a>, known as RPC calls, which are used data exchange between servers. Say that Google has their ads servers running Java code and they want to feed in data into some other server running Python code for some machine learning analysis on users' ad clicks. Google can specify a common protobuf schema:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span>message AdClick {
+</span><span>    string url </span><span style="color:#f29668;">= </span><span style="color:#f29718;">1</span><span style="color:#bfbab0cc;">;
+</span><span>    uint64 user_id </span><span style="color:#f29668;">= </span><span style="color:#f29718;">2</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span><span>
+</span><span>message AdClickResponse {
+</span><span>    bool ok </span><span style="color:#f29668;">= </span><span style="color:#f29718;">1</span><span style="color:#bfbab0cc;">;
+</span><span>}
+</span><span>
+</span><span>service AdClickAnalyzer {
+</span><span>    rpc </span><span style="color:#ffb454;">SendClickData</span><span>(AdClick) </span><span style="color:#ffb454;">returns </span><span>(AdClickResponse)
+</span><span>}
+</span></code></pre>
+<p>And generate the appropriate, compliant data structures in both Python and Java that implement the protobuf serialization format. Having this common language makes data transport simple and unambiguous. Imagine the alternative approach of every project at a company having different rules for how you should communicate with their servers - it would be a nightmare!</p>
+<h2 id="rule-1-of-serialization-don-t-reinvent-the-wheel">Rule #1 Of Serialization: Don't Reinvent the Wheel</h2>
+<p>To say serialization has been overdone is an understatement. Such a core aspect of today's Internet has been widely studied, implemented, and optimized to serve the needs of billions of people around the world - every second, any moment. JSON, protobufs, and other specifications are constantly being micro-optimized and maturing to better serve our highly connected world. Creating a <em>new</em> serialization library from scratch is, in general, a bad idea save for very select situations.</p>
+<p>Any new approach should leverage existing work and understand the limitations and learnings previous approaches have uncovered. Most of these libraries follow a few core tenets:</p>
+<h3 id="3-tenets-of-serialization">3 Tenets of Serialization</h3>
+<ul>
+<li>Serialization must be unambiguous</li>
+<li>Serialization must be agnostic</li>
+<li>Serialization must be efficient</li>
+</ul>
+<h3 id="serialization-must-be-unambiguous">Serialization Must Be Unambiguous</h3>
+<p>Imagine you look at a bunch of raw bytes - something like:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>01010100100101000100101010101010
+</span></code></pre>
+<p>and imagine you have some serialization/deserialization rules that tell you how to decode this information into some readable, useful data. A serialization function would be completely broken if it were not <em>injective</em>. That is, two different object must never map into the same serialization, as this makes the algorithm ambiguous. If the rules tell us the data can decode into the value <code>[3, 4, 5]</code> but it turns out the list can also decode as <code>[5, 4, 3]</code>, we have no way of knowing which is the correct one! Serialization is stateless, as we have no access to determining the original value that was serialized into aside from using the inverse of the serialization rules to decode it. Serialization <em>must</em> be unambiguous.</p>
+<h3 id="serialization-must-be-agnostic">Serialization Must Be Agnostic</h3>
+<p>From its earlier definition, serialization is simply a set of rules that allow us to encode and decode data into some common format a system can understand. It should <strong>not</strong> make assumptions about underlying data and it should not make explicit implementation decisions in its schema. An example of this is making design decisions around specific types that may not be available across different programming languages, preventing others wanting to use the serialization rules in an implementation from doing so due to language constraints. The <strong>goal</strong> of serialization is simply concerned with translation and definining an unambiguous set of rules for marshaling and unmarshaling data - nothing more, nothing less. Keep it abstract, make no assumptions for what the serialization will be used for, and keep it concise.</p>
+<h3 id="serialization-must-be-efficient">Serialization Must Be Efficient</h3>
+<p>The purpose of serialization is typically for transporting information from one place to another in a common format. Bits are the smallest type possible for computers to compactly represent information, and they translate well to data transmission protocols that exist today via the wires that power the Internet. It is still possible to create a set of serialization rules, however, that add unnecessary bloat to encoded data.</p>
+<p>The rules for marshaling data should <em>only include what's necessary</em> for a decoder to unambigiously unmarshal the bytes back to their original form - nothing more, nothing less. Think of it like the core axioms of mathematics - they are as concise and abstract as possible such that all of math can be derived from those simple rules we hold as true. We could, for example, say the pythagorean theorem is an axiom of math without needing to prove it. In fact, we could just say all theorems are axioms and are true by default - but that would defeat the purpose of math itself and its ruleset! Having more rules than necessary will simply add bloat to a system, possibly leading to massive inefficiencies when that data needs to be transported between machines.</p>
+<blockquote>
+<p>Keep the core rules simple, don't add more rules than you need to </p>
+</blockquote>
+<h1 id="the-task-implement-a-new-serialization-algorithm-in-go">The Task: Implement a New Serialization Algorithm in Go</h1>
+<p>Now that we've looked at what serialization is and why it matters, let's get into the core of this post. The goal at hand is to create a compliant, <a href="https://golang.org">Golang</a> implementation of the <a href="https://github.com/ethereum/eth2.0-specs/blob/dev/specs/simple-serialize.md">Simple Serialize</a> specification created by the official <a href="https://ethereum.org">Ethereum</a> research team. Ethereum is a global, distributed network of nodes that runs decentralized applications. That is, anyone can use it to write computers that are not ran by any individual, entity, or corporation in a permissionless fashion. Similar to Bitcoin, Ethereum uses a distributed ledger known as a <a href="https://en.wikipedia.org/wiki/Blockchain">blockchain</a> to maintain a state of the world and reach <a href="https://en.wikipedia.org/wiki/Consensus_(computer_science)">consensus</a>.</p>
+<p>The way nodes across the network communicate is by sending packets of byte encoded data via <a href="https://en.wikipedia.org/wiki/Peer-to-peer">peer-to-peer (p2p) networking</a> using some standard serialization algorithm. Ethereum is currently in the process of upgrading to its 2.0 version, which will contain radical improvements to its core protocol as well as its network architecture. Serialization for Ethereum 2.0 is being revamped, with the Simple Serialize algorithm, <strong>known as SSZ</strong>, having won as the <em>de facto</em> standard for marshaling consensus data into bytes.</p>
+<p>Ethereum 2.0 has various in-progress implementations in various languages, and my team, <a href="https://prysmaticlabs.com">Prysmatic Labs</a>, works on a Go implementation called <a href="https://github.com/prysmaticlabs/prysm">Prysm</a>.</p>
+<p>Our goal is to create a serialization library in Go so we can easily plug into Prysm that is conforms to standard tests handed to us by Ethereum researchers. This is part of a greater interoperability effort so different implementations can communicate between each other unambiguously.</p>
+<h2 id="why-a-new-serialization-format-why-not-protobuf-json-or-others">Why a New Serialization Format? Why Not Protobuf, JSON, or Others?</h2>
+<p>Serialization plays a very important role in distributed systems, particularly blockchain-based protocols such as Bitcoin and Ethereum. The entire crux of the network depends on a distributed set of nodes around the world reaching <strong>consensus</strong> on a set of transactions, marking them as canonical based on a set of voting-majority rules. Imagine if you wanted 1000 different servers around the world agreeing on the following data structure between each other:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">State </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>    AccountBalancesByUserId </span><span style="color:#ff7733;">map</span><span>[</span><span style="font-style:italic;color:#39bae6;">uint64</span><span>]</span><span style="font-style:italic;color:#39bae6;">uint64
+</span><span>}
+</span></code></pre>
+<p>Imagine this information is <em>so critical</em>, you can't possibly afford its internal data differing across server implementations. The rules for marshaling and unmarshaling this data <strong>must</strong> be unambiguous. Serialization schemas such as Protocol Buffers provide support for map data structures as seen above, but map support across languages differ underneat the hood. The problem with using protocol buffers for consensus specifically for map-based types is that they <strong>do not provide determinism</strong> between languages. That is, a Java protobuf for that data could marshal/unmarshal differently than a Go implementation, and that is unacceptable.</p>
+<p>Serialization for distributed systems operates under an extra constraint that there is zero room for error or non-determinism. For Ethereum, we decided not to use protobufs for serializing important consensus values, as we needed something a lot simpler. This is how simple serialize came to be.</p>
+<h2 id="how-simple-serialize-works">How Simple Serialize Works</h2>
+<p>Every serialization specification begins by defining the basic, core types it can support. Basic types then serve as building blocks for more complex types which may have different serialization rules depending on their structure. Once again, a core tenet of serialization is to be <em>unambiguous</em>. That is, we need to the serialized bytes of some initial data give us enough information by themselves along with the serialization ruleset to successfully retrieve the original object if we wanted to. The official Simple Serialize specification as of the time of writing is located <a href="https://github.com/ethereum/eth2.0-specs/blob/v0.7.1/specs/simple-serialize.md">here</a> if you want to follow along.</p>
+<p>Simple serialize supports the following basic types:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>uint8 or byte
+</span><span>uint16
+</span><span>uint32
+</span><span>uint64
+</span><span>bool
+</span></code></pre>
+<h3 id="why-not-more-basic-types">Why Not More Basic Types!?</h3>
+<p>Notice the omission of ints and floats from the above, as they are not used for precision reasons in a consensus-critical system such as Ethereum, which demands absolute determinism. Instead, we keep it simple - using only unsigned integers and booleans. </p>
+<p>SSZ as a serialization tool should only be concerned with agnostic marshaling/unmarshaling of data - it should <em>not</em> be concerned with making assumptions about its use cases. </p>
+<p><a href="https://en.wikipedia.org/wiki/Robustness_principle">Postel's Law</a> holds true for SSZ in particular:</p>
+<blockquote>
+<p>Be conservative in what you do, be liberal in what you accept from others</p>
+<p>TCP/IP Protocol</p>
+</blockquote>
+<p>That is, our SSZ implementation should be able to handle all sorts of complex structures and fail gracefully if they are not serializable. At the same time, it should be conservative in its scope, only doing what it needs to do based on its specification without making assumptions about its inner data or use-cases.</p>
+<p>Additionally, adding other types such as BitLists or BitVectors as primitives to Simple Serialize is like adding more axioms to mathematics, it can make your life easier in the short term but makes your abstractions a lot weaker!</p>
+<h3 id="composite-types">Composite Types</h3>
+<p>From these basic types, Simple Serialize defines <em>composite</em> types which are:</p>
+<ol>
+<li>Containers: heterogenous collections of values <code>{uint64, bool, uint8, uint16}</code></li>
+<li>Vectors: ordered, <em>fixed</em> size collections of the same type of value <code>[uint64, N]</code></li>
+<li>Lists: ordered, <em>variable</em> length collections of the same type of value <code>[uint64]</code></li>
+</ol>
+<p>Two other critical rules of Simple Serialize are the definition of element sizes. An element is said to be <em>variable size</em> if, recursively, it contains at least one element which is of <em>variable size</em>. Otherwise, an element is determined to be fixed-size.</p>
+<p>Let's look at some examples:</p>
+<ol>
+<li><code>[[uint64], N]</code> is variable-sized, as despite being a fixed-size vector, its inner element is an unbounded list type</li>
+<li><code>{field1: [uint64, N], field2: bool}</code> is a fixed-size container as it only contains fixed-size elements</li>
+<li><code>[{field1: uint64, field2: bool}, N]</code> is fixed-size, as it contains no variable-sized elements</li>
+</ol>
+<p>Easy - let's keep going. Now, we define the <em>marshaling</em> rules for each of these basic types, fixed-size types, and variable-size types.</p>
+<p>For <code>uint</code> types:</p>
+<pre data-lang="python" style="background-color:#0f1419;color:#bfbab0;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#ff7733;">assert </span><span>N </span><span style="color:#f29668;">in </span><span>[</span><span style="color:#f29718;">8</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">16</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">32</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">64</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">128</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">256</span><span>]
+</span><span style="color:#ff7733;">return </span><span>value</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">to_bytes</span><span>(N </span><span style="color:#f29668;">// </span><span style="color:#f29718;">8</span><span style="color:#bfbab0cc;">, </span><span style="color:#c2d94c;">&quot;little&quot;</span><span>)
+</span></code></pre>
+<p>For <code>bool</code> types:</p>
+<pre data-lang="python" style="background-color:#0f1419;color:#bfbab0;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#ff7733;">assert </span><span>value </span><span style="color:#f29668;">in </span><span>(</span><span style="color:#f29718;">True</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">False</span><span>)
+</span><span style="color:#ff7733;">return b</span><span style="color:#c2d94c;">&quot;</span><span style="color:#95e6cb;">\x01</span><span style="color:#c2d94c;">&quot; </span><span style="color:#ff7733;">if </span><span>value </span><span style="color:#f29668;">is </span><span style="color:#f29718;">True </span><span style="color:#ff7733;">else b</span><span style="color:#c2d94c;">&quot;</span><span style="color:#95e6cb;">\x00</span><span style="color:#c2d94c;">&quot;
+</span></code></pre>
+<p>For fixed-size type vectors, we simply serialize them element-wise based on their corresponding elements' marshaling rules.</p>
+<pre data-lang="python" style="background-color:#0f1419;color:#bfbab0;" class="language-python "><code class="language-python" data-lang="python"><span style="font-style:italic;color:#39bae6;">buffer </span><span style="color:#f29668;">= </span><span>[]
+</span><span style="color:#ff7733;">for </span><span>item </span><span style="color:#ff7733;">in </span><span>value:
+</span><span>    </span><span style="font-style:italic;color:#39bae6;">buffer</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">append</span><span>(</span><span style="color:#ffb454;">marshal</span><span>(item))
+</span></code></pre>
+<p>For byte-vectors, we simply leave them as they are as they already represent the format we are using for serialization, namely, a collection of bytes.</p>
+<p>When it comes to variable-sized items, however, that's when things get interesting. We have <strong>no way of knowing</strong> how big a variable-sized element will be unless we have some delimeters that tell us so in their encoded representation. Think of these values kind of like positional markers of when a variable-sized element begins in a collection of bytes. These values are referred to as <em>offsets</em> in the Simple Serialize specification. </p>
+<p>SSZ offsets are denoted by <code>uint32</code> values which serve as positional markers of where variable-sized items occur in a marshaled set of bytes. Take the container type denoted by:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Example </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>    Field1 []</span><span style="font-style:italic;color:#39bae6;">byte
+</span><span>    Field2 []</span><span style="font-style:italic;color:#39bae6;">byte
+</span><span>}
+</span><span>
+</span><span>example </span><span style="color:#f29668;">:= &amp;</span><span>Example{
+</span><span>    Field1</span><span style="color:#bfbab0cc;">: </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>{</span><span style="color:#f29718;">1</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">2</span><span>}</span><span style="color:#bfbab0cc;">,
+</span><span>    Field2</span><span style="color:#bfbab0cc;">: </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>{</span><span style="color:#f29718;">3</span><span>}</span><span style="color:#bfbab0cc;">,
+</span><span>}
+</span></code></pre>
+<p>Its corresponding SSZ encoding will be:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>[8 0 0 0 10 0 0 0 1 2 3]
+</span></code></pre>
+<p>Where <code>8 0 0 0</code> denotes a uint32 value of 8 which which tells us the first variable sized element begins at index 8 in the list. Similarly, the next offset, <code>10 0 0 0</code>, tells us there is another variable-sized element which begins at index 10. When we attempt to unmarshal the bytes into a new instance of type <code>&amp;Example</code>, we know exactly where the first field and the next field begin, giving us an unambiguous unmarshaling.</p>
+<p>In a complex SSZ type, however, variable-sized elements can be interwoven with fixed-size elements, and we similarly use the idea of offsets to denote where the variable ones occur. Let's see an example:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Example2 </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>    Field1 []</span><span style="font-style:italic;color:#39bae6;">byte
+</span><span>    Field2 </span><span style="font-style:italic;color:#39bae6;">uint16
+</span><span>    Field3 []</span><span style="font-style:italic;color:#39bae6;">byte
+</span><span>}
+</span><span>
+</span><span>example2 </span><span style="color:#f29668;">:= &amp;</span><span>Example2{
+</span><span>    Field1</span><span style="color:#bfbab0cc;">: </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>{</span><span style="color:#f29718;">1</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">2</span><span>}</span><span style="color:#bfbab0cc;">,
+</span><span>    Field2</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29718;">7</span><span style="color:#bfbab0cc;">,
+</span><span>    Field3</span><span style="color:#bfbab0cc;">: </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>{</span><span style="color:#f29718;">3</span><span>}</span><span style="color:#bfbab0cc;">,
+</span><span>}
+</span></code></pre>
+<p>This new SSZ encoding, which has a fixed-size <code>uint16</code> field mixed in, will look like:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>[10 0 0 0 7 0 12 0 0 0 1 2 3]
+</span></code></pre>
+<p>Once again telling us that there is a variable-sized element at index 10, one at index 12, and in the middle we have the fixed-size, <code>uint16</code> field unambiguously. That's pretty much it! Using these basic rules, one may derive even complex, nested types of fixed-size and variable-sized containers and lists.</p>
+<h2 id="the-limitations-of-golang">The Limitations of Golang</h2>
+<p>Go in particular is an interesting language to build a serialization library in due to its lack of generics - a very common trait of other languages. The lack of generics makes it really difficult to write functions that work on general types in Go, and instead Go has to rely on tricky approaches such as inspecting the metadata of values, which can lead to massive inefficiencies. One of the only safe options Go has for writing generic libraries is the <a href="https://blog.golang.org/laws-of-reflection">&quot;reflect&quot;</a> package, which gives us a whole suite of utilities for doing <a href="https://en.wikipedia.org/wiki/Metaprogramming">metaprogramming</a> - the notion of a computer program inferring details about its own structure.</p>
+<p>The problem with using reflect in Go comes down to its speed. Go was not built in its current form to support generics underneath the hood, making it expensive to infer and operate on abstract types. The closest thing Go has to a generic type is the <code>interface{}</code> type, which is not <em>exactly</em> like the generic types in other languages. In Python, for example, which is a dynamically-typed language, the following code is perfectly valid:</p>
+<pre data-lang="python" style="background-color:#0f1419;color:#bfbab0;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#ff7733;">def </span><span style="color:#ffb454;">add</span><span>(</span><span style="color:#f29718;">x</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">y</span><span>):
+</span><span>    </span><span style="color:#ff7733;">return </span><span>x </span><span style="color:#f29668;">+ </span><span>y
+</span></code></pre>
+<p>In Go, however, you can't just add two interfaces unless you coerce them into a concrete type that allows for addition, such as uint64. The following piece of Go code is invalid:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">func </span><span style="color:#ffb454;">add</span><span>(</span><span style="color:#f29718;">v1 </span><span style="color:#ff7733;">interface</span><span>{}</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">v2 </span><span style="color:#ff7733;">interface</span><span>{}) </span><span style="color:#ff7733;">interface</span><span>{} {
+</span><span>    </span><span style="color:#ff7733;">return </span><span>v1 </span><span style="color:#f29668;">+ </span><span>v2
+</span><span>}
+</span></code></pre>
+<p>Giving us the error <code>invalid operation: v1 + v2 (operator + not defined on interface)</code>, as expected. If we really want to be able to create a generic add function as above, we'll have to infer the concrete types of the function arguments using the reflect package and act accordingly. Let's use a switch statement to do so:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">import </span><span>(
+</span><span>    </span><span style="color:#c2d94c;">&quot;errors&quot;
+</span><span>    </span><span style="color:#c2d94c;">&quot;reflect&quot;
+</span><span>)
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">add</span><span>(</span><span style="color:#f29718;">v1 </span><span style="color:#ff7733;">interface</span><span>{}</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">v2 </span><span style="color:#ff7733;">interface</span><span>{}) (</span><span style="color:#ff7733;">interface</span><span>{}</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>    rval1 </span><span style="color:#f29668;">:= </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">ValueOf</span><span>(v1)
+</span><span>    rval2 </span><span style="color:#f29668;">:= </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">ValueOf</span><span>(v2)
+</span><span>    k1 </span><span style="color:#f29668;">:= </span><span>rval1</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Type</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Kind</span><span>()
+</span><span>    k2 </span><span style="color:#f29668;">:= </span><span>rval2</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Type</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Kind</span><span>()
+</span><span>    </span><span style="color:#ff7733;">switch </span><span>{
+</span><span>    </span><span style="color:#ff7733;">case </span><span>k1 </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Uint64 </span><span style="color:#f29668;">&amp;&amp; </span><span>k2 </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Uint64</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="color:#ff7733;">return </span><span>rval1</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>()</span><span style="color:#f29668;">.</span><span>(</span><span style="font-style:italic;color:#39bae6;">uint64</span><span>) </span><span style="color:#f29668;">+ </span><span>rval2</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>()</span><span style="color:#f29668;">.</span><span>(</span><span style="font-style:italic;color:#39bae6;">uint64</span><span>)</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>    </span><span style="color:#ff7733;">case </span><span>k1 </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Uint32 </span><span style="color:#f29668;">&amp;&amp; </span><span>k2 </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Uint32</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="color:#ff7733;">return </span><span>rval1</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>()</span><span style="color:#f29668;">.</span><span>(</span><span style="font-style:italic;color:#39bae6;">uint32</span><span>) </span><span style="color:#f29668;">+ </span><span>rval2</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>()</span><span style="color:#f29668;">.</span><span>(</span><span style="font-style:italic;color:#39bae6;">uint32</span><span>)</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>    </span><span style="color:#ff7733;">case </span><span>k1 </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Uint16 </span><span style="color:#f29668;">&amp;&amp; </span><span>k2 </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Uint16</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="color:#ff7733;">return </span><span>rval1</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>()</span><span style="color:#f29668;">.</span><span>(</span><span style="font-style:italic;color:#39bae6;">uint16</span><span>) </span><span style="color:#f29668;">+ </span><span>rval2</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>()</span><span style="color:#f29668;">.</span><span>(</span><span style="font-style:italic;color:#39bae6;">uint16</span><span>)</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>    </span><span style="color:#ff7733;">case </span><span>k1 </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Uint8 </span><span style="color:#f29668;">&amp;&amp; </span><span>k2 </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Uint8</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="color:#ff7733;">return </span><span>rval1</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>()</span><span style="color:#f29668;">.</span><span>(</span><span style="font-style:italic;color:#39bae6;">uint8</span><span>) </span><span style="color:#f29668;">+ </span><span>rval2</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>()</span><span style="color:#f29668;">.</span><span>(</span><span style="font-style:italic;color:#39bae6;">uint8</span><span>)</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>    </span><span style="color:#ff7733;">case </span><span>k1 </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Int64 </span><span style="color:#f29668;">&amp;&amp; </span><span>k2 </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Int64</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="color:#ff7733;">return </span><span>rval1</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>()</span><span style="color:#f29668;">.</span><span>(</span><span style="font-style:italic;color:#39bae6;">int64</span><span>) </span><span style="color:#f29668;">+ </span><span>rval2</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>()</span><span style="color:#f29668;">.</span><span>(</span><span style="font-style:italic;color:#39bae6;">int64</span><span>)</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>    </span><span style="color:#ff7733;">case </span><span>k1 </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Int32 </span><span style="color:#f29668;">&amp;&amp; </span><span>k2 </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Int32</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="color:#ff7733;">return </span><span>rval1</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>()</span><span style="color:#f29668;">.</span><span>(</span><span style="font-style:italic;color:#39bae6;">int32</span><span>) </span><span style="color:#f29668;">+ </span><span>rval2</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>()</span><span style="color:#f29668;">.</span><span>(</span><span style="font-style:italic;color:#39bae6;">int32</span><span>)</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>    </span><span style="color:#ff7733;">case </span><span>k1 </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Int16 </span><span style="color:#f29668;">&amp;&amp; </span><span>k2 </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Int16</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="color:#ff7733;">return </span><span>rval1</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>()</span><span style="color:#f29668;">.</span><span>(</span><span style="font-style:italic;color:#39bae6;">int16</span><span>) </span><span style="color:#f29668;">+ </span><span>rval2</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>()</span><span style="color:#f29668;">.</span><span>(</span><span style="font-style:italic;color:#39bae6;">int16</span><span>)</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>    </span><span style="color:#ff7733;">default</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil</span><span style="color:#bfbab0cc;">, </span><span>errors</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">New</span><span>(</span><span style="color:#c2d94c;">&quot;expected numeric values&quot;</span><span>)
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>Ouch - look at how painful that was! Even worse, let's see how slow it is against a function that just concretely takes in <code>uint64</code> values as arguments.</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>BenchmarkAddGeneric-4                   20000000                85.1 ns/op            24 B/op          3 allocs/op
+</span><span>BenchmarkAddUint64-4                    2000000000               0.34 ns/op            0 B/op          0 allocs/op
+</span></code></pre>
+<p>Using reflect makes a big difference - imagine if we have to do the same thing but for more complex types such as nested structs! Let's see how we can tackle actually implementing SSZ in Go.</p>
+<h1 id="high-level-approach">High Level Approach</h1>
+<p>Alright, so we do <em>not</em> have access to generics for our Simple Serialize implementation, and our approach must be generic enough to handle extremely complex data structures efficiently and correctly. Moreover, we need to be able to <strong>round trip, benchmark, and ensure correctness</strong> of our code as we go along. Where do we start? Let's first go back to the basics of how we made a generic <code>add</code> function in Go. It is not <em>truly</em> generic, as it actually does type assertions on a few, selected numeric types and applies their addition operations. Along the same vein, our SSZ implementation should only concern itself with supporting the types enumerated in its official <a href="https://github.com/ethereum/eth2.0-specs/blob/v0.7.1/specs/simple-serialize.md">specification</a>. </p>
+<p>The most naive approach would be to have a giant, recursive function that uses a huge switch statement to figure out how to handle every different type. Our approach will instead focus on creating specific marshaler and unmarshaler functions for the various types which satisfy a <em>common Go interface</em>.</p>
+<p>In general, we need a few things in our marshaler and unmarshaler functions.</p>
+<ul>
+<li>For Marshaling, we want to track the latest positional index we have written into some bytes buffer</li>
+<li>For Unmarshaling, we want to track the latest positional index we have read from some bytes buffer</li>
+<li>Inside both functions, we want to either write (Marshal) or read (Unmarshal) N bytes from a bytes buffer and return the positional index the next Marshaler/Unmarshaler should start from, i.e. the current index + N</li>
+</ul>
+<p>With that in mind, we can define the following two key interfaces that are enough for us to handle the entire SSZ spec in an abstract fashion:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Marshaler </span><span style="color:#ff7733;">interface </span><span>{
+</span><span>    </span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">MarshalType</span><span>(</span><span style="color:#f29718;">val </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">b </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">lastWrittenIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span>) (</span><span style="color:#f29718;">nextIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">error</span><span>)
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Unmarshaler </span><span style="color:#ff7733;">interface </span><span>{
+</span><span>    </span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">UnmarshalType</span><span>(</span><span style="color:#f29718;">target </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">b </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">lastReadIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span>) (</span><span style="color:#f29718;">nextIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">error</span><span>)
+</span><span>}
+</span></code></pre>
+<p>The <code>Marshaler</code> type specifies a function, <code>MarshalType</code>, which can take in an abstract value, a buffer we will write into, and the last index into the buffer we have written into. </p>
+<blockquote>
+<p>This last index is a positional marker that tells us where we are in the process of 
+writing the serialized encoding of the input value</p>
+</blockquote>
+<p>Similarly, the <code>Unmarshaler</code> type specifies a function, <code>UnmarshalType</code>, which can take a buffer of SSZ-marshaled bytes, a target value we will deserialize <em>into</em>, and the last index we have read from the buffer. This last index is a positional marker that tells us where we are in the process of reading marshaled bytes from the serialized encoding.</p>
+<h2 id="marshaling">Marshaling</h2>
+<p>The first thing we should do when Marshaling is to go back to our trusty switch statement to determine the type we're looking at before we decide how it should be handled. </p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">func </span><span style="color:#ffb454;">Marshal</span><span>(</span><span style="color:#f29718;">data </span><span style="color:#ff7733;">interface</span><span>{}) ([]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>    val </span><span style="color:#f29668;">:= </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">ValueOf</span><span>(data)
+</span><span>    m</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">:= </span><span style="color:#ffb454;">makeMarshaler</span><span>(val)
+</span><span>    </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil</span><span style="color:#bfbab0cc;">, </span><span>err
+</span><span>    }
+</span><span>    totalBufferSize </span><span style="color:#f29668;">:= </span><span style="color:#ffb454;">determineSize</span><span>(val)
+</span><span>    buffer </span><span style="color:#f29668;">:= </span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span>totalBufferSize)
+</span><span>    </span><span style="color:#ff7733;">if </span><span style="font-style:italic;color:#39bae6;">_</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">= </span><span>m</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">MarshalType</span><span>(rval</span><span style="color:#bfbab0cc;">, </span><span>buf</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0 </span><span style="font-style:italic;color:#5c6773;">/* start index */</span><span>)</span><span style="color:#bfbab0cc;">; </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil</span><span style="color:#bfbab0cc;">, </span><span>fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Errorf</span><span>(</span><span style="color:#c2d94c;">&quot;failed to marshal for type: </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>rval</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Type</span><span>())
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">return </span><span>buffer</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">makeMarshaler</span><span>(</span><span style="color:#f29718;">val </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span>) (</span><span style="color:#ff7733;">Marshaler</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>    kind </span><span style="color:#f29668;">:= </span><span>val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Type</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Kind</span><span>()
+</span><span>    </span><span style="color:#ff7733;">switch </span><span>{
+</span><span>    </span><span style="color:#ff7733;">case </span><span>kind </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Bool</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Handle bool marshaling...
+</span><span>    </span><span style="color:#ff7733;">case </span><span>kind </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Uint8</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Handle uint marshaling...
+</span><span>    </span><span style="color:#ff7733;">case </span><span>kind </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Uint16</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Handle uint marshaling...
+</span><span>    </span><span style="color:#ff7733;">case </span><span>kind </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Uint32</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Handle uint marshaling...
+</span><span>    </span><span style="color:#ff7733;">case </span><span>kind </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Uint64</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Handle uint marshaling...
+</span><span>    </span><span style="color:#ff7733;">case </span><span>kind </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Slice </span><span style="color:#f29668;">&amp;&amp; </span><span>typ</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Elem</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Kind</span><span>() </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Uint8</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Handle byte slice marshaling...
+</span><span>    </span><span style="color:#ff7733;">case </span><span>kind </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Array </span><span style="color:#f29668;">&amp;&amp; </span><span>typ</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Elem</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Kind</span><span>() </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Uint8</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Handle byte array marshaling...
+</span><span>    </span><span style="color:#ff7733;">case </span><span style="color:#ffb454;">isBasicTypeSlice</span><span>(val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Type</span><span>()) </span><span style="color:#f29668;">|| </span><span style="color:#ffb454;">isBasicTypeArray</span><span>(val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Type</span><span>())</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Handle basic-type array/slice marshaling...
+</span><span>    </span><span style="color:#ff7733;">case </span><span>kind </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Array </span><span style="color:#f29668;">&amp;&amp; !</span><span style="color:#ffb454;">isVariableSizeType</span><span>(typ</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Elem</span><span>())</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Handle fixed-size element array marshaling...
+</span><span>    </span><span style="color:#ff7733;">case </span><span>kind </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Slice </span><span style="color:#f29668;">&amp;&amp; !</span><span style="color:#ffb454;">isVariableSizeType</span><span>(typ</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Elem</span><span>())</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Handle fixed-size element slice marshaling...
+</span><span>    </span><span style="color:#ff7733;">case </span><span>kind </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Slice </span><span style="color:#f29668;">|| </span><span>kind </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Array</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Handle variable-sized element slice/array marshaling...
+</span><span>    </span><span style="color:#ff7733;">case </span><span>kind </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Struct</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Handle struct marshaling...
+</span><span>    </span><span style="color:#ff7733;">case </span><span>kind </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Ptr</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Handle pointer marshaling...
+</span><span>    </span><span style="color:#ff7733;">default</span><span style="color:#bfbab0cc;">:
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil</span><span style="color:#bfbab0cc;">, </span><span>fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Errorf</span><span>(</span><span style="color:#c2d94c;">&quot;type </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;"> is not serializable&quot;</span><span style="color:#bfbab0cc;">, </span><span>typ)
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// determineSize figures out the total size of the SSZ-encoding in order
+</span><span style="font-style:italic;color:#5c6773;">// to preallocate a buffer before marshaling.
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">determineSize</span><span>(</span><span style="color:#f29718;">val </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span>) </span><span style="font-style:italic;color:#39bae6;">uint64 </span><span>{
+</span><span>    </span><span style="color:#f29668;">...
+</span><span>}
+</span></code></pre>
+<p>On a case-by-case basis, we can return an abstract <code>Marshaler</code> interface for the different types we support for SSZ. Notice at the top, we have to also determine the <em>total size</em> of the serialized bytes before we begin writing to a buffer, otherwise we'll be getting nasty index out of range issues in Go. That is, if we want to encode the number <code>uint64(5)</code>, we need 8 bytes to do so, so we would need to preallocate some fixed-size buffer before we begin marshaling at all.</p>
+<p>The above gives us as generic and as flexible of a basic marshaling approach for SSZ. To proceed, we'd just need to fill in the blanks and create marshalers that work for the different types based on the SSZ specification. Here's what the <code>MarshalType</code> function for some of these basic types would look like:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">import </span><span style="color:#c2d94c;">&quot;binary&quot;
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">BoolSSZ </span><span style="font-style:italic;color:#39bae6;">bool
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Uint64SSZ </span><span style="font-style:italic;color:#39bae6;">uint64
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// Boolean basic type marshaling.
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">b </span><span style="color:#ff7733;">BoolSSZ</span><span>) </span><span style="color:#ffb454;">MarshalType</span><span>(</span><span style="color:#f29718;">val </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">b </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">lastWrittenIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span>) (</span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>    </span><span style="color:#ff7733;">if </span><span>val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Bool</span><span>() {
+</span><span>        buf[lastWrittenIdx] </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">uint8</span><span>(</span><span style="color:#f29718;">1</span><span>)
+</span><span>    } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>        buf[lastWrittenIdx] </span><span style="color:#f29668;">= </span><span style="font-style:italic;color:#39bae6;">uint8</span><span>(</span><span style="color:#f29718;">0</span><span>)
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">return </span><span>lastWrittenIdx </span><span style="color:#f29668;">+ </span><span style="color:#f29718;">1</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>}
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// Uint64 basic type marshaling.
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">b </span><span style="color:#ff7733;">Uint64SSZ</span><span>) </span><span style="color:#ffb454;">MarshalType</span><span>(</span><span style="color:#f29718;">val </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">b </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">lastWrittenIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span>) (</span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>    v </span><span style="color:#f29668;">:= </span><span>val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Uint</span><span>()
+</span><span>    encoded </span><span style="color:#f29668;">:= </span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">8</span><span>)
+</span><span>    binary</span><span style="color:#f29668;">.</span><span>LittleEndian</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">PutUint64</span><span>(encoded</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">uint64</span><span>(v))
+</span><span>    </span><span style="color:#f07178;">copy</span><span>(buf[lastWrittenIdx</span><span style="color:#bfbab0cc;">:</span><span>lastWrittenIdx</span><span style="color:#f29668;">+</span><span style="color:#f29718;">8</span><span>]</span><span style="color:#bfbab0cc;">, </span><span>encoded)
+</span><span>    </span><span style="color:#ff7733;">return </span><span>lastWrittenIndex </span><span style="color:#f29668;">+ </span><span style="color:#f29718;">8</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>}
+</span></code></pre>
+<p>As long as we satisfy the Marshaler interface, we can rinse and repeat for all basic types! Go is indeed powerful, but let's take a look at the most complicated marshaling example.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">var </span><span>BytesPerLengthOffset </span><span style="color:#f29668;">= </span><span style="color:#f29718;">4
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">SliceMarshaler </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>    elementMarshaler </span><span style="color:#ff7733;">Marshaler
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">NewSliceMarshaler</span><span>(</span><span style="color:#f29718;">val </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span>) (</span><span style="color:#f29668;">*</span><span style="color:#ff7733;">SliceMarshaler</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// We attach the marshaler for the slice&#39;s particular element type
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// to the struct for usage later.
+</span><span>    elementMarshaler</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">:= </span><span style="color:#ffb454;">makeMarshaler</span><span>(val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Elem</span><span>())
+</span><span>    </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil</span><span style="color:#bfbab0cc;">, </span><span>err
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">return </span><span style="color:#f29668;">&amp;</span><span>SliceMarshaler{elementMarshaler}
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">SliceMarshaler</span><span>) </span><span style="color:#ffb454;">MarshalType</span><span>(</span><span style="color:#f29718;">val </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">b </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">lastWrittenIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span>) (</span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>    currentIndex </span><span style="color:#f29668;">:= </span><span>lastWrittenIndex
+</span><span>    typ </span><span style="color:#f29668;">:= </span><span>val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Type</span><span>()
+</span><span>    </span><span style="color:#ff7733;">var </span><span>err </span><span style="font-style:italic;color:#39bae6;">error
+</span><span>    </span><span style="color:#ff7733;">if </span><span style="color:#ffb454;">isVariableSizeType</span><span>(typ) {
+</span><span>        currentIndex</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">= </span><span>s</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">marshalVariableSize</span><span>(val</span><span style="color:#bfbab0cc;">, </span><span>b</span><span style="color:#bfbab0cc;">, </span><span>currentIndex)
+</span><span>        </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>            </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span>err
+</span><span>        }
+</span><span>    } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>        currentIndex</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">= </span><span>s</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">marshalFixedSize</span><span>(val</span><span style="color:#bfbab0cc;">, </span><span>b</span><span style="color:#bfbab0cc;">, </span><span>currentIndex)
+</span><span>        </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>            </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span>err
+</span><span>        }
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">return </span><span>index</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>}
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// If an element is variable sized, we need to also keep track of its 
+</span><span style="font-style:italic;color:#5c6773;">// offset indices and where they tell us to begin checking for its 
+</span><span style="font-style:italic;color:#5c6773;">// next variable-sized element in the input. Using these two positional
+</span><span style="font-style:italic;color:#5c6773;">// trackers, we can write the offsets at their respective positions
+</span><span style="font-style:italic;color:#5c6773;">// as well as write the actual values we are marshaling into the buffer
+</span><span style="font-style:italic;color:#5c6773;">// at the current index we are tracking.
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">SliceMarshaler</span><span>) </span><span style="color:#ffb454;">marshalVariableSize</span><span>(</span><span style="color:#f29718;">val </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Val</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">b </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">idx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span>) (</span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>    currentIndex </span><span style="color:#f29668;">:= </span><span>idx
+</span><span>    fixedElementIndex </span><span style="color:#f29668;">:= </span><span>currentIndex
+</span><span>    startOffset </span><span style="color:#f29668;">:= </span><span>lastWrittenIndex
+</span><span>    currentOffsetIndex </span><span style="color:#f29668;">:= </span><span>startOffset </span><span style="color:#f29668;">+ </span><span>val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Len</span><span>()</span><span style="color:#f29668;">*</span><span>BytesPerLengthOffset
+</span><span>    nextOffsetIndex </span><span style="color:#f29668;">:= </span><span>currentOffsetIndex
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// If the elements are variable size, we need to include offset indices
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// in the serialized output list.
+</span><span>    </span><span style="color:#ff7733;">for </span><span>i </span><span style="color:#f29668;">:= </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">; </span><span>i </span><span style="color:#f29668;">&lt; </span><span>val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Len</span><span>()</span><span style="color:#bfbab0cc;">; </span><span>i</span><span style="color:#f29668;">++ </span><span>{
+</span><span>        nextOffsetIndex</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">= </span><span>s</span><span style="color:#f29668;">.</span><span>elementMarshaler</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">MarshalType</span><span>(val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Index</span><span>(i)</span><span style="color:#bfbab0cc;">, </span><span>b</span><span style="color:#bfbab0cc;">, </span><span>currentOffsetIndex)
+</span><span>        </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>            </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span>err
+</span><span>        }
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Write the variable-sized element offset.
+</span><span>        offsetBuf </span><span style="color:#f29668;">:= </span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span>BytesPerLengthOffset)
+</span><span>        binary</span><span style="color:#f29668;">.</span><span>LittleEndian</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">PutUint32</span><span>(offsetBuf</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">uint32</span><span>(currentOffsetIndex</span><span style="color:#f29668;">-</span><span>startOffset))
+</span><span>        </span><span style="color:#f07178;">copy</span><span>(b[fixedElementIndex</span><span style="color:#bfbab0cc;">:</span><span>fixedElementIndex</span><span style="color:#f29668;">+</span><span>BytesPerLengthOffset]</span><span style="color:#bfbab0cc;">, </span><span>offsetBuf)
+</span><span>
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// We increase the positional index tracker of the offsets accordingly.
+</span><span>        currentOffsetIndex </span><span style="color:#f29668;">= </span><span>nextOffsetIndex
+</span><span>        fixedElementIndex </span><span style="color:#f29668;">+= </span><span>BytesPerLengthOffset
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">return </span><span>currentOffsetIndex
+</span><span>}
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// If each element is not variable size, we simply encode sequentially and write
+</span><span style="font-style:italic;color:#5c6773;">// into the buffer at the last index we wrote at.
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">SliceMarshaler</span><span>) </span><span style="color:#ffb454;">marshalFixedSize</span><span>(</span><span style="color:#f29718;">val </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Val</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">b </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">idx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span>) (</span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>    currentIndex </span><span style="color:#f29668;">:= </span><span>idx
+</span><span>    </span><span style="color:#ff7733;">var </span><span>err </span><span style="font-style:italic;color:#39bae6;">error
+</span><span>    </span><span style="color:#ff7733;">for </span><span>i </span><span style="color:#f29668;">:= </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">; </span><span>i </span><span style="color:#f29668;">&lt; </span><span>val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Len</span><span>()</span><span style="color:#bfbab0cc;">; </span><span>i</span><span style="color:#f29668;">++ </span><span>{
+</span><span>        currentIndex</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">= </span><span>s</span><span style="color:#f29668;">.</span><span>elementMarshaler</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">MarshalType</span><span>(val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Index</span><span>(i)</span><span style="color:#bfbab0cc;">, </span><span>b</span><span style="color:#bfbab0cc;">, </span><span>currentIndex)
+</span><span>        </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>            </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span>err
+</span><span>        }
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">return </span><span>currentIndex</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>}
+</span></code></pre>
+<p>Although it looks a bit intimidating, let's break it down into pieces. First, we create an instance of a slice marshaler that also contains a field which gives us access to a marshaler for that slice's individual elements. Then, we check if the slice has fixed-sized elements, for which we simply loop through the slice's length and call the element marshaler at each index of the slice.</p>
+<p>Otherwise, we perform a more complex, variable-sized element marshaling. As mentioned in how SSZ works, we need to keep track of particular <em>offset</em> values which tell us the positional indices where variable sized elements begin in the serialization. We also need to keep track of the current writing position into the buffer accordingly. We loop through the slice's length, determine any offsets, write those offsets to the buffer, and update the positional trackers respectively. Voilà, that's pretty much the hardest part of writing an SSZ marshaler :). For container types, such as structs, we have to keep track of the marshalers for each of their fields, and simply loop over the struct's fields and perform the same logic as above.</p>
+<h2 id="unmarshaling">Unmarshaling</h2>
+<p>Now for the hard part...unmarshaling. This part of SSZ is particularly tricky because there are no hard-and fast rules for doing so aside from &quot;doing the inverse of serialization&quot;. That is, we'll find ourselves in some hairy situations due to variable-size offsets that will massively increase the complexity of the implementation. Additionally, we'll hit some important gotchas of using Go's reflect package along the way.</p>
+<p>Unmarshaling follows the similar philosophy of creating different types that comply with the <code>Unmarshaler</code> interface and pattern matching types through a switch statement at the start. Compared to marshaling, however, we do not need to create a bytes buffer of a certain size beforehand, but we have to do something even more difficult. We have to <em>deeply hydrate</em> the value we are unmarshaling into, and that's where the Go gotchas come into play.</p>
+<p>We start with our top-level <code>Unmarshal</code> function:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">func </span><span style="color:#ffb454;">Unmarshal</span><span>(</span><span style="color:#f29718;">input </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">val </span><span style="color:#ff7733;">interface</span><span>{}) </span><span style="font-style:italic;color:#39bae6;">error </span><span>{
+</span><span>    rval </span><span style="color:#f29668;">:= </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">ValueOf</span><span>(val)
+</span><span>    </span><span style="color:#ff7733;">if </span><span>rval</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">IsNil</span><span>() {
+</span><span>        </span><span style="color:#ff7733;">return </span><span>errors</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">New</span><span>(</span><span style="color:#c2d94c;">&quot;cannot unmarshal into untyped, nil value&quot;</span><span>)
+</span><span>    }
+</span><span>    rtyp </span><span style="color:#f29668;">:= </span><span>rval</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Type</span><span>()
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// val must be a pointer, otherwise we refuse to unmarshal.
+</span><span>    </span><span style="color:#ff7733;">if </span><span>rtyp</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Kind</span><span>() </span><span style="color:#f29668;">!= </span><span>reflect</span><span style="color:#f29668;">.</span><span>Ptr {
+</span><span>        </span><span style="color:#ff7733;">return </span><span>errors</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">New</span><span>(</span><span style="color:#c2d94c;">&quot;can only unmarshal into a pointer target&quot;</span><span>)
+</span><span>    }
+</span><span>    m</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">:= </span><span style="color:#ffb454;">makeUnmarshaler</span><span>(val)
+</span><span>    </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil</span><span style="color:#bfbab0cc;">, </span><span>err
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">if </span><span style="font-style:italic;color:#39bae6;">_</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">= </span><span>m</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">UnmarshalType</span><span>(rval</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Elem</span><span>()</span><span style="color:#bfbab0cc;">, </span><span>input</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0 </span><span style="font-style:italic;color:#5c6773;">/* last read idx */</span><span>)</span><span style="color:#bfbab0cc;">; </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>        </span><span style="color:#ff7733;">return </span><span>fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Errorf</span><span>(</span><span style="color:#c2d94c;">&quot;could not unmarshal input into type: </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">, </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>rval</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Elem</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Type</span><span>()</span><span style="color:#bfbab0cc;">, </span><span>err)
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil
+</span><span>}
+</span></code></pre>
+<p>Let's take a look at some basic type unmarshaling:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">import </span><span style="color:#c2d94c;">&quot;binary&quot;
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Uint32SSZ </span><span style="font-style:italic;color:#39bae6;">uint64
+</span><span>
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">u </span><span style="color:#ff7733;">Uint32SSZ</span><span>) </span><span style="color:#ffb454;">UnmarshalBytes</span><span>(</span><span style="color:#f29718;">val </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">b </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte </span><span style="color:#f29718;">lastReadIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span>) (</span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>    nextReadIdx </span><span style="color:#f29668;">:= </span><span>lastReadIdx </span><span style="color:#f29668;">+ </span><span style="color:#f29718;">4
+</span><span>    buf </span><span style="color:#f29668;">:= </span><span style="color:#f07178;">make</span><span>([]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">4</span><span>)
+</span><span>    </span><span style="color:#f07178;">copy</span><span>(buf</span><span style="color:#bfbab0cc;">, </span><span>b[lastReadIdx</span><span style="color:#bfbab0cc;">:</span><span>nextReadIdxjj])
+</span><span>    val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">SetUint</span><span>(</span><span style="font-style:italic;color:#39bae6;">uint64</span><span>(binary</span><span style="color:#f29668;">.</span><span>LittleEndian</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Uint32</span><span>(buf)))
+</span><span>    </span><span style="color:#ff7733;">return </span><span>nextReadIdx</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>}
+</span></code></pre>
+<p>So what's the hard part? Let's check out how we would unmarshal the following:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">FixedSizeItem </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>    Field1 </span><span style="font-style:italic;color:#39bae6;">uint32
+</span><span>}
+</span><span>
+</span><span>data </span><span style="color:#f29668;">:= </span><span>[</span><span style="color:#f29718;">3</span><span>]</span><span style="color:#f29668;">*</span><span style="color:#ff7733;">FixedSizeItem</span><span>{
+</span><span>    </span><span style="color:#f29668;">&amp;</span><span>FixedSizeItem{ Field1</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29718;">7 </span><span>}</span><span style="color:#bfbab0cc;">,
+</span><span>    </span><span style="color:#f29668;">&amp;</span><span>FixedSizeItem{ Field1</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29718;">8 </span><span>}</span><span style="color:#bfbab0cc;">,
+</span><span>    </span><span style="color:#f29668;">&amp;</span><span>FixedSizeItem{ Field1</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29718;">9 </span><span>}</span><span style="color:#bfbab0cc;">,
+</span><span>}
+</span><span>
+</span><span>encoded</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">:= </span><span>ssz</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Marshal</span><span>(data)
+</span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>    </span><span style="color:#f07178;">panic</span><span>(err)
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">var </span><span>decoded [</span><span style="color:#f29718;">3</span><span>]</span><span style="color:#f29668;">*</span><span style="color:#ff7733;">FixedSizeItem
+</span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">:= </span><span>ssz</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Unmarshal</span><span>(encoded</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29668;">&amp;</span><span>decoded)</span><span style="color:#bfbab0cc;">; </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>    </span><span style="color:#f07178;">panic</span><span>(err)
+</span><span>}
+</span></code></pre>
+<p>Given it's a simple array of fixed size elements, we <em>could</em> simply unmarshal element-wise as follows:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span>currentIndex </span><span style="color:#f29668;">:= </span><span>lastReadIdx
+</span><span style="color:#ff7733;">for </span><span>i </span><span style="color:#f29668;">:= </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">; </span><span>i </span><span style="color:#f29668;">&lt; </span><span>val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Len</span><span>()</span><span style="color:#bfbab0cc;">; </span><span>i</span><span style="color:#f29668;">++ </span><span>{
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// if val.Index(i).Kind() == reflect.Ptr {
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">//     instantiateConcreteTypeForElement(val.Index(i), typ.Elem().Elem())
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// }
+</span><span>    currentIndex</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">= </span><span>m</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">UnmarshalType</span><span>(val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Index</span><span>(i)</span><span style="color:#bfbab0cc;">, </span><span>b</span><span style="color:#bfbab0cc;">, </span><span>currentIndex)
+</span><span>    </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span>fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Errorf</span><span>(</span><span style="color:#c2d94c;">&quot;failed to unmarshal element of array: </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>err)
+</span><span>    }
+</span><span>}
+</span><span style="color:#ff7733;">return </span><span>currentIndex</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span></code></pre>
+<p>But if we run this, we get the the following error!</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>panic: cannot call Type() of nil value
+</span></code></pre>
+<p>What gives? When we initialize a variable which will be the target of the unmarshaling, it knows it has to be of type <code>[3]*FixedSizeItem</code>, however, we haven't <em>deeply</em> initialized the values of that array with the correct zero values we will unmarshal into. That is, once we're attempting to unmarshal each <code>&amp;FixedSizeItem</code> type contained in this array, that item has not been initialized, so what we are feeding the unmarshaler is an array of nil values</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>[nil, nil, nil]
+</span></code></pre>
+<p>Even though the array above has the correct type, we are not able to deduce the unmarshaler properly for each individual element, as they are all initialized to nil! Instead, we have to deeply <em>hydrate</em> the type if it is nil.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">func </span><span style="color:#ffb454;">instantiateConcreteTypeForElement</span><span>(</span><span style="color:#f29718;">val </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">typ </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Type</span><span>) {
+</span><span>    val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Set</span><span>(reflect</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">New</span><span>(typ))
+</span><span>}
+</span><span>
+</span><span style="color:#f29668;">...
+</span><span>
+</span><span>currentIndex </span><span style="color:#f29668;">:= </span><span>lastReadIdx
+</span><span style="color:#ff7733;">for </span><span>i </span><span style="color:#f29668;">:= </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">; </span><span>i </span><span style="color:#f29668;">&lt; </span><span>val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Len</span><span>()</span><span style="color:#bfbab0cc;">; </span><span>i</span><span style="color:#f29668;">++ </span><span>{
+</span><span>    </span><span style="color:#ff7733;">if </span><span>val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Index</span><span>(i)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Kind</span><span>() </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Ptr {
+</span><span>        </span><span style="color:#ffb454;">instantiateConcreteTypeForElement</span><span>(val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Index</span><span>(i)</span><span style="color:#bfbab0cc;">, </span><span>typ</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Elem</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Elem</span><span>())
+</span><span>    }
+</span><span>    currentIndex</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">= </span><span>m</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">UnmarshalType</span><span>(val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Index</span><span>(i)</span><span style="color:#bfbab0cc;">, </span><span>b</span><span style="color:#bfbab0cc;">, </span><span>currentIndex)
+</span><span>    </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span>fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Errorf</span><span>(</span><span style="color:#c2d94c;">&quot;failed to unmarshal element of array: </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>err)
+</span><span>    }
+</span><span>}
+</span><span style="color:#ff7733;">return </span><span>currentIndex</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span></code></pre>
+<p>This makes our unmarshaling logic at a tad bit obscure, but it gets even worse once we have to deal with slices, as slices have no fixed-size as part of their type definition, making it impossible to iterate over them and unmarshal pointwise like we can do with fixed-size arrays. Instead, on each iteration, we have to:</p>
+<ol>
+<li>Grow the slice's length by 1</li>
+<li>Deeply hydrate the element at the current index in the slice</li>
+</ol>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">func </span><span style="color:#ffb454;">growConcreteSliceValue</span><span>(</span><span style="color:#f29718;">val </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">typ </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Type</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">length </span><span style="font-style:italic;color:#39bae6;">int</span><span>) {
+</span><span>    newVal </span><span style="color:#f29668;">:= </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">MakeSlice</span><span>(typ</span><span style="color:#bfbab0cc;">, </span><span>length</span><span style="color:#bfbab0cc;">, </span><span>length)
+</span><span>    reflect</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Copy</span><span>(newVal</span><span style="color:#bfbab0cc;">, </span><span>val)
+</span><span>    val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Set</span><span>(newVal)
+</span><span>    </span><span style="color:#ff7733;">if </span><span>val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Index</span><span>(length</span><span style="color:#f29668;">-</span><span style="color:#f29718;">1</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Kind</span><span>() </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Ptr {
+</span><span>        </span><span style="color:#ffb454;">instantiateConcreteTypeForElement</span><span>(val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Index</span><span>(length</span><span style="color:#f29668;">-</span><span style="color:#f29718;">1</span><span>)</span><span style="color:#bfbab0cc;">, </span><span>typ</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Elem</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Elem</span><span>())
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>We can accomplish this using the helper above, but all we're doing once again is instantiating the correct <em>zero-values</em> of a type so we can successfully unmarshal without panics.</p>
+<p>Let's put this together and see how we can handle variable-sized slices:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">var </span><span>BytesPerLengthOffset </span><span style="color:#f29668;">= </span><span style="color:#f29718;">4
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">SliceUnmarshaler </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>    elementUnmarshaler </span><span style="color:#ff7733;">Unmarshaler
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">NewSliceUnmarshaler</span><span>(</span><span style="color:#f29718;">val </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span>) (</span><span style="color:#f29668;">*</span><span style="color:#ff7733;">SliceUnmarshaler</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// We attach the marshaler for the slice&#39;s particular element type
+</span><span>    </span><span style="font-style:italic;color:#5c6773;">// to the struct for usage later.
+</span><span>    typ </span><span style="color:#f29668;">:= </span><span>val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Type</span><span>()
+</span><span>    elementUnmarshaler</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">:= </span><span style="color:#ffb454;">makeUnmarshaler</span><span>(typ</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Elem</span><span>())
+</span><span>    </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil</span><span style="color:#bfbab0cc;">, </span><span>err
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">return </span><span style="color:#f29668;">&amp;</span><span>SliceUnmarshaler{elementUnmarshaler}
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">SliceUnmarshaler</span><span>) </span><span style="color:#ffb454;">UnmarshalType</span><span>(</span><span style="color:#f29718;">val </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">b </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">lastReadIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span>) (</span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>    </span><span style="color:#ff7733;">if </span><span style="color:#f07178;">len</span><span>(input) </span><span style="color:#f29668;">== </span><span style="color:#f29718;">0 </span><span>{
+</span><span>        newVal </span><span style="color:#f29668;">:= </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">MakeSlice</span><span>(val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Type</span><span>()</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span>)
+</span><span>        val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Set</span><span>(newVal)
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>    }
+</span><span>    </span><span style="color:#ffb454;">growConcreteSliceType</span><span>(val</span><span style="color:#bfbab0cc;">, </span><span>typ</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">1</span><span>)
+</span><span>    endOffset </span><span style="color:#f29668;">:= </span><span style="font-style:italic;color:#39bae6;">uint64</span><span>(</span><span style="color:#f07178;">len</span><span>(input))
+</span><span>    currentIndex </span><span style="color:#f29668;">:= </span><span>lastReadIdx
+</span><span>    nextIndex </span><span style="color:#f29668;">:= </span><span>currentIndex
+</span><span>    offsetVal </span><span style="color:#f29668;">:= </span><span>input[startOffset </span><span style="color:#bfbab0cc;">: </span><span>startOffset</span><span style="color:#f29668;">+</span><span>BytesPerLengthOffset]
+</span><span>    firstOffset </span><span style="color:#f29668;">:= </span><span>startOffset </span><span style="color:#f29668;">+ </span><span style="font-style:italic;color:#39bae6;">uint64</span><span>(binary</span><span style="color:#f29668;">.</span><span>LittleEndian</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Uint32</span><span>(offsetVal))
+</span><span>    currentOffset </span><span style="color:#f29668;">:= </span><span>firstOffset
+</span><span>    nextOffset </span><span style="color:#f29668;">:= </span><span>currentOffset
+</span><span>    i </span><span style="color:#f29668;">:= </span><span style="color:#f29718;">0
+</span><span>    </span><span style="color:#ff7733;">for </span><span>currentIndex </span><span style="color:#f29668;">&lt; </span><span>firstOffset {
+</span><span>        nextIndex </span><span style="color:#f29668;">= </span><span>currentIndex </span><span style="color:#f29668;">+ </span><span>BytesPerLengthOffset
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// We have to keep track of the position of each offset we use for reading.
+</span><span>        </span><span style="color:#ff7733;">if </span><span>nextIndex </span><span style="color:#f29668;">== </span><span>firstOffset {
+</span><span>            nextOffset </span><span style="color:#f29668;">= </span><span>endOffset
+</span><span>        } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>            </span><span style="font-style:italic;color:#5c6773;">// We then determine the next offset by reading 4 bytes (BytesPerLengthOffset).
+</span><span>            nextOffsetVal </span><span style="color:#f29668;">:= </span><span>input[nextIndex </span><span style="color:#bfbab0cc;">: </span><span>nextIndex</span><span style="color:#f29668;">+</span><span>BytesPerLengthOffset]
+</span><span>            nextOffset </span><span style="color:#f29668;">= </span><span>startOffset </span><span style="color:#f29668;">+ </span><span style="font-style:italic;color:#39bae6;">uint64</span><span>(binary</span><span style="color:#f29668;">.</span><span>LittleEndian</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Uint32</span><span>(nextOffsetVal))
+</span><span>        }
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// We grow the slice&#39;s size to accommodate a new element being unmarshaled.
+</span><span>        </span><span style="color:#ffb454;">growConcreteSliceType</span><span>(val</span><span style="color:#bfbab0cc;">, </span><span>typ</span><span style="color:#bfbab0cc;">, </span><span>i</span><span style="color:#f29668;">+</span><span style="color:#f29718;">1</span><span>)
+</span><span>        </span><span style="color:#ff7733;">if </span><span style="font-style:italic;color:#39bae6;">_</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">:= </span><span>s</span><span style="color:#f29668;">.</span><span>elementUnmarshaler</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">UnmarshalType</span><span>(val</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Index</span><span>(i)</span><span style="color:#bfbab0cc;">, </span><span>input[currentOffset</span><span style="color:#bfbab0cc;">:</span><span>nextOffset]</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0 </span><span style="font-style:italic;color:#5c6773;">/* last read element idx */</span><span>)</span><span style="color:#bfbab0cc;">; </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>            </span><span style="color:#ff7733;">return </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span>fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Errorf</span><span>(</span><span style="color:#c2d94c;">&quot;failed to unmarshal element of slice: </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>err)
+</span><span>        }
+</span><span>        i</span><span style="color:#f29668;">++
+</span><span>        currentIndex </span><span style="color:#f29668;">= </span><span>nextIndex
+</span><span>        currentOffset </span><span style="color:#f29668;">= </span><span>nextOffset
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">return </span><span>currentIndex</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span></code></pre>
+<p>We have to add a special caveat that if we are unmarshaling a nil value, we simply create a slice of size 0 and return, otherwise we will encounter painful panics down the line! Phew, using Go and its lack of generics adds massive complexity when it comes to populating a raw pointer of a certain type, but that covers the basics.</p>
+<h3 id="limitations-of-go-ssz">Limitations of Go-SSZ</h3>
+<p>Unfortunately, there are still some inherent limitations in the rules of SSZ that prevent us from unambiguously unmarshal certain types of data. In particular, consider we run into a value that our unmarshaler determines is empty and is of slice type. We have no way to know if it should unmarshal as <code>nil</code> or as <code>[]</code></p>
+<blockquote>
+<p>SSZ unmarshaling is ambiguous when it comes to empty values in Go</p>
+</blockquote>
+<p>Say if you want to round-trip test the following:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">import </span><span>(
+</span><span>    </span><span style="color:#c2d94c;">&quot;reflect&quot;
+</span><span>    </span><span style="color:#c2d94c;">&quot;testing&quot;
+</span><span>    </span><span style="color:#c2d94c;">&quot;github.com/prysmaticlabs/go-ssz&quot;
+</span><span>)
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">AmbiguousItem </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>    Field1 []</span><span style="font-style:italic;color:#39bae6;">byte
+</span><span>    Field2</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">uint64
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">TestRoundTrip</span><span>(</span><span style="color:#f29718;">t </span><span style="color:#f29668;">*</span><span>testing</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">T</span><span>) {
+</span><span>    item </span><span style="color:#f29668;">:= &amp;</span><span>AmbiguousItem{
+</span><span>        Field2</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29718;">5</span><span style="color:#bfbab0cc;">,
+</span><span>    }
+</span><span>
+</span><span>    encoded</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">:= </span><span>ssz</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Marshal</span><span>(item)
+</span><span>    </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>        t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Fatal</span><span>(err)
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#ff7733;">var </span><span>decoded </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">AmbiguousItem
+</span><span>    </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">:= </span><span>ssz</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Unmarshal</span><span>(encoded</span><span style="color:#bfbab0cc;">, </span><span>decoded)</span><span style="color:#bfbab0cc;">; </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>        t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Fatal</span><span>(err)
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#ff7733;">if </span><span style="color:#f29668;">!</span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">DeepEqual</span><span>(item</span><span style="color:#bfbab0cc;">, </span><span>decoded) {
+</span><span>        t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Errorf</span><span>(</span><span style="color:#c2d94c;">&quot;Expected </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">, received </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>item</span><span style="color:#bfbab0cc;">, </span><span>decodedjj)
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>You'll see the following error message pop-up:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>Expected { Field1: nil, Field2: 5 }, received { Field1: []. Field2: 5}
+</span></code></pre>
+<p>Our unmarshal prefers to unmarshal into an empty slice despite the original being nil, how can we resolve this? Typically, serialization libraries in Go run into similar roadblocks, and they suggest checking equality of objects within their scope by using their own custom comparison function. For this purpose, we had to write our own <code>ssz.DeepEqual</code> to catch these little nuances of SSZ which <code>reflect.DeepEqual</code> would not be able to discern.</p>
+<p>No serialization specification is perfect in every language, but we can afford to make these compromises in Go for a better developer experience and to reduce ambiguity.</p>
+<h2 id="testing">Testing</h2>
+<p>Writing tests for a generic serialization is tricky, as they must be exhaustive, however, there are infinite types you can try your marshaling/unmarshaling rules on. How can we measure <em>robustness</em>? </p>
+<p>The standard approach for establishing robustness in Go is to include the following:</p>
+<ul>
+<li>Edge case unit tests</li>
+<li>Comprehensive fuzz tests</li>
+</ul>
+<p>At a high level, the API for SSZ is quite simple and easy to understand. There are only 2 core functions needed for SSZ, which are <code>Marshal</code> and <code>Unmarshal</code>:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">func </span><span style="color:#ffb454;">Marshal</span><span>(</span><span style="color:#f29718;">val </span><span style="color:#ff7733;">interface</span><span>{}) ([]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>)
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">Unmarshal</span><span>(</span><span style="color:#f29718;">encoded </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">val </span><span style="color:#ff7733;">interface</span><span>{}) </span><span style="font-style:italic;color:#39bae6;">error
+</span></code></pre>
+<p>Their conciseness is no accident, as we designed this API to match the very popular <a href="https://golang.org/pkg/encoding/json/#Marshal">JSON marshaler/unmarshaler</a> from the Go standard library. Aside from hiding implementation details, the reason this was done was for powerful access to testing primitives in the form of <em>serialization fuzz testing</em>.</p>
+<p>From <a href="https://www.techopedia.com/definition/13625/fuzz-testing">Techopedia</a>:</p>
+<blockquote>
+<p>Fuzz testing is a means of stress test applications by feeding random data into them in order to spot any errors or hang-ups that may occur. The idea behind fuzz testing is that software applications and systems can have a lot of different bugs or glitches related to data input.</p>
+</blockquote>
+<p>Having fuzz tests can help us feed our round trip tests through all sorts of randomized data structures to ensure we catch those pesky panics and improve the robustness of our SSZ toolset.</p>
+<p>For basic edge case, sanity-focused unit tests, we can opt for simple table-driven tests in Go to get the job done. We'll be doing a simple, round-trip marshal/unmarshal test to ensure we can recover data in its original form after passing through SSZ.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">item </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>    Field1 []</span><span style="font-style:italic;color:#39bae6;">byte
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">nestedItem </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>    Field1 []</span><span style="font-style:italic;color:#39bae6;">uint64
+</span><span>    Field2 </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">item
+</span><span>    Field3 [</span><span style="color:#f29718;">3</span><span>]</span><span style="font-style:italic;color:#39bae6;">byte
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">var </span><span>nestedItemExample </span><span style="color:#f29668;">= </span><span>nestedItem{
+</span><span>    Field1</span><span style="color:#bfbab0cc;">: </span><span>[]</span><span style="font-style:italic;color:#39bae6;">uint64</span><span>{</span><span style="color:#f29718;">2</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">3</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">4</span><span>}</span><span style="color:#bfbab0cc;">,
+</span><span>    Field2</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span>item{
+</span><span>        Field1</span><span style="color:#bfbab0cc;">: </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>{</span><span style="color:#f29718;">0</span><span>}</span><span style="color:#bfbab0cc;">,
+</span><span>    }</span><span style="color:#bfbab0cc;">,
+</span><span>    Field3</span><span style="color:#bfbab0cc;">: </span><span>[</span><span style="color:#f29718;">3</span><span>]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>{</span><span style="color:#f29718;">1</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">1</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">1</span><span>}</span><span style="color:#bfbab0cc;">,
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">TestMarshalUnmarshal</span><span>(</span><span style="color:#f29718;">t </span><span style="color:#f29668;">*</span><span>testing</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">T</span><span>) {
+</span><span>    tests </span><span style="color:#f29668;">:= </span><span>[]</span><span style="color:#ff7733;">struct </span><span>{
+</span><span>        input </span><span style="color:#ff7733;">interface</span><span>{}
+</span><span>        ptr   </span><span style="color:#ff7733;">interface</span><span>{}
+</span><span>    }{
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Bool test cases.
+</span><span>        {input</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29718;">true</span><span style="color:#bfbab0cc;">, </span><span>ptr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">new</span><span>(</span><span style="font-style:italic;color:#39bae6;">bool</span><span>)}</span><span style="color:#bfbab0cc;">,
+</span><span>        {input</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29718;">false</span><span style="color:#bfbab0cc;">, </span><span>ptr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">new</span><span>(</span><span style="font-style:italic;color:#39bae6;">bool</span><span>)}</span><span style="color:#bfbab0cc;">,
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Uint test cases.
+</span><span>        {input</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">byte</span><span>(</span><span style="color:#f29718;">1</span><span>)</span><span style="color:#bfbab0cc;">, </span><span>ptr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">new</span><span>(</span><span style="font-style:italic;color:#39bae6;">byte</span><span>)}</span><span style="color:#bfbab0cc;">,
+</span><span>        {input</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">uint16</span><span>(</span><span style="color:#f29718;">232</span><span>)</span><span style="color:#bfbab0cc;">, </span><span>ptr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">new</span><span>(</span><span style="font-style:italic;color:#39bae6;">uint16</span><span>)}</span><span style="color:#bfbab0cc;">,
+</span><span>        {input</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">uint32</span><span>(</span><span style="color:#f29718;">1029391</span><span>)</span><span style="color:#bfbab0cc;">, </span><span>ptr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">new</span><span>(</span><span style="font-style:italic;color:#39bae6;">uint32</span><span>)}</span><span style="color:#bfbab0cc;">,
+</span><span>        {input</span><span style="color:#bfbab0cc;">: </span><span style="font-style:italic;color:#39bae6;">uint64</span><span>(</span><span style="color:#f29718;">23929309</span><span>)</span><span style="color:#bfbab0cc;">, </span><span>ptr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">new</span><span>(</span><span style="font-style:italic;color:#39bae6;">uint64</span><span>)}</span><span style="color:#bfbab0cc;">,
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Byte slice, byte array test cases.
+</span><span>        {input</span><span style="color:#bfbab0cc;">: </span><span>[</span><span style="color:#f29718;">8</span><span>]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>{</span><span style="color:#f29718;">1</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">2</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">3</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">4</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">5</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">6</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">7</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">8</span><span>}</span><span style="color:#bfbab0cc;">, </span><span>ptr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">new</span><span>([</span><span style="color:#f29718;">8</span><span>]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>)}</span><span style="color:#bfbab0cc;">,
+</span><span>        {input</span><span style="color:#bfbab0cc;">: </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>{</span><span style="color:#f29718;">9</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">8</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">9</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">8</span><span>}</span><span style="color:#bfbab0cc;">, </span><span>ptr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">new</span><span>([]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>)}</span><span style="color:#bfbab0cc;">,
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Basic type array test cases.
+</span><span>        {input</span><span style="color:#bfbab0cc;">: </span><span>[</span><span style="color:#f29718;">12</span><span>]</span><span style="font-style:italic;color:#39bae6;">uint64</span><span>{</span><span style="color:#f29718;">1</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">2</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">3</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">4</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">5</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">6</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">7</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">8</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">9</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">10</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">11</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">12</span><span>}</span><span style="color:#bfbab0cc;">, </span><span>ptr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">new</span><span>([</span><span style="color:#f29718;">12</span><span>]</span><span style="font-style:italic;color:#39bae6;">uint64</span><span>)}</span><span style="color:#bfbab0cc;">,
+</span><span>        {input</span><span style="color:#bfbab0cc;">: </span><span>[</span><span style="color:#f29718;">100</span><span>]</span><span style="font-style:italic;color:#39bae6;">bool</span><span>{</span><span style="color:#f29718;">true</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">false</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">true</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">true</span><span>}</span><span style="color:#bfbab0cc;">, </span><span>ptr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">new</span><span>([</span><span style="color:#f29718;">100</span><span>]</span><span style="font-style:italic;color:#39bae6;">bool</span><span>)}</span><span style="color:#bfbab0cc;">,
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Basic type slice test cases.
+</span><span>        {input</span><span style="color:#bfbab0cc;">: </span><span>[]</span><span style="font-style:italic;color:#39bae6;">bool</span><span>{</span><span style="color:#f29718;">true</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">false</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">true</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">true</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">true</span><span>}</span><span style="color:#bfbab0cc;">, </span><span>ptr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">new</span><span>([]</span><span style="font-style:italic;color:#39bae6;">bool</span><span>)}</span><span style="color:#bfbab0cc;">,
+</span><span>        {input</span><span style="color:#bfbab0cc;">: </span><span>[]</span><span style="font-style:italic;color:#39bae6;">uint32</span><span>{</span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span>}</span><span style="color:#bfbab0cc;">, </span><span>ptr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">new</span><span>([]</span><span style="font-style:italic;color:#39bae6;">uint32</span><span>)}</span><span style="color:#bfbab0cc;">,
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Struct decoding test cases.
+</span><span>        {input</span><span style="color:#bfbab0cc;">: </span><span>nestedItemExample</span><span style="color:#bfbab0cc;">, </span><span>ptr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">new</span><span>(</span><span style="color:#ff7733;">nestedItem</span><span>)}</span><span style="color:#bfbab0cc;">,
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Non-basic type slice/array test cases.
+</span><span>        {input</span><span style="color:#bfbab0cc;">: </span><span>[</span><span style="color:#f29718;">2</span><span>]</span><span style="color:#ff7733;">nestedItem</span><span>{nestedItemExample}</span><span style="color:#bfbab0cc;">, </span><span>ptr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">new</span><span>([</span><span style="color:#f29718;">2</span><span>]</span><span style="color:#ff7733;">nestedItem</span><span>)}</span><span style="color:#bfbab0cc;">,
+</span><span>        </span><span style="font-style:italic;color:#5c6773;">// Pointer-type test cases.
+</span><span>        {input</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">&amp;</span><span>nestedItemExample</span><span style="color:#bfbab0cc;">, </span><span>ptr</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">new</span><span>(</span><span style="color:#ff7733;">nestedItem</span><span>)}</span><span style="color:#bfbab0cc;">,
+</span><span>    }
+</span><span>    </span><span style="color:#ff7733;">for </span><span style="font-style:italic;color:#39bae6;">_</span><span style="color:#bfbab0cc;">, </span><span>tt </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>tests {
+</span><span>        serializedItem</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">:= </span><span>ssz</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Marshal</span><span>(tt</span><span style="color:#f29668;">.</span><span>input)
+</span><span>        </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>            t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Fatal</span><span>(err)
+</span><span>        }
+</span><span>        </span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">:= </span><span>ssz</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Unmarshal</span><span>(serializedItem</span><span style="color:#bfbab0cc;">, </span><span>tt</span><span style="color:#f29668;">.</span><span>ptr)</span><span style="color:#bfbab0cc;">; </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>            t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Fatal</span><span>(err)
+</span><span>        }
+</span><span>        output </span><span style="color:#f29668;">:= </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">ValueOf</span><span>(tt</span><span style="color:#f29668;">.</span><span>ptr)
+</span><span>        inputVal </span><span style="color:#f29668;">:= </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">ValueOf</span><span>(tt</span><span style="color:#f29668;">.</span><span>input)
+</span><span>        </span><span style="color:#ff7733;">if </span><span>inputVal</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Kind</span><span>() </span><span style="color:#f29668;">== </span><span>reflect</span><span style="color:#f29668;">.</span><span>Ptr {
+</span><span>            </span><span style="color:#ff7733;">if </span><span style="color:#f29668;">!</span><span>ssz</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">DeepEqual</span><span>(output</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>()</span><span style="color:#bfbab0cc;">, </span><span>tt</span><span style="color:#f29668;">.</span><span>input) {
+</span><span>                t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Errorf</span><span>(</span><span style="color:#c2d94c;">&quot;Expected </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">, received </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>tt</span><span style="color:#f29668;">.</span><span>input</span><span style="color:#bfbab0cc;">, </span><span>output</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>())
+</span><span>            }
+</span><span>        } </span><span style="color:#ff7733;">else </span><span>{
+</span><span>            got </span><span style="color:#f29668;">:= </span><span>output</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Elem</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>()
+</span><span>            want </span><span style="color:#f29668;">:= </span><span>tt</span><span style="color:#f29668;">.</span><span>input
+</span><span>            </span><span style="color:#ff7733;">if </span><span style="color:#f29668;">!</span><span>ssz</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">DeepEqual</span><span>(want</span><span style="color:#bfbab0cc;">, </span><span>got) {
+</span><span>                t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Errorf</span><span>(</span><span style="color:#c2d94c;">&quot;Did not unmarshal properly: wanted </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">, received </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>tt</span><span style="color:#f29668;">.</span><span>input</span><span style="color:#bfbab0cc;">, </span><span>output</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Elem</span><span>()</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Interface</span><span>())
+</span><span>            }
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<h2 id="benchmarks-and-standards">Benchmarks and Standards</h2>
+<p>The final step for wrapping up our serialization library has to do with benchmarking and standardization. Note our focus of this implementation was a correct/robust <em>first</em> approach without much attention to optimization. Using benchmarks and Go's pprof are the best ways to catch any relevant bottlenecks, but the most likely problem we will encounter is a massive amount of allocations per operation, as we are consistently creating new pointers, new reflect values, and more. </p>
+<p>Alec Thomas has put together an excellent repository standardizing serialization benchmarks in Go across different libraries you can find <a href="https://github.com/alecthomas/go_serialization_benchmarks">here</a>. We will be adding Go-SSZ to that list quite soon! In the meantime, expect a follow-up post on optimizing SSZ!</p>
+<p>Check out our full repo here: <a href="https://rauljordan.com/go-lessons-from-writing-a-serialization-library-for-ethereum/github.com/prysmaticlabs/go-ssz">github.com/prysmaticlabs/go-ssz</a></p>
+
+        </div>
+
+        
+        <div class="pagination">
+            <div class="pagination__title">
+                <span class="pagination__title-h">More posts</span>
+                <hr />
+            </div>
+            <div class="pagination__buttons">
+                    <span class="button previous">
+                        <a href="https://rauljordan.com/how-my-team-won-the-facebook-graphql-hackathon/">
+                            <span class="button__icon">←</span>&nbsp;
+                            <span class="button__text">How My Team Won the Facebook GraphQL Hackathon</span>
+                        </a>
+                    </span>
+                
+                
+                    <span class="button next">
+                        <a href="https://rauljordan.com/key-takeaways-from-a-harvard-education/">
+                            <span class="button__text">10 Key Takeaways from a Harvard Education</span>&nbsp;
+                            <span class="button__icon">→</span>
+                        </a>
+                    </span>
+                </div>
+        </div>
+    
+    </div>
+
+    </div>
+
+    
+    <footer class="footer">
+        <div class="footer__inner">
+                <div class="copyright">
+                        <span>© 
+    2023
+ Raul Jordan</span>
+                    <span class="copyright-theme">
+                        <span class="copyright-theme-sep">:: </span>
+                        Theme: <a href="https://github.com/pawroman/zola-theme-terminimal/">Terminimal</a> by pawroman
+                    </span>
+                </div>
+            </div>
+    </footer>
+    
+
+</div>
+</body>
+
+</html>

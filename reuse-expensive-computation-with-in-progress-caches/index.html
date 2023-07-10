@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>rauljordan::blog</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="robots" content="noodp"/>
+
+    <link rel="stylesheet" href="https://rauljordan.com/style.css">
+    <link rel="stylesheet" href="https://rauljordan.com/color/orange.css">
+
+        <link rel="stylesheet" href="https://rauljordan.com/color/background_pink.css">
+    
+    <link rel="stylesheet" href="https://rauljordan.com/font-hack-subset.css">
+
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://rauljordan.com/rss.xml">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@rauljordaneth">
+    <meta name="twitter:creator" content="@rauljordaneth">
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://rauljordan.com" />
+    <meta property="og:site_name" content="rauljordan::blog" />
+
+    
+<meta property="og:title" content="Reuse Expensive Computation With In-Progress Caches in Go" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="rauljordan::blog" />
+<meta property="og:image" content="" />
+<meta property="og:type" content="article" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="Reuse Expensive Computation With In-Progress Caches in Go" />
+<meta property="twitter:image" content="" />
+<meta property="twitter:description" content="" />
+<meta name="twitter:site" content="@rauljordaneth" />
+<meta name="twitter:creator" content="@rauljordaneth" />
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-53062950-12"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-53062950-12');
+    </script>
+</head>
+
+<body class="">
+<div class="container">
+    
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__logo">
+                    
+                <a href="https://rauljordan.com" style="text-decoration: none;">
+                    <div class="logo">
+                      
+                            rauljordan::blog
+                        
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        
+        <nav class="menu">
+            <ul class="menu__inner">
+                <li><a href="https://rauljordan.com/tags">tags</a></li>
+            
+                <li><a href="https://rauljordan.com/archive">archive</a></li>
+            
+                <li><a href="https://rauljordan.com/about-me">about me</a></li>
+            
+                <li><a href="https://twitter.com/rauljordaneth" target="_blank" rel="noopener noreferrer">twitter</a></li>
+            
+                <li><a href="https://github.com/rauljordan" target="_blank" rel="noopener noreferrer">github</a></li>
+            </ul>
+        </nav>
+    
+    
+        
+    </header>
+    
+
+    <div class="content">
+        
+    <div class="post">
+        
+    <h1 class="post-title"><a href="https://rauljordan.com/reuse-expensive-computation-with-in-progress-caches/">Reuse Expensive Computation With In-Progress Caches in Go</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2021-01-05
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/golang/">#golang</a></span>
+    
+
+        
+        <div class="post-content">
+            <p>Caching is the go-to solution in applications to avoid repeating expensive computation and instead prefer some value that can be readily fetched in-memory. A simple caching strategy is to use a cache as a thin layer above database read access as follows:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">package </span><span>main
+</span><span>
+</span><span style="color:#ff7733;">import </span><span style="color:#c2d94c;">&quot;sync&quot;
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Database </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>	cache </span><span style="color:#ff7733;">map</span><span>[</span><span style="font-style:italic;color:#39bae6;">string</span><span>][]</span><span style="font-style:italic;color:#39bae6;">byte
+</span><span>	lock  sync</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">RWMutex
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">db </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">Database</span><span>) </span><span style="color:#ffb454;">GetItem</span><span>(</span><span style="color:#f29718;">key </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>) ([]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>	db</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">RLock</span><span>()
+</span><span>	</span><span style="color:#ff7733;">if </span><span>value</span><span style="color:#bfbab0cc;">, </span><span>ok </span><span style="color:#f29668;">:= </span><span>db</span><span style="color:#f29668;">.</span><span>cache[</span><span style="font-style:italic;color:#39bae6;">string</span><span>(key)]</span><span style="color:#bfbab0cc;">; </span><span>ok {
+</span><span>		db</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">RUnlock</span><span>()
+</span><span>		</span><span style="color:#ff7733;">return </span><span>value
+</span><span>	}
+</span><span>	db</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">RUnlock</span><span>()
+</span><span>	</span><span style="color:#ff7733;">return </span><span>db</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">readFromDatabase</span><span>(key)
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">db </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">Database</span><span>) </span><span style="color:#ffb454;">WriteItem</span><span>(</span><span style="color:#f29718;">key</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">value </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>) </span><span style="font-style:italic;color:#39bae6;">error </span><span>{
+</span><span>	</span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">:= </span><span>db</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">writeToDatabase</span><span>(key</span><span style="color:#bfbab0cc;">, </span><span>value)</span><span style="color:#bfbab0cc;">; </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>		</span><span style="color:#ff7733;">return </span><span>err
+</span><span>	}
+</span><span>	db</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Lock</span><span>()
+</span><span>	db</span><span style="color:#f29668;">.</span><span>cache[</span><span style="font-style:italic;color:#39bae6;">string</span><span>(key)] </span><span style="color:#f29668;">= </span><span>value
+</span><span>	db</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Unlock</span><span>()
+</span><span>	</span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil
+</span><span>}
+</span></code></pre>
+<p>This strategy works great for applications where you have requests to read access for a certain value repeatedly, preventing you from performing a potentially expensive db query and leveraging fast access in-memory. Caching is very helpful. For some problems, however, a cache is definitely not enough.</p>
+<span id="continue-reading"></span><h3 id="the-busy-workers-problem">The busy workers problem</h3>
+<p>Imagine you have thousands or more processes attempting to perform the same expensive computation at the same time. Perhaps all of them were notified they need to crunch certain numbers which takes a long time, or they need perform a prohibitively expensive operation that can max out your CPU or RAM if overdone. This is quite a common problem in my project, Prysm, which has many different workers in the form of goroutines often attempting to perform duplicate work. A naive solution to this is to simply leverage a cache strategy to avoid repeated computation, as shown above. However, what if there is nothing in the cache yet for the value you care about and thousands of workers are <em>already</em> attempting the expensive computation? Perhaps there are many workers attempting to perform an action that is <em>already in progress</em>. This is a great use-case for what we call an <strong>in progress cache</strong>. Let's look at an example:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">package </span><span>main
+</span><span>
+</span><span style="color:#ff7733;">import </span><span style="color:#c2d94c;">&quot;sync&quot;
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">main</span><span>() {
+</span><span>	</span><span style="color:#ff7733;">var </span><span>wg sync</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">WaitGroup
+</span><span>	numWorkers </span><span style="color:#f29668;">:= </span><span style="color:#f29718;">1000
+</span><span>	wg</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Add</span><span>(numWorkers)
+</span><span>	</span><span style="color:#ff7733;">for </span><span>i </span><span style="color:#f29668;">:= </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">; </span><span>i </span><span style="color:#f29668;">&lt; </span><span>numWorkers</span><span style="color:#bfbab0cc;">; </span><span>i</span><span style="color:#f29668;">++ </span><span>{
+</span><span>		</span><span style="color:#ff7733;">go func</span><span>(</span><span style="color:#f29718;">w </span><span style="color:#f29668;">*</span><span>sync</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">WaitGroup</span><span>) {
+</span><span>			</span><span style="color:#ff7733;">defer </span><span>wg</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Done</span><span>()
+</span><span>			</span><span style="color:#ffb454;">doSomethingExpensive</span><span>()
+</span><span>		}(</span><span style="color:#f29668;">&amp;</span><span>wg)
+</span><span>	}
+</span><span>	wg</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Wait</span><span>()
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">doSomethingExpensive</span><span>() {
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Get result from cache if it has already completed.
+</span><span>	value</span><span style="color:#bfbab0cc;">, </span><span>ok </span><span style="color:#f29668;">:= </span><span style="color:#ffb454;">checkCache</span><span>()
+</span><span>	ok{
+</span><span>		</span><span style="font-style:italic;color:#5c6773;">// Do something with the cached value.
+</span><span>	}
+</span><span>
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Expensive operation which can take a few seconds to complete...
+</span><span>}
+</span></code></pre>
+<p>But what if there is nothing in the cache yet when all 1000 workers are attempting to perform the expensive operation? Well, all of them will start performing your expensive operation, your computer might blow up, and our cache was pretty much useless. Instead, we can leverage the power of <strong>Go channels</strong> to mark work as <strong>in progress</strong> and instead have all workers share the same return value of whichever worker completed it first. Let's think about how to do this.</p>
+<p>First of all, we need a way to <em>block</em> a worker from performing expensive computation if a request we care about is already in progress. Second, once a <em>single worker completes</em> an expensive computation, we need to notify all workers that were attempting the same computation of the return value immediately. To accomplish the first task, we can leverage a combination of a shared map to check if a request is in progress, then subscribe to the in-progress request by initializing a channel and appending it to some shared list for the request. Finally, once a worker completes the computation, it can send out the result to all receivers subscribed to that in-progress request. Let's see it in action.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">service </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>	inProgress         </span><span style="color:#ff7733;">map</span><span>[</span><span style="font-style:italic;color:#39bae6;">string</span><span>]</span><span style="font-style:italic;color:#39bae6;">bool
+</span><span>	awaitingCompletion </span><span style="color:#ff7733;">map</span><span>[</span><span style="font-style:italic;color:#39bae6;">string</span><span>][]</span><span style="color:#ff7733;">chan </span><span style="font-style:italic;color:#39bae6;">string
+</span><span>	lock               sync</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">RWMutex
+</span><span>}
+</span></code></pre>
+<p>Above, we define a simple struct used to encapsulate this information. In our example, the result of our expensive computation is some string value and the request identity is also a string. We keep track of two maps for request identities: the first is called <code>inProgress</code> and will be used by workers to check if expensive computation is already in progress. The second is called <code>awaitingCompletion</code>, which is a list of channels that are awaiting to be notified of an in-progress request. They are essentially other workers that are subscribing to the computed value of the worker currently in progress. We use a mutex to make these maps thread-safe.</p>
+<p>Next up, we start our <code>main</code> function simulating 5 workers doing some expensive operation concurrently.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">func </span><span style="color:#ffb454;">main</span><span>() {
+</span><span>	ss </span><span style="color:#f29668;">:= &amp;</span><span>service{
+</span><span>		inProgress</span><span style="color:#bfbab0cc;">:         </span><span style="color:#f07178;">make</span><span>(</span><span style="color:#ff7733;">map</span><span>[</span><span style="font-style:italic;color:#39bae6;">string</span><span>]</span><span style="font-style:italic;color:#39bae6;">bool</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>		awaitingCompletion</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">make</span><span>(</span><span style="color:#ff7733;">map</span><span>[</span><span style="font-style:italic;color:#39bae6;">string</span><span>][]</span><span style="color:#ff7733;">chan </span><span style="font-style:italic;color:#39bae6;">string</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>	}
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Create N = 5 workers.
+</span><span>	numWorkers </span><span style="color:#f29668;">:= </span><span style="color:#f29718;">5
+</span><span>	</span><span style="color:#ff7733;">var </span><span>wg sync</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">WaitGroup
+</span><span>	wg</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Add</span><span>(numWorkers)
+</span><span>
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Launch N goroutines performing the same work:
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// a request with ID &quot;expensivecomputation&quot;.
+</span><span>	requestID </span><span style="color:#f29668;">:= </span><span style="color:#c2d94c;">&quot;expensivecomputation&quot;
+</span><span>	</span><span style="color:#ff7733;">for </span><span>i </span><span style="color:#f29668;">:= </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">; </span><span>i </span><span style="color:#f29668;">&lt; </span><span>numWorkers</span><span style="color:#bfbab0cc;">; </span><span>i</span><span style="color:#f29668;">++ </span><span>{
+</span><span>		</span><span style="color:#ff7733;">go func</span><span>(</span><span style="color:#f29718;">w </span><span style="color:#f29668;">*</span><span>sync</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">WaitGroup</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">id </span><span style="font-style:italic;color:#39bae6;">string</span><span>) {
+</span><span>			</span><span style="color:#ff7733;">defer </span><span>wg</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Done</span><span>()
+</span><span>			ss</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">doWork</span><span>(id)
+</span><span>		}(</span><span style="color:#f29668;">&amp;</span><span>wg</span><span style="color:#bfbab0cc;">, </span><span>requestID)
+</span><span>	}
+</span><span>
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Wait for all goroutines to complete work.
+</span><span>	wg</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Wait</span><span>()
+</span><span>	fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Println</span><span>(</span><span style="color:#c2d94c;">&quot;Done&quot;</span><span>)
+</span><span>}
+</span></code></pre>
+<p>Next up, we look at the key function: <code>doWork(requestID string)</code>. We'll write it out in Go pseudocode first.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">package </span><span>main
+</span><span>
+</span><span style="color:#ff7733;">import </span><span style="color:#c2d94c;">&quot;time&quot;
+</span><span>
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">service</span><span>) </span><span style="color:#ffb454;">doWork</span><span>(</span><span style="color:#f29718;">requestID </span><span style="font-style:italic;color:#39bae6;">string</span><span>) {
+</span><span>	</span><span style="color:#ff7733;">if </span><span>ok </span><span style="color:#f29668;">:= </span><span>s</span><span style="color:#f29668;">.</span><span>inProgress[requestID]</span><span style="color:#bfbab0cc;">; </span><span>ok {
+</span><span>		</span><span style="font-style:italic;color:#5c6773;">// Subscribe to be notified of when the in-progress
+</span><span>		</span><span style="font-style:italic;color:#5c6773;">// request completes via a channel.
+</span><span>
+</span><span>		</span><span style="font-style:italic;color:#5c6773;">// Await the response from the worker currently in-progress...
+</span><span>
+</span><span>		</span><span style="color:#ff7733;">return
+</span><span>	}
+</span><span>
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Mark the requestID as in progress.
+</span><span>	s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Lock</span><span>()
+</span><span>	s</span><span style="color:#f29668;">.</span><span>inProgress[requestID] </span><span style="color:#f29668;">= </span><span style="color:#f29718;">true
+</span><span>	s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Unlock</span><span>()
+</span><span>
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Perform some expensive, lengthy work (time.Sleep used to simulate it).
+</span><span>	time</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Sleep</span><span>(time</span><span style="color:#f29668;">.</span><span>Second </span><span style="color:#f29668;">* </span><span style="color:#f29718;">4</span><span>)
+</span><span>	response </span><span style="color:#f29668;">:= </span><span style="color:#c2d94c;">&quot;the answer is 42&quot;
+</span><span>
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Send to all subscribers.
+</span><span>	s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">RLock</span><span>()
+</span><span>	receiversWaiting</span><span style="color:#bfbab0cc;">, </span><span>ok </span><span style="color:#f29668;">:= </span><span>s</span><span style="color:#f29668;">.</span><span>awaitingCompletion[requestID]
+</span><span>	s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">RUnlock</span><span>()
+</span><span>	</span><span style="color:#ff7733;">if </span><span>ok {
+</span><span>		</span><span style="color:#ff7733;">for </span><span style="font-style:italic;color:#39bae6;">_</span><span style="color:#bfbab0cc;">, </span><span>ch </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>receiversWaiting {
+</span><span>			ch </span><span style="color:#f29668;">&lt;- </span><span>response
+</span><span>		}
+</span><span>	}
+</span><span>
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Reset the in-progress data for the requestID.
+</span><span>	s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Lock</span><span>()
+</span><span>	s</span><span style="color:#f29668;">.</span><span>inProgress[requestID] </span><span style="color:#f29668;">= </span><span style="color:#f29718;">false
+</span><span>	s</span><span style="color:#f29668;">.</span><span>awaitingCompletion[requestID] </span><span style="color:#f29668;">= </span><span style="color:#f07178;">make</span><span>([]</span><span style="color:#ff7733;">chan </span><span style="font-style:italic;color:#39bae6;">string</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span>)
+</span><span>	s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Unlock</span><span>()
+</span><span>}
+</span></code></pre>
+<p>We lock around the map access to reduce lock contention in the real application. Next up, we fill in the logic for <code>if ok := inProgress[key]; ok</code>.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">if </span><span>ok </span><span style="color:#f29668;">:= </span><span>s</span><span style="color:#f29668;">.</span><span>inProgress[requestID]</span><span style="color:#bfbab0cc;">; </span><span>ok {
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// We add a buffer of 1 to prevent blocking
+</span><span>  </span><span style="font-style:italic;color:#5c6773;">// the sender&#39;s goroutine.
+</span><span>  responseChan </span><span style="color:#f29668;">:= </span><span style="color:#f07178;">make</span><span>(</span><span style="color:#ff7733;">chan </span><span style="font-style:italic;color:#39bae6;">string</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">1</span><span>)
+</span><span>  </span><span style="color:#ff7733;">defer </span><span style="color:#f07178;">close</span><span>(responseChan)
+</span><span>
+</span><span>  lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Lock</span><span>()
+</span><span>  s</span><span style="color:#f29668;">.</span><span>awaitingCompletion[requestID] </span><span style="color:#f29668;">= </span><span style="color:#f07178;">append</span><span>(s</span><span style="color:#f29668;">.</span><span>awaitingCompletion[requestID]</span><span style="color:#bfbab0cc;">, </span><span>responseChan)
+</span><span>  lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Unlock</span><span>()
+</span><span>  fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Println</span><span>(</span><span style="color:#c2d94c;">&quot;Awaiting work in-progress&quot;</span><span>)
+</span><span>  val </span><span style="color:#f29668;">:= &lt;-</span><span>responseChan
+</span><span>  fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Printf</span><span>(</span><span style="color:#c2d94c;">&quot;Work result received with value </span><span style="color:#f29718;">%s</span><span style="color:#95e6cb;">\n</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>val)
+</span><span>  </span><span style="color:#ff7733;">return
+</span><span>}
+</span></code></pre>
+<p>Putting it altogether, we get:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">package </span><span>main
+</span><span>
+</span><span style="color:#ff7733;">import </span><span>(
+</span><span>	</span><span style="color:#c2d94c;">&quot;fmt&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;sync&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;time&quot;
+</span><span>)
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">service </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>	inProgress         </span><span style="color:#ff7733;">map</span><span>[</span><span style="font-style:italic;color:#39bae6;">string</span><span>]</span><span style="font-style:italic;color:#39bae6;">bool
+</span><span>	awaitingCompletion </span><span style="color:#ff7733;">map</span><span>[</span><span style="font-style:italic;color:#39bae6;">string</span><span>][]</span><span style="color:#ff7733;">chan </span><span style="font-style:italic;color:#39bae6;">string
+</span><span>	lock               sync</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">RWMutex
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">service</span><span>) </span><span style="color:#ffb454;">doWork</span><span>(</span><span style="color:#f29718;">requestID </span><span style="font-style:italic;color:#39bae6;">string</span><span>) {
+</span><span>	s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">RLock</span><span>()
+</span><span>	</span><span style="color:#ff7733;">if </span><span>ok </span><span style="color:#f29668;">:= </span><span>s</span><span style="color:#f29668;">.</span><span>inProgress[requestID]</span><span style="color:#bfbab0cc;">; </span><span>ok {
+</span><span>		s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">RUnlock</span><span>()
+</span><span>		responseChan </span><span style="color:#f29668;">:= </span><span style="color:#f07178;">make</span><span>(</span><span style="color:#ff7733;">chan </span><span style="font-style:italic;color:#39bae6;">string</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">1</span><span>)
+</span><span>		</span><span style="color:#ff7733;">defer </span><span style="color:#f07178;">close</span><span>(responseChan)
+</span><span>
+</span><span>		s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Lock</span><span>()
+</span><span>		s</span><span style="color:#f29668;">.</span><span>awaitingCompletion[requestID] </span><span style="color:#f29668;">= </span><span style="color:#f07178;">append</span><span>(s</span><span style="color:#f29668;">.</span><span>awaitingCompletion[requestID]</span><span style="color:#bfbab0cc;">, </span><span>responseChan)
+</span><span>		s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Unlock</span><span>()
+</span><span>		fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Println</span><span>(</span><span style="color:#c2d94c;">&quot;Awaiting work completed&quot;</span><span>)
+</span><span>		val </span><span style="color:#f29668;">:= &lt;-</span><span>responseChan
+</span><span>		fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Printf</span><span>(</span><span style="color:#c2d94c;">&quot;Work result received with value </span><span style="color:#f29718;">%s</span><span style="color:#95e6cb;">\n</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>val)
+</span><span>		</span><span style="color:#ff7733;">return
+</span><span>	}
+</span><span>	s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">RUnlock</span><span>()
+</span><span>
+</span><span>	s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Lock</span><span>()
+</span><span>	s</span><span style="color:#f29668;">.</span><span>inProgress[requestID] </span><span style="color:#f29668;">= </span><span style="color:#f29718;">true
+</span><span>	s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Unlock</span><span>()
+</span><span>
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Do expensive operation
+</span><span>	fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Println</span><span>(</span><span style="color:#c2d94c;">&quot;Doing expensive work...&quot;</span><span>)
+</span><span>	time</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Sleep</span><span>(time</span><span style="color:#f29668;">.</span><span>Second </span><span style="color:#f29668;">* </span><span style="color:#f29718;">4</span><span>)
+</span><span>	result </span><span style="color:#f29668;">:= </span><span style="color:#c2d94c;">&quot;the answer is 42&quot;
+</span><span>
+</span><span>	s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">RLock</span><span>()
+</span><span>	receiversWaiting</span><span style="color:#bfbab0cc;">, </span><span>ok </span><span style="color:#f29668;">:= </span><span>s</span><span style="color:#f29668;">.</span><span>awaitingCompletion[requestID]
+</span><span>	s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">RUnlock</span><span>()
+</span><span>
+</span><span>	</span><span style="color:#ff7733;">if </span><span>ok {
+</span><span>		</span><span style="color:#ff7733;">for </span><span style="font-style:italic;color:#39bae6;">_</span><span style="color:#bfbab0cc;">, </span><span>ch </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>receiversWaiting {
+</span><span>			ch </span><span style="color:#f29668;">&lt;- </span><span>result
+</span><span>		}
+</span><span>		fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Println</span><span>(</span><span style="color:#c2d94c;">&quot;Sent result to all subscribers&quot;</span><span>)
+</span><span>	}
+</span><span>
+</span><span>	s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Lock</span><span>()
+</span><span>	s</span><span style="color:#f29668;">.</span><span>inProgress[requestID] </span><span style="color:#f29668;">= </span><span style="color:#f29718;">false
+</span><span>	s</span><span style="color:#f29668;">.</span><span>awaitingCompletion[requestID] </span><span style="color:#f29668;">= </span><span style="color:#f07178;">make</span><span>([]</span><span style="color:#ff7733;">chan </span><span style="font-style:italic;color:#39bae6;">string</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0</span><span>)
+</span><span>	s</span><span style="color:#f29668;">.</span><span>lock</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Unlock</span><span>()
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">main</span><span>() {
+</span><span>	ss </span><span style="color:#f29668;">:= &amp;</span><span>service{
+</span><span>		inProgress</span><span style="color:#bfbab0cc;">:         </span><span style="color:#f07178;">make</span><span>(</span><span style="color:#ff7733;">map</span><span>[</span><span style="font-style:italic;color:#39bae6;">string</span><span>]</span><span style="font-style:italic;color:#39bae6;">bool</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>		awaitingCompletion</span><span style="color:#bfbab0cc;">: </span><span style="color:#f07178;">make</span><span>(</span><span style="color:#ff7733;">map</span><span>[</span><span style="font-style:italic;color:#39bae6;">string</span><span>][]</span><span style="color:#ff7733;">chan </span><span style="font-style:italic;color:#39bae6;">string</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>	}
+</span><span>	numWorkers </span><span style="color:#f29668;">:= </span><span style="color:#f29718;">5
+</span><span>	</span><span style="color:#ff7733;">var </span><span>wg sync</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">WaitGroup
+</span><span>	wg</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Add</span><span>(numWorkers)
+</span><span>	requestID </span><span style="color:#f29668;">:= </span><span style="color:#c2d94c;">&quot;expensivecomputation&quot;
+</span><span>	</span><span style="color:#ff7733;">for </span><span>i </span><span style="color:#f29668;">:= </span><span style="color:#f29718;">0</span><span style="color:#bfbab0cc;">; </span><span>i </span><span style="color:#f29668;">&lt; </span><span>numWorkers</span><span style="color:#bfbab0cc;">; </span><span>i</span><span style="color:#f29668;">++ </span><span>{
+</span><span>		</span><span style="color:#ff7733;">go func</span><span>(</span><span style="color:#f29718;">w </span><span style="color:#f29668;">*</span><span>sync</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">WaitGroup</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">id </span><span style="font-style:italic;color:#39bae6;">string</span><span>) {
+</span><span>			</span><span style="color:#ff7733;">defer </span><span>wg</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Done</span><span>()
+</span><span>			ss</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">doWork</span><span>(id)
+</span><span>		}(</span><span style="color:#f29668;">&amp;</span><span>wg</span><span style="color:#bfbab0cc;">, </span><span>requestID)
+</span><span>	}
+</span><span>	wg</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Wait</span><span>()
+</span><span>	fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Println</span><span>(</span><span style="color:#c2d94c;">&quot;Done&quot;</span><span>)
+</span><span>}
+</span></code></pre>
+<p>Now running the main.go file: <code>go run main.go</code>, we observe it happening as expected:</p>
+<pre data-lang="text" style="background-color:#0f1419;color:#bfbab0;" class="language-text "><code class="language-text" data-lang="text"><span>Doing expensive work...
+</span><span>Awaiting work completed
+</span><span>Awaiting work completed
+</span><span>Awaiting work completed
+</span><span>Awaiting work completed
+</span><span>Sent result to all subscribers
+</span><span>Work result received with value the answer is 42
+</span><span>Work result received with value the answer is 42
+</span><span>Work result received with value the answer is 42
+</span><span>Work result received with value the answer is 42
+</span><span>Done
+</span></code></pre>
+<p>One out of 5 workers is doing the expensive work, the rest are waiting for it to complete. Once it completes after 4 seconds, the 4 subscribed workers receive the value correctly &quot;the answer is 42&quot;! Hopefully this simple approach can help you when you want to reduce duplicate work performed by your background routines, leveraging the power of Go channels to block goroutines until a value is received.</p>
+<p><strong>NOTE</strong>: The code above is not meant for production, as in production you need to have better ways of dealing with goroutine context cancelation and a smarter way of namespacing requests and subscribers rather than just using naive maps.</p>
+
+        </div>
+
+        
+        <div class="pagination">
+            <div class="pagination__title">
+                <span class="pagination__title-h">More posts</span>
+                <hr />
+            </div>
+            <div class="pagination__buttons">
+                    <span class="button previous">
+                        <a href="https://rauljordan.com/custom-static-analysis-in-go-part-1/">
+                            <span class="button__icon">←</span>&nbsp;
+                            <span class="button__text">Custom Static Analysis in Go, Part I</span>
+                        </a>
+                    </span>
+                
+                
+                    <span class="button next">
+                        <a href="https://rauljordan.com/when-a-solution-is-right-in-front-of-your-eyes/">
+                            <span class="button__text">When a Solution Is Right In Front of You</span>&nbsp;
+                            <span class="button__icon">→</span>
+                        </a>
+                    </span>
+                </div>
+        </div>
+    
+    </div>
+
+    </div>
+
+    
+    <footer class="footer">
+        <div class="footer__inner">
+                <div class="copyright">
+                        <span>© 
+    2023
+ Raul Jordan</span>
+                    <span class="copyright-theme">
+                        <span class="copyright-theme-sep">:: </span>
+                        Theme: <a href="https://github.com/pawroman/zola-theme-terminimal/">Terminimal</a> by pawroman
+                    </span>
+                </div>
+            </div>
+    </footer>
+    
+
+</div>
+</body>
+
+</html>

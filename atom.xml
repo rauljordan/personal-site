@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>rauljordan::blog</title>
+    <link href="https://rauljordan.com/atom.xml" rel="self" type="application/atom+xml"/>
+    <link href="https://rauljordan.com"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-07-09T00:00:00+00:00</updated>
+    <id>https://rauljordan.com/atom.xml</id>
+    <entry xml:lang="en">
+        <title>My Most Embarrassing Story as a Beginner Software Engineer</title>
+        <published>2023-07-09T00:00:00+00:00</published>
+        <updated>2023-07-09T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/my-most-embarrassing-story-as-a-beginner-software-engineer/" type="text/html"/>
+        <id>https://rauljordan.com/my-most-embarrassing-story-as-a-beginner-software-engineer/</id>
+        
+        <summary type="html">&lt;p&gt;The beginner&#x27;s curse of not knowing when to ask &amp;quot;why&amp;quot;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;i.kym-cdn.com&#x2F;entries&#x2F;icons&#x2F;facebook&#x2F;000&#x2F;008&#x2F;342&#x2F;ihave.jpg&quot; alt=&quot;Image&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Rust concepts I wish I learned earlier</title>
+        <published>2023-01-16T00:00:00+00:00</published>
+        <updated>2023-01-16T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/rust-concepts-i-wish-i-learned-earlier/" type="text/html"/>
+        <id>https://rauljordan.com/rust-concepts-i-wish-i-learned-earlier/</id>
+        
+        <summary type="html">&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;user-images.githubusercontent.com&#x2F;689247&#x2F;27258102-0ddeb2ec-53a6-11e7-91f1-72b01ca3e4a0.png&quot; alt=&quot;Image&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;This past month, I have been enthralled by the &lt;a href=&quot;https:&#x2F;&#x2F;www.rust-lang.org&#x2F;&quot;&gt;Rust programming language&lt;&#x2F;a&gt;
+given its unique edge for writing memory-safe, modern programs. Over the years, several languages have
+emerged as the most preferred by engineers to write resilient, backend software. The tides have shifted
+from Java&#x2F;C++ into Go and Rust, which combine decades of programming language theory to build tools
+that are effective in our current age.&lt;&#x2F;p&gt;
+&lt;p&gt;Rust’s numbers speak for themselves. As the &lt;a href=&quot;https:&#x2F;&#x2F;survey.stackoverflow.co&#x2F;2022&#x2F;?utm_source=so-owned&amp;amp;utm_medium=announcement-banner&amp;amp;utm_campaign=dev-survey-2022&amp;amp;utm_content=results#section-most-loved-dreaded-and-wanted-programming-scripting-and-markup-languages&quot;&gt;number 1 most loved language&lt;&#x2F;a&gt; in
+the famous stack overflow survey for &lt;strong&gt;seven years&lt;&#x2F;strong&gt; in a row, it has also recently been
+released as part of Linux kernel - a feat no language other than C has been able to
+accomplish. What’s exciting about the language, to me, is that it provides something truly new
+in the art of how software is built.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rs&quot; style=&quot;background-color:#0f1419;color:#bfbab0;&quot; class=&quot;language-rs &quot;&gt;&lt;code class=&quot;language-rs&quot; data-lang=&quot;rs&quot;&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;std&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span&gt;thread&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;std&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span&gt;time&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span&gt;Duration&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;std&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span&gt;{collections&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span&gt;VecDeque&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span&gt;sync&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span&gt;Condvar&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span&gt;sync&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span&gt;Mutex}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; queue &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;Mutex&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span&gt;new(VecDeque&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span&gt;new())&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    thread&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span&gt;scope(|&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;s&lt;&#x2F;span&gt;&lt;span&gt;| {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; s&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f07178;&quot;&gt;spawn&lt;&#x2F;span&gt;&lt;span&gt;(|| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;loop &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; item &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; queue&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f07178;&quot;&gt;lock&lt;&#x2F;span&gt;&lt;span&gt;()&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f07178;&quot;&gt;unwrap&lt;&#x2F;span&gt;&lt;span&gt;()&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f07178;&quot;&gt;pop_front&lt;&#x2F;span&gt;&lt;span&gt;()&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;if let &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;Some&lt;&#x2F;span&gt;&lt;span&gt;(item) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; item {
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f07178;&quot;&gt;dbg!&lt;&#x2F;span&gt;&lt;span&gt;(item)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;            } &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;else &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;                thread&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span&gt;park()&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;            }
+&lt;&#x2F;span&gt;&lt;span&gt;        })&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span&gt; i &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;in &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.. &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            queue&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f07178;&quot;&gt;lock&lt;&#x2F;span&gt;&lt;span&gt;()&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f07178;&quot;&gt;unwrap&lt;&#x2F;span&gt;&lt;span&gt;()&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f07178;&quot;&gt;push_back&lt;&#x2F;span&gt;&lt;span&gt;(i)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;            t&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f07178;&quot;&gt;thread&lt;&#x2F;span&gt;&lt;span&gt;()&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f07178;&quot;&gt;unpark&lt;&#x2F;span&gt;&lt;span&gt;()&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;            thread&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span&gt;sleep(Duration&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span&gt;from_secs(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;))&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;        }
+&lt;&#x2F;span&gt;&lt;span&gt;    })
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>How to Set Up an Ethereum Proof-of-Stake Devnet in Minutes </title>
+        <published>2022-10-20T00:00:00+00:00</published>
+        <updated>2022-10-20T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/how-to-setup-a-proof-of-stake-devnet/" type="text/html"/>
+        <id>https://rauljordan.com/how-to-setup-a-proof-of-stake-devnet/</id>
+        
+        <summary type="html">&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;user-images.githubusercontent.com&#x2F;5572669&#x2F;186052301-dd487b50-183a-4fa6-bbec-216f32d6f03a.png&quot; alt=&quot;Image&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;With Ethereum having finally transitioned to proof-of-stake, many people are wondering how to set up a local testing environment given so much has changed.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>When Years of Work Finally Materialize</title>
+        <published>2022-09-20T00:00:00+00:00</published>
+        <updated>2022-09-20T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/when-years-of-work-materialize/" type="text/html"/>
+        <id>https://rauljordan.com/when-years-of-work-materialize/</id>
+        
+        <summary type="html">&lt;p&gt;Back in late 2017, I was curious about a particular technology called Ethereum when I understood its incredible potential to change the world. I assembled a team of software engineers I met on the Internet that shared this vision and for 4 years, we have worked tirelessly to upgrade the system to one that is more economically and environmentally sustainable. &lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Using Interface Composition in Go As Guardrails</title>
+        <published>2021-06-10T00:00:00+00:00</published>
+        <updated>2021-06-10T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/using-interface-composition-in-go-as-guardrails/" type="text/html"/>
+        <id>https://rauljordan.com/using-interface-composition-in-go-as-guardrails/</id>
+        
+        <summary type="html">&lt;p&gt;&lt;img src=&quot;&#x2F;gopher.jpg&quot; alt=&quot;Image&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Composition over inheritance&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Composition_over_inheritance&quot;&gt;Someone, somewhere&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Go, as a programming language, favors simplicity. When writing abstractions in Go, interfaces are some of the most powerful tools available to developers, providing a whole suite of useful functionality for your applications and expressive packages.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>When a Solution Is Right In Front of You</title>
+        <published>2021-02-18T00:00:00+00:00</published>
+        <updated>2021-02-18T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/when-a-solution-is-right-in-front-of-your-eyes/" type="text/html"/>
+        <id>https://rauljordan.com/when-a-solution-is-right-in-front-of-your-eyes/</id>
+        
+        <summary type="html">&lt;p&gt;We had a crazy week debugging one of the trickiest issues we&#x27;ve seen in our software. This post showcases how we went down a rabbit hole of information only to conclude a resolution was far easier than we thought.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Reuse Expensive Computation With In-Progress Caches in Go</title>
+        <published>2021-01-05T00:00:00+00:00</published>
+        <updated>2021-01-05T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/reuse-expensive-computation-with-in-progress-caches/" type="text/html"/>
+        <id>https://rauljordan.com/reuse-expensive-computation-with-in-progress-caches/</id>
+        
+        <summary type="html">&lt;p&gt;Caching is the go-to solution in applications to avoid repeating expensive computation and instead prefer some value that can be readily fetched in-memory. A simple caching strategy is to use a cache as a thin layer above database read access as follows:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; style=&quot;background-color:#0f1419;color:#bfbab0;&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;package &lt;&#x2F;span&gt;&lt;span&gt;main
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c2d94c;&quot;&gt;&amp;quot;sync&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;color:#59c2ff;&quot;&gt;Database &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;struct &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;	cache &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;string&lt;&#x2F;span&gt;&lt;span&gt;][]&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;byte
+&lt;&#x2F;span&gt;&lt;span&gt;	lock  sync&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;RWMutex
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;func &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;db &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;Database&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;GetItem&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;key &lt;&#x2F;span&gt;&lt;span&gt;[]&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;byte&lt;&#x2F;span&gt;&lt;span&gt;) ([]&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;byte&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;error&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;	db&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;lock&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;RLock&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span&gt;ok &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;:= &lt;&#x2F;span&gt;&lt;span&gt;db&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;cache[&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;string&lt;&#x2F;span&gt;&lt;span&gt;(key)]&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;; &lt;&#x2F;span&gt;&lt;span&gt;ok {
+&lt;&#x2F;span&gt;&lt;span&gt;		db&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;lock&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;RUnlock&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;value
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;	db&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;lock&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;RUnlock&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;db&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;readFromDatabase&lt;&#x2F;span&gt;&lt;span&gt;(key)
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;func &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;db &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;Database&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;WriteItem&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;key&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;value &lt;&#x2F;span&gt;&lt;span&gt;[]&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;byte&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;error &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;err &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;:= &lt;&#x2F;span&gt;&lt;span&gt;db&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;writeToDatabase&lt;&#x2F;span&gt;&lt;span&gt;(key&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span&gt;value)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;; &lt;&#x2F;span&gt;&lt;span&gt;err &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;!= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;nil &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;err
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;	db&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;lock&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;Lock&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;	db&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;cache[&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;string&lt;&#x2F;span&gt;&lt;span&gt;(key)] &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;value
+&lt;&#x2F;span&gt;&lt;span&gt;	db&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;lock&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;Unlock&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;nil
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This strategy works great for applications where you have requests to read access for a certain value repeatedly, preventing you from performing a potentially expensive db query and leveraging fast access in-memory. Caching is very helpful. For some problems, however, a cache is definitely not enough.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Custom Static Analysis in Go, Part I</title>
+        <published>2020-11-01T00:00:00+00:00</published>
+        <updated>2020-11-01T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/custom-static-analysis-in-go-part-1/" type="text/html"/>
+        <id>https://rauljordan.com/custom-static-analysis-in-go-part-1/</id>
+        
+        <summary type="html">&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;www.scylladb.com&#x2F;wp-content&#x2F;uploads&#x2F;1200x628-fb-golang-scylla-gocqlx-package.png&quot; alt=&quot;Image&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;(Credits to ScyllaDB)&lt;&#x2F;p&gt;
+&lt;p&gt;Static analysis is the practice of examining source code in an automated way before code is run, typically to find bugs before they can even manifest. As a powerful programming language used in mission critical applications, &lt;a href=&quot;https:&#x2F;&#x2F;golang.org&#x2F;&quot;&gt;Go&lt;&#x2F;a&gt; also adds a lot of responsibility to its developers to write safe code. The risk of nil pointer panics, variable shadowing, and otherwise ignoring important errors can make an otherwise good looking program become an easy target for attacks or faults you never imagined could happen. &lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Why Go&#x27;s Error Handling is Awesome</title>
+        <published>2020-07-06T00:00:00+00:00</published>
+        <updated>2020-07-06T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/why-go-error-handling-is-awesome/" type="text/html"/>
+        <id>https://rauljordan.com/why-go-error-handling-is-awesome/</id>
+        
+        <summary type="html">&lt;p&gt;Go&#x27;s &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;golang&#x2F;go&#x2F;issues&#x2F;32825&quot;&gt;infamous error handling&lt;&#x2F;a&gt; has caught quite the attention from outsiders to the programming language, often touted as one of the language&#x27;s most questionable design decisions. If you look into any project on Github written in Go, it&#x27;s almost a guarantee you&#x27;ll see the lines more frequently than anything else in the codebase:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; style=&quot;background-color:#0f1419;color:#bfbab0;&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;err &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;!= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;nil &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;err
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Although it may seem redundant and unnecessary for those new to the language, the reason errors in Go are treated as first-class citizens (values) has a deeply-rooted history in programming language theory and the main goal of Go as a language itself. Numerous efforts have been made to change or improve how Go deals with errors, but so far, one proposal is winning above all others:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;golang&#x2F;go&#x2F;issues&#x2F;32825&quot;&gt;Leave if err != nil alone!&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Why I Speak Cantonese</title>
+        <published>2020-07-01T00:00:00+00:00</published>
+        <updated>2020-07-01T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/why-i-speak-cantonese/" type="text/html"/>
+        <id>https://rauljordan.com/why-i-speak-cantonese/</id>
+        
+        <summary type="html">&lt;p&gt;&lt;img src=&quot;&#x2F;cantonese.jpg&quot; alt=&quot;image&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Many folks that know me personally know how much time I dedicate each day towards becoming proficient at speaking, reading, and writing Cantonese, making it my favorite language and one I have developed a major personal goal of becoming proficient in. Cantonese, known as jyut6 jyuh5 (粵話), is one of the major languages of China and the Chinese diaspora abroad, spoken by around 100 million native speakers [1] today along the pearl river delta in the southern Chinese province of Gwongdung (廣東), Macao, Hong Kong, and Southeast Asia as a lingua franca. It is a language rich with tradition and a history spanning over 2000 years, retaining significant elements of Classical Chinese.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Immutability Patterns in Go</title>
+        <published>2020-05-25T00:00:00+00:00</published>
+        <updated>2020-05-25T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/immutability-patterns-in-go/" type="text/html"/>
+        <id>https://rauljordan.com/immutability-patterns-in-go/</id>
+        
+        <summary type="html">&lt;pre data-lang=&quot;go&quot; style=&quot;background-color:#0f1419;color:#bfbab0;&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;field&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span&gt;ref &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;:= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;range &lt;&#x2F;span&gt;&lt;span&gt;s&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;sharedFieldReferences {
+&lt;&#x2F;span&gt;&lt;span&gt;    ref&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;AddRef&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;    dst&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;sharedFieldReferences[field] &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;ref
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;One of cons of Go as a modern programming language is the lack of native options for making certain data structures immutable. That is, we often have to make key software design decisions in our application just to ensure certain data is immutable throughout the code&#x27;s runtime, and it may not look pretty. At my company, &lt;a href=&quot;https:&#x2F;&#x2F;prysmaticlabs.com&quot;&gt;Prysmatic Labs&lt;&#x2F;a&gt;, we often encounter the problem where we need to maintain certain large data structures in-memory for performance reasons and we also need to perform one-off, local computations on such data. That is, we have very intensive &lt;em&gt;read-heavy&lt;&#x2F;em&gt; workloads in our application where we do not want to compromise data safety.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Building a Service Registry in Go</title>
+        <published>2020-03-10T00:00:00+00:00</published>
+        <updated>2020-03-10T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/building-a-service-registry-in-go/" type="text/html"/>
+        <id>https://rauljordan.com/building-a-service-registry-in-go/</id>
+        
+        <summary type="html">&lt;pre data-lang=&quot;go&quot; style=&quot;background-color:#0f1419;color:#bfbab0;&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;func &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;s &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;ServiceRegistry&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;RegisterService&lt;&#x2F;span&gt;&lt;span&gt;(
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;service &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;Service&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;error &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;	kind &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;:= &lt;&#x2F;span&gt;&lt;span&gt;reflect&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;TypeOf&lt;&#x2F;span&gt;&lt;span&gt;(service)
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;_&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span&gt;exists &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;:= &lt;&#x2F;span&gt;&lt;span&gt;s&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;services[kind]&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;; &lt;&#x2F;span&gt;&lt;span&gt;exists {
+&lt;&#x2F;span&gt;&lt;span&gt;		&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;fmt&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;Errorf&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c2d94c;&quot;&gt;&amp;quot;exists: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;%v&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c2d94c;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span&gt;kind)
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;	s&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;services[kind] &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;service
+&lt;&#x2F;span&gt;&lt;span&gt;	s&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;serviceTypes &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f07178;&quot;&gt;append&lt;&#x2F;span&gt;&lt;span&gt;(s&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;serviceTypes&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span&gt;kind)
+&lt;&#x2F;span&gt;&lt;span&gt;	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;nil
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Thinking of building an application in Go that has multiple running parts? Say you have some server that needs to do a bunch of different things while it runs, such as perform some backround jobs, update caches, handle several requests, expose a REST API, perform outbound requests to other APIs, all without blocking the main thread - what do you do? Typically, this is a good task for creating a microservices architecture where you have multiple applications talking to each other over some network service mesh, each containerized in some nice docker environment, orchestrated through something like Kubernetes or docker-compose.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Writing an One-to-Many Event Feed Library in Go</title>
+        <published>2019-09-23T00:00:00+00:00</published>
+        <updated>2019-09-23T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/how-to-write-an-event-feed-library/" type="text/html"/>
+        <id>https://rauljordan.com/how-to-write-an-event-feed-library/</id>
+        
+        <summary type="html">&lt;pre data-lang=&quot;go&quot; style=&quot;background-color:#0f1419;color:#bfbab0;&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;color:#59c2ff;&quot;&gt;sub &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;struct &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    feed         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;BoolFeed
+&lt;&#x2F;span&gt;&lt;span&gt;    channelIndex &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;int
+&lt;&#x2F;span&gt;&lt;span&gt;    channel      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;chan &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;bool
+&lt;&#x2F;span&gt;&lt;span&gt;    once         sync&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;Once
+&lt;&#x2F;span&gt;&lt;span&gt;    err          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;chan &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;error
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This blog post explores the design rationale behind building a performant, simple, one-to-many event feed library in Go. We&#x27;ll be recreating the event library from the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;ethereum&#x2F;go-ethereum&#x2F;blob&#x2F;master&#x2F;event&#x2F;feed.go&quot;&gt;go-ethereum&lt;&#x2F;a&gt; project step by step, even explaining some of the tricky design decisions behind its robust concurrency approach. &lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>10 Key Takeaways from a Harvard Education</title>
+        <published>2019-07-05T00:00:00+00:00</published>
+        <updated>2019-07-05T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/key-takeaways-from-a-harvard-education/" type="text/html"/>
+        <id>https://rauljordan.com/key-takeaways-from-a-harvard-education/</id>
+        
+        <summary type="html">&lt;p&gt;&lt;img src=&quot;&#x2F;harvard1.jpg&quot; alt=&quot;image&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Coming from Honduras, attending college in the U.S. felt an unattainable dream during my high school years. Emblazoned upon one of the entrances to Harvard University one can find the words:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;quot;Enter to Grow in Wisdom, Depart to Serve Thy Country and Thy Kind&amp;quot;&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;This adage, although seemingly cliché, had its words weigh heavily on me as the years went on. I promised myself when starting my first year that I would not leave its walls an unchanged man. Despite its highs and lows, here is a final list of my major takeaways from my 4 years as an undergraduate at Harvard University.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Go Lessons from Writing a Serialization Library for Ethereum</title>
+        <published>2019-07-02T00:00:00+00:00</published>
+        <updated>2019-07-02T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/go-lessons-from-writing-a-serialization-library-for-ethereum/" type="text/html"/>
+        <id>https://rauljordan.com/go-lessons-from-writing-a-serialization-library-for-ethereum/</id>
+        
+        <summary type="html">&lt;pre data-lang=&quot;go&quot; style=&quot;background-color:#0f1419;color:#bfbab0;&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;color:#59c2ff;&quot;&gt;Marshaler &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;interface &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;func &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;MarshalType&lt;&#x2F;span&gt;&lt;span&gt;(
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;reflect&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;Value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, 
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;b &lt;&#x2F;span&gt;&lt;span&gt;[]&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;byte&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, 
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;lastWrittenIdx &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;uint64&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;    ) (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;nextIdx &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;uint64&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;error&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;color:#59c2ff;&quot;&gt;Unmarshaler &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;interface &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;func &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;UnmarshalType&lt;&#x2F;span&gt;&lt;span&gt;(
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;target &lt;&#x2F;span&gt;&lt;span&gt;reflect&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;Value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, 
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;b &lt;&#x2F;span&gt;&lt;span&gt;[]&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;byte&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, 
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;lastReadIdx &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;uint64&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;    ) (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;nextIdx &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;uint64&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;error&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.techopedia.com&#x2F;definition&#x2F;867&#x2F;serialization-net&quot;&gt;Techopedia&lt;&#x2F;a&gt; defines serialization as&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The process of converting the state information of an object instance into a binary or textual form to persist into storage medium or transported over a network.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;In simple words, it is the task of &lt;strong&gt;translating&lt;&#x2F;strong&gt; data using a common set of rules a standard system can understand, as well as the task of &lt;strong&gt;decoding&lt;&#x2F;strong&gt; translated data back into its original form using the same set of rules. All computers function around the notion of 1s and 0s, otherwise known as bits, which give us a convenient, common format we can serialize &lt;em&gt;into&lt;&#x2F;em&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;The process of serializing data is called &lt;em&gt;Marshaling&lt;&#x2F;em&gt;, and the process of recovering original data from some serialized bytes is known as &lt;em&gt;Unmarshaling&lt;&#x2F;em&gt;. We will be using the two terms extensively throughout this post.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>How My Team Won the Facebook GraphQL Hackathon</title>
+        <published>2017-02-04T00:00:00+00:00</published>
+        <updated>2017-02-04T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/how-my-team-won-the-facebook-graphql-hackathon/" type="text/html"/>
+        <id>https://rauljordan.com/how-my-team-won-the-facebook-graphql-hackathon/</id>
+        
+        <summary type="html">&lt;pre data-lang=&quot;js&quot; style=&quot;background-color:#0f1419;color:#bfbab0;&quot; class=&quot;language-js &quot;&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span style=&quot;color:#59c2ff;&quot;&gt;links&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#59c2ff;&quot;&gt;type&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;new &lt;&#x2F;span&gt;&lt;span style=&quot;color:#59c2ff;&quot;&gt;GraphQLList&lt;&#x2F;span&gt;&lt;span&gt;(HtmlPage)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#59c2ff;&quot;&gt;resolve&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;async &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;args&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;context&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span&gt;res &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;await &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;fetch&lt;&#x2F;span&gt;&lt;span&gt;(root&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;url)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span&gt;$ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;cheerio&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f07178;&quot;&gt;load&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;await &lt;&#x2F;span&gt;&lt;span&gt;res&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;text&lt;&#x2F;span&gt;&lt;span&gt;())&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;const &lt;&#x2F;span&gt;&lt;span&gt;links &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c2d94c;&quot;&gt;&amp;#39;a&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;attr&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c2d94c;&quot;&gt;&amp;#39;href&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;)) {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;return&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;      }
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;attr&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c2d94c;&quot;&gt;&amp;#39;href&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;!== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c2d94c;&quot;&gt;&amp;#39;#&amp;#39; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;&amp;amp;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;attr&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c2d94c;&quot;&gt;&amp;#39;href&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f07178;&quot;&gt;indexOf&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c2d94c;&quot;&gt;&amp;#39;http&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;&amp;gt; -&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#39bae6;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;attr&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c2d94c;&quot;&gt;&amp;#39;href&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;      }
+&lt;&#x2F;span&gt;&lt;span&gt;    })&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f07178;&quot;&gt;get&lt;&#x2F;span&gt;&lt;span&gt;()&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;links&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29668;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb454;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f29718;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff7733;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;({ url }))
+&lt;&#x2F;span&gt;&lt;span&gt;  }
+&lt;&#x2F;span&gt;&lt;span&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bfbab0cc;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;A few months ago, my teammate Trey Granderson who worked with me at Kynplex, suggested we go to Facebook’s official GraphQL hackathon at their Cambridge headquarters, where we put together a simple project to try to use the awesomeness of the language to create something nifty and meet new people.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>How I Accurately Predicted Loan Payments on the LendingClub Dataset</title>
+        <published>2017-02-03T00:00:00+00:00</published>
+        <updated>2017-02-03T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/how-i-accurately-predicted-loan-payments-on-the-lendingclub-dataset/" type="text/html"/>
+        <id>https://rauljordan.com/how-i-accurately-predicted-loan-payments-on-the-lendingclub-dataset/</id>
+        
+        <summary type="html">&lt;p&gt;I had a blast at a hackathon where all sorts of beginners and experts got together for a 6 hour sprint to solve a Machine Learning problem. Personally, I had no idea what we would be doing...would we be coming up with our own data sets? Participating in a Kaggle competition on the spot?&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>About me</title>
+        <published>2017-01-01T00:00:00+00:00</published>
+        <updated>2017-01-01T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rauljordan.com/about-me/" type="text/html"/>
+        <id>https://rauljordan.com/about-me/</id>
+        
+        <content type="html">&lt;p&gt;Hi. My name is Raul and I am an individual passionate about building the decentralized web and contributing to a future where decentralized technology swings the pendulum back to the original promise of the Internet and empowers personal freedom.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;quot;why we make the things we make says a lot about us&amp;quot;&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Anonymous&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Born and raised in San Pedro Sula, Honduras, I studied Computer Science at Harvard University, where I learned how important it is to harness the power of machines to build technology the world can benefit from.&lt;&#x2F;p&gt;
+&lt;p&gt;I started a company called &lt;a href=&quot;https:&#x2F;&#x2F;prysmaticlabs.com&quot;&gt;Prysmatic Labs&lt;&#x2F;a&gt; with my co-founder &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;prestonvanloon&quot;&gt;Preston Van Loon&lt;&#x2F;a&gt; 
+working on implementing the core of Ethereum blockchain protocol, including its major scalability upgrades using cutting-edge research such 
+as Proof of Stake and Sharding. My team has received significant funding to achieve our vision. We have created a project 
+named &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;prysmaticlabs&#x2F;prysm&quot;&gt;Prysm&lt;&#x2F;a&gt; fully open source as a Go implementation of Ethereum Proof of Stake. 
+Today, our software is the most popular one to run the Ethereum blockchain, powering its consensus engine.&lt;&#x2F;p&gt;
+&lt;p&gt;While at Harvard, I received the &lt;a href=&quot;https:&#x2F;&#x2F;thielfellowship.org&#x2F;&quot;&gt;Thiel Fellowship&lt;&#x2F;a&gt;: a $100k grant that allowed me to take off from school to pursue my passions. Thanks to the fellowship, I got into Ethereum and now I am a blockchain developer interested in building core improvements to the protocol.&lt;&#x2F;p&gt;
+&lt;p&gt;My company, Prysmatic Labs, was acquired by &lt;a href=&quot;https:&#x2F;&#x2F;offchainlabs.com&quot;&gt;Offchain Labs&lt;&#x2F;a&gt;, the team behind the leading scaling solution for Ethereum called Arbitrum.&lt;&#x2F;p&gt;
+&lt;p&gt;I am currently based in Atlanta, where I enjoy spending time in nature with my awesome wife Jackie and our cat, Buster.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>

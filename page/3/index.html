@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>rauljordan::blog</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="robots" content="noodp"/>
+
+    <link rel="stylesheet" href="https://rauljordan.com/style.css">
+    <link rel="stylesheet" href="https://rauljordan.com/color/orange.css">
+
+        <link rel="stylesheet" href="https://rauljordan.com/color/background_pink.css">
+    
+    <link rel="stylesheet" href="https://rauljordan.com/font-hack-subset.css">
+
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://rauljordan.com/rss.xml">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@rauljordaneth">
+    <meta name="twitter:creator" content="@rauljordaneth">
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://rauljordan.com" />
+    <meta property="og:site_name" content="rauljordan::blog" />
+
+    
+    <meta name="twitter:title" content="rauljordan::blog">
+    <meta name="og:title" content="rauljordan::blog">
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-53062950-12"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-53062950-12');
+    </script>
+</head>
+
+<body class="">
+<div class="container">
+    
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__logo">
+                    
+                <a href="https://rauljordan.com" style="text-decoration: none;">
+                    <div class="logo">
+                      
+                            rauljordan::blog
+                        
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        
+        <nav class="menu">
+            <ul class="menu__inner">
+                <li><a href="https://rauljordan.com/tags">tags</a></li>
+            
+                <li><a href="https://rauljordan.com/archive">archive</a></li>
+            
+                <li><a href="https://rauljordan.com/about-me">about me</a></li>
+            
+                <li><a href="https://twitter.com/rauljordaneth" target="_blank" rel="noopener noreferrer">twitter</a></li>
+            
+                <li><a href="https://github.com/rauljordan" target="_blank" rel="noopener noreferrer">github</a></li>
+            </ul>
+        </nav>
+    
+    
+        
+    </header>
+    
+
+    <div class="content">
+        
+        <div class="posts">
+            <div>
+                <div class="intro-index">
+                    <div class="img-index">
+                        <img src="https://ca.slack-edge.com/TEZ6KRBFF-U045S5V4J6N-f082fbc6757b-512"/>
+                    </div>
+                    <div class="text-index">
+                        Hi, my name is Raul Jordan. I am a software engineer and one of the maintainers of the Ethereum
+                        blockchain protocol. I believe technology can help us build a less zero-sum world.
+                    </div>
+                </div>
+                I like to write code in <a href="https://go.dev/">Go</a> and <a href="https://www.rust-lang.org/">Rust</a>, and maintain a large open source project called <a href="https://github.com/prysmaticlabs/prysm">Prysm</a>.
+                I currently work as a senior software engineer at <a href="https://offchainlabs.com">Offchain Labs</a>, the company behind the leading scalability solution for Ethereum,
+                <a href="https://github.com/offchainlabs/nitro">Arbitrum</a>
+                <br/>
+                <br/>
+                Some of my blog's highlights are:
+                <ul class="listy">
+                    <li>
+                        <a href="/rust-concepts-i-wish-i-learned-earlier">Rust Concepts I Wish I Learned Earlier</a>
+                    </li>
+                    <li>
+                        <a href="/key-takeaways-from-a-harvard-education">10 Takeaways from a Harvard Education</a>
+                    </li>
+                    <li>
+                        <a href="/why-i-speak-cantonese">Why I Speak Cantonese</a>
+                    </li>
+                </ul>
+                Check out my <a href="https://github.com/rauljordan">Github</a> or <a href="mailto:rauljordan@alumni.harvard.edu">email me</a> to get in touch
+            </div>
+                <div class="post on-list">
+                    
+    <h1 class="post-title"><a href="https://rauljordan.com/go-lessons-from-writing-a-serialization-library-for-ethereum/">Go Lessons from Writing a Serialization Library for Ethereum</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2019-07-02
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/golang/">#golang</a></span>
+    
+
+                    
+        <div class="post-content">
+            <pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Marshaler </span><span style="color:#ff7733;">interface </span><span>{
+</span><span>    </span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">MarshalType</span><span>(
+</span><span>      </span><span style="color:#f29718;">val </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span style="color:#bfbab0cc;">, 
+</span><span>      </span><span style="color:#f29718;">b </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, 
+</span><span>      </span><span style="color:#f29718;">lastWrittenIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">,
+</span><span>    ) (</span><span style="color:#f29718;">nextIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">error</span><span>)
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Unmarshaler </span><span style="color:#ff7733;">interface </span><span>{
+</span><span>    </span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">UnmarshalType</span><span>(
+</span><span>      </span><span style="color:#f29718;">target </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Value</span><span style="color:#bfbab0cc;">, 
+</span><span>      </span><span style="color:#f29718;">b </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span style="color:#bfbab0cc;">, 
+</span><span>      </span><span style="color:#f29718;">lastReadIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">,
+</span><span>    ) (</span><span style="color:#f29718;">nextIdx </span><span style="font-style:italic;color:#39bae6;">uint64</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">error</span><span>)
+</span><span>}
+</span></code></pre>
+<p><a href="https://www.techopedia.com/definition/867/serialization-net">Techopedia</a> defines serialization as</p>
+<blockquote>
+<p>The process of converting the state information of an object instance into a binary or textual form to persist into storage medium or transported over a network.</p>
+</blockquote>
+<p>In simple words, it is the task of <strong>translating</strong> data using a common set of rules a standard system can understand, as well as the task of <strong>decoding</strong> translated data back into its original form using the same set of rules. All computers function around the notion of 1s and 0s, otherwise known as bits, which give us a convenient, common format we can serialize <em>into</em>.</p>
+<p>The process of serializing data is called <em>Marshaling</em>, and the process of recovering original data from some serialized bytes is known as <em>Unmarshaling</em>. We will be using the two terms extensively throughout this post.</p>
+
+        </div>
+        <div>
+            <!-- &#xFE0E; -- force text style - some devices render this as emoji -->
+            <a class="read-more button" href="https://rauljordan.com/go-lessons-from-writing-a-serialization-library-for-ethereum/">
+                <span class="button__text">Read more</span>&nbsp;
+                <span class="button__icon">&#8617;&#xFE0E;</span>
+            </a>
+        </div>
+    
+
+                </div>
+            
+                <div class="post on-list">
+                    
+    <h1 class="post-title"><a href="https://rauljordan.com/how-my-team-won-the-facebook-graphql-hackathon/">How My Team Won the Facebook GraphQL Hackathon</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2017-02-04
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/web-development/">#web-development</a></span>
+    
+
+                    
+        <div class="post-content">
+            <pre data-lang="js" style="background-color:#0f1419;color:#bfbab0;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#59c2ff;">links</span><span style="color:#bfbab0cc;">: </span><span>{
+</span><span>  </span><span style="color:#59c2ff;">type</span><span style="color:#bfbab0cc;">: </span><span style="color:#f29668;">new </span><span style="color:#59c2ff;">GraphQLList</span><span>(HtmlPage)</span><span style="color:#bfbab0cc;">,
+</span><span>  </span><span style="color:#59c2ff;">resolve</span><span style="color:#bfbab0cc;">: </span><span style="color:#ff7733;">async </span><span>(</span><span style="color:#f29718;">root</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">args</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">context</span><span>) </span><span style="color:#ff7733;">=&gt; </span><span>{
+</span><span>    </span><span style="color:#ff7733;">const </span><span>res </span><span style="color:#f29668;">= </span><span style="color:#ff7733;">await </span><span style="color:#ffb454;">fetch</span><span>(root</span><span style="color:#f29668;">.</span><span>url)</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">const </span><span>$ </span><span style="color:#f29668;">= </span><span>cheerio</span><span style="color:#f29668;">.</span><span style="color:#f07178;">load</span><span>(</span><span style="color:#ff7733;">await </span><span>res</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">text</span><span>())</span><span style="color:#bfbab0cc;">;
+</span><span>    </span><span style="color:#ff7733;">const </span><span>links </span><span style="color:#f29668;">= </span><span style="color:#ffb454;">$</span><span>(</span><span style="color:#c2d94c;">&#39;a&#39;</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">map</span><span>(</span><span style="color:#ff7733;">function</span><span>() {
+</span><span>      </span><span style="color:#ff7733;">if </span><span>(</span><span style="color:#f29668;">!</span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;href&#39;</span><span>)) {
+</span><span>        </span><span style="color:#ff7733;">return</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>      </span><span style="color:#ff7733;">if </span><span>(</span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;href&#39;</span><span>) </span><span style="color:#f29668;">!== </span><span style="color:#c2d94c;">&#39;#&#39; </span><span style="color:#f29668;">&amp;&amp; </span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;href&#39;</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#f07178;">indexOf</span><span>(</span><span style="color:#c2d94c;">&#39;http&#39;</span><span>) </span><span style="color:#f29668;">&gt; -</span><span style="color:#f29718;">1</span><span>) {
+</span><span>        </span><span style="color:#ff7733;">return </span><span style="color:#ffb454;">$</span><span>(</span><span style="font-style:italic;color:#39bae6;">this</span><span>)</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">attr</span><span>(</span><span style="color:#c2d94c;">&#39;href&#39;</span><span>)</span><span style="color:#bfbab0cc;">;
+</span><span>      }
+</span><span>    })</span><span style="color:#f29668;">.</span><span style="color:#f07178;">get</span><span>()</span><span style="color:#bfbab0cc;">;
+</span><span>
+</span><span>    </span><span style="color:#ff7733;">return </span><span>links</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">map</span><span>(</span><span style="color:#f29718;">url </span><span style="color:#ff7733;">=&gt; </span><span>({ url }))
+</span><span>  }
+</span><span>}</span><span style="color:#bfbab0cc;">,
+</span></code></pre>
+<p>A few months ago, my teammate Trey Granderson who worked with me at Kynplex, suggested we go to Facebook’s official GraphQL hackathon at their Cambridge headquarters, where we put together a simple project to try to use the awesomeness of the language to create something nifty and meet new people.</p>
+
+        </div>
+        <div>
+            <!-- &#xFE0E; -- force text style - some devices render this as emoji -->
+            <a class="read-more button" href="https://rauljordan.com/how-my-team-won-the-facebook-graphql-hackathon/">
+                <span class="button__text">Read more</span>&nbsp;
+                <span class="button__icon">&#8617;&#xFE0E;</span>
+            </a>
+        </div>
+    
+
+                </div>
+            
+                <div class="post on-list">
+                    
+    <h1 class="post-title"><a href="https://rauljordan.com/how-i-accurately-predicted-loan-payments-on-the-lendingclub-dataset/">How I Accurately Predicted Loan Payments on the LendingClub Dataset</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2017-02-03
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/machine-learning/">#machine-learning</a></span>
+    
+
+                    
+        <div class="post-content">
+            <p>I had a blast at a hackathon where all sorts of beginners and experts got together for a 6 hour sprint to solve a Machine Learning problem. Personally, I had no idea what we would be doing...would we be coming up with our own data sets? Participating in a Kaggle competition on the spot?</p>
+
+        </div>
+        <div>
+            <!-- &#xFE0E; -- force text style - some devices render this as emoji -->
+            <a class="read-more button" href="https://rauljordan.com/how-i-accurately-predicted-loan-payments-on-the-lendingclub-dataset/">
+                <span class="button__text">Read more</span>&nbsp;
+                <span class="button__icon">&#8617;&#xFE0E;</span>
+            </a>
+        </div>
+    
+
+                </div>
+            
+                <div class="post on-list">
+                    
+    <h1 class="post-title"><a href="https://rauljordan.com/about-me/">About me</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2017-01-01
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/personal/">#personal</a></span>
+    
+
+                    
+        <div class="post-content">
+            <p>Hi. My name is Raul and I am an individual passionate about building the decentralized web and contributing to a future where decentralized technology swings the pendulum back to the original promise of the Internet and empowers personal freedom.</p>
+<blockquote>
+<p>&quot;why we make the things we make says a lot about us&quot;</p>
+<ul>
+<li>Anonymous</li>
+</ul>
+</blockquote>
+<p>Born and raised in San Pedro Sula, Honduras, I studied Computer Science at Harvard University, where I learned how important it is to harness the power of machines to build technology the world can benefit from.</p>
+<p>I started a company called <a href="https://prysmaticlabs.com">Prysmatic Labs</a> with my co-founder <a href="https://github.com/prestonvanloon">Preston Van Loon</a> 
+working on implementing the core of Ethereum blockchain protocol, including its major scalability upgrades using cutting-edge research such 
+as Proof of Stake and Sharding. My team has received significant funding to achieve our vision. We have created a project 
+named <a href="https://github.com/prysmaticlabs/prysm">Prysm</a> fully open source as a Go implementation of Ethereum Proof of Stake. 
+Today, our software is the most popular one to run the Ethereum blockchain, powering its consensus engine.</p>
+<p>While at Harvard, I received the <a href="https://thielfellowship.org/">Thiel Fellowship</a>: a $100k grant that allowed me to take off from school to pursue my passions. Thanks to the fellowship, I got into Ethereum and now I am a blockchain developer interested in building core improvements to the protocol.</p>
+<p>My company, Prysmatic Labs, was acquired by <a href="https://offchainlabs.com">Offchain Labs</a>, the team behind the leading scaling solution for Ethereum called Arbitrum.</p>
+<p>I am currently based in Atlanta, where I enjoy spending time in nature with my awesome wife Jackie and our cat, Buster.</p>
+
+        </div>
+
+                </div>
+            <div class="pagination">
+                <div class="pagination__buttons">
+                    <span class="button previous">
+                        <a href="https://rauljordan.com/page/2/">
+                            <span class="button__icon">←</span>&nbsp;
+                            <span class="button__text">Newer posts</span>
+                        </a>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    
+    <footer class="footer">
+        <div class="footer__inner">
+                <div class="copyright">
+                        <span>© 
+    2023
+ Raul Jordan</span>
+                    <span class="copyright-theme">
+                        <span class="copyright-theme-sep">:: </span>
+                        Theme: <a href="https://github.com/pawroman/zola-theme-terminimal/">Terminimal</a> by pawroman
+                    </span>
+                </div>
+            </div>
+    </footer>
+    
+
+</div>
+</body>
+
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>rauljordan::blog</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="robots" content="noodp"/>
+
+    <link rel="stylesheet" href="https://rauljordan.com/style.css">
+    <link rel="stylesheet" href="https://rauljordan.com/color/orange.css">
+
+        <link rel="stylesheet" href="https://rauljordan.com/color/background_pink.css">
+    
+    <link rel="stylesheet" href="https://rauljordan.com/font-hack-subset.css">
+
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://rauljordan.com/rss.xml">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@rauljordaneth">
+    <meta name="twitter:creator" content="@rauljordaneth">
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://rauljordan.com" />
+    <meta property="og:site_name" content="rauljordan::blog" />
+
+    
+<meta property="og:title" content="When a Solution Is Right In Front of You" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="rauljordan::blog" />
+<meta property="og:image" content="" />
+<meta property="og:type" content="article" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="When a Solution Is Right In Front of You" />
+<meta property="twitter:image" content="" />
+<meta property="twitter:description" content="" />
+<meta name="twitter:site" content="@rauljordaneth" />
+<meta name="twitter:creator" content="@rauljordaneth" />
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-53062950-12"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-53062950-12');
+    </script>
+</head>
+
+<body class="">
+<div class="container">
+    
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__logo">
+                    
+                <a href="https://rauljordan.com" style="text-decoration: none;">
+                    <div class="logo">
+                      
+                            rauljordan::blog
+                        
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        
+        <nav class="menu">
+            <ul class="menu__inner">
+                <li><a href="https://rauljordan.com/tags">tags</a></li>
+            
+                <li><a href="https://rauljordan.com/archive">archive</a></li>
+            
+                <li><a href="https://rauljordan.com/about-me">about me</a></li>
+            
+                <li><a href="https://twitter.com/rauljordaneth" target="_blank" rel="noopener noreferrer">twitter</a></li>
+            
+                <li><a href="https://github.com/rauljordan" target="_blank" rel="noopener noreferrer">github</a></li>
+            </ul>
+        </nav>
+    
+    
+        
+    </header>
+    
+
+    <div class="content">
+        
+    <div class="post">
+        
+    <h1 class="post-title"><a href="https://rauljordan.com/when-a-solution-is-right-in-front-of-your-eyes/">When a Solution Is Right In Front of You</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2021-02-18
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/golang/">#golang</a></span>
+    
+
+        
+        <div class="post-content">
+            <p>We had a crazy week debugging one of the trickiest issues we've seen in our software. This post showcases how we went down a rabbit hole of information only to conclude a resolution was far easier than we thought.</p>
+<span id="continue-reading"></span><h3 id="summary">Summary</h3>
+<ul>
+<li>An extremely elusive bug in our production application running on pointed to some behavior that was impossible to reproduce locally</li>
+<li>We went deep into the rabbit hole of thinking the problem had to do with how syscalls are used by our database</li>
+<li>We had <strong>proof</strong> our code was not inefficient with benchmarks the entire team ran, but yet the numbers in production were showing us the application was indeed, inefficient</li>
+<li>My teammate, Preston Van Loon, ended up coming up with a solution to the problem via a simple, software engineering design</li>
+</ul>
+<blockquote>
+<p>Key takeaway: software benchmarks are not absolute truths</p>
+</blockquote>
+<p>At my company, we maintain a software implementation of the Ethereum 2.0 blockchain called <a href="https://github.com/prysmaticlabs/prysm">Prysm</a>. At the time of writing, Ethereum 2.0 is a live, proof-of-stake network with over $5 billion USD at <a href="https://beaconcha.in">stake</a>, with our software powering over <a href="https://discord.com/channels/595666850260713488/746343380900118528/804341674040885288">half of the network</a>.</p>
+<p>In order to release software updates, our code goes through an intensive series of testing pipelines, even running in a public staging environment called the <a href="https://pyrmont.beaconcha.in">Pyrmont testnet</a> before we are confident enough to tag a release that is compatible with the real network. As such, we run a complex Kubernetes deployment where we run our software replicas, <a href="https://semaphoreci.com/blog/what-is-canary-deployment#:~:text=In%20software%20engineering%2C%20canary%20deployment,the%20rest%20of%20the%20users.">canary deployments</a>, and more as a distributed system. Any serious bug that makes it into production could causes losses in the <em>many millions</em> of dollars to a collective group of people using our software around the world. As such, we take releases very seriously.</p>
+<p>Our application is very read-intensive, which is why we opted to use <a href="https://github.com/etcd-io/bbolt">BoltDB</a>, a popular, embedded key-value store as our database of choice. Bolt uses an underlying data structure known as a B+ tree which is great for our high amount of read/write ratio in db operations.</p>
+<p>Over the past few weeks, we noticed something quite strange when we were doing our regular tests in our cloud cluster. We started noticing that database calls were extremely poor upon startup, leading to significant errors at runtime and performance nearly grinding to a halt for the first 10-30 minutes of operation, before going back to being fully operational. This behavior was deterministic on every single restart of the application, and it soon became a critical issue we had to investigate.</p>
+<p><img src="https://i.imgur.com/HKXWJCc.png" alt="Image" /></p>
+<h3 id="it-must-be-something-in-kubernetes-right">It <em>must</em> be something in Kubernetes, right?</h3>
+<p>We realized that no matter how many times we would try to reproduce this locally via benchmarks or small, testruns that our Kubernetes cluster would always run into this crazy issue. We were convinced that perhaps google cloud platform is giving our Kubernetes nodes really bad persistent storage, or that the actual machines such as I/O, but that was far from the case.</p>
+<p><img src="https://i.imgur.com/EogbpFy.png" alt="Image" /></p>
+<p>In fact, we were barely even <em>using</em> the IOPS limits of the machines we had allocated in our cluster.</p>
+<h3 id="it-must-be-something-about-how-our-application-interacts-with-the-operating-system-s-memory-via-syscalls-right">It <em>must</em> be something about how our application interacts with the operating system's memory via syscalls, <em>right</em>?</h3>
+<p>Embedded key-value stores such as BoltDB are so powerful because they contain <em>all the data</em> you want, persisted in a single file. These databases use an operating system call named <code>mmap</code> which is able to <em>map</em> the contents of a file, even very large ones, to your computer's memory directly, allowing for lightning-fast random access to its data. Popular file-based databases such as bolt and sqlite use mmap extensively.</p>
+<p>Mmap as a system call is a very <em>powerful</em> tool. MMap is arguably the reason why embedded key-value stores can be so darn performant, even in programming languages that may not be the known for speed. The problem with mmap is that of course, you need to know how much to initially allocate, and dynamically grow that allocation to fit your software's needs. We realized that bolt db's mmap defaults were actually <em>too</em> conservative.</p>
+<p><img src="https://i.imgur.com/rX7hAFm.png" alt="Image" /></p>
+<p>Seems like mmap grows very slowly if the initial size is not specified, growing by only 32Kb increments.</p>
+<p>we immediately thought, aha! So our application probably spends way too much time in the beginning initializing mmap and growing by small chunks until it reaches the required allocation, and then goes back to normal. The story fits the pattern we have been seeing for so long, it <em>must be it</em>. So then, we created our own fork of the bolt DB dependency in our application, added specific prometheus metrics around mmap usage, the number of reallocations, and the final allocated size at equilibrium.</p>
+<p><img src="https://i.imgur.com/OUsFKcf.png" alt="Image" /></p>
+<p>We tried to increase the initial mmap size of the database, but nothing happened, the charts remained the same.</p>
+<h3 id="okay-it-must-be-something-weird-about-boltdb-probably-some-other-bug-right">Okay, it <em>must</em> be something weird about BoltDB, probably some other bug, right?</h3>
+<p>Our team ended up creating its own fork of our database dependency, BoltDB, and adding in our own metrics into the mix. We wanted to have as much observability as possible over <em>everything</em> happening in our database interactions.</p>
+<p><img src="https://i.imgur.com/8y6mYEs.png" alt="Image" /></p>
+<p>Everything.</p>
+<p>We started digging around for patterns, and something really stood out which made sense with the problems we were observing. Namely, we noticed that the rate of how long write transactions were taking would skyrocket when our application starts:</p>
+<p><img src="https://i.imgur.com/DecRoQE.png" alt="Image" /></p>
+<p>Near the top, it slows down dramatically to a linear rate, but has a high rate of growth at its very beginning. We tried to correlate this with the ratio of read/write transactions, the number of open read transactions at any given time, and more. However, this was just a symptom of a greater problem at hand.</p>
+<p>We even tried investigating mutex lock/unlock operations in the BoltDB code itself, realizing that this was really not a problem, since the time spent waiting for transactions to unlock their mutex would be extremely low.</p>
+<p><img src="https://i.imgur.com/GcSiMAY.png" alt="Image" /></p>
+<p>In fact, when looking at the charts, it seemed the actual <em>logic</em> of reading and writing was taking way too long, a fact that points towards our code being the problem.</p>
+<h2 id="back-to-square-one">Back to square one</h2>
+<p>At the end of this entire session we decided to take a simple CPU profile using <a href="https://github.com/google/pprof">pprof</a> and looked at the flame graph. </p>
+<p><img src="https://i.imgur.com/JuWUpE5.png" alt="Image" /></p>
+<p>Aha, it's clear that iterating over all keys in a particular db bucket is taking up a big portion of the flames, but is it really that bad? Can bolt really not handle iterating over a bucket this way?</p>
+<p>We began tweaking parameters, modifying things such as bucket-level and transaction-level optimizations, but we felt like we were still shooting in the dark here. That's when we went back to the basics and looked at the assumptions of our algorithm.</p>
+<h3 id="when-best-case-time-complexity-really-matters">When &quot;best-case&quot; time complexity really matters</h3>
+<p>In summary, the algorithm we were performing roughly goes as follows (in pseudocode):</p>
+<pre data-lang="python" style="background-color:#0f1419;color:#bfbab0;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#f07178;">input </span><span style="color:#f29668;">= </span><span>(x uint64</span><span style="color:#bfbab0cc;">, </span><span>y uint64)
+</span><span style="color:#ff7733;">for </span><span>key</span><span style="color:#bfbab0cc;">, </span><span>value </span><span style="color:#ff7733;">in </span><span>bucket:
+</span><span>  surrounding </span><span style="color:#f29668;">= </span><span>x </span><span style="color:#f29668;">&lt; </span><span>key </span><span style="color:#f29668;">and </span><span>y </span><span style="color:#f29668;">&gt; </span><span>value
+</span><span>  surrounded </span><span style="color:#f29668;">= </span><span>x </span><span style="color:#f29668;">&gt; </span><span>key </span><span style="color:#f29668;">and </span><span>y </span><span style="color:#f29668;">&lt; </span><span>value
+</span><span>  </span><span style="color:#ff7733;">if </span><span>surrounding </span><span style="color:#f29668;">or </span><span>surrounded:
+</span><span>    </span><span style="color:#ff7733;">return </span><span>NOT_OK
+</span><span style="color:#ff7733;">return </span><span>OK
+</span></code></pre>
+<p>During normal conditions, there should never be a <code>NOT_OK</code> returned from this algorithm. This means that even in the <em>best-case</em> scenario, the algorithm above will loop through all the buckets. Time complexity is O(n) and Ω(n), not great at all. </p>
+<p>You might think this is terrible engineering and a lack of foresight, however, the reason we went with this relatively naive approach in the first place was because there is a known upper bound to n of 54000. We were able to prove, <em>with a benchmark</em>, that 2000 concurrent runs of this algorithm at that upper bound take a total of 300ms to complete, which is within reason, and with minimal resource footprint. We also didn't anticipate reaching that upper bound anytime soon. So why, then, were we having problems? Was our benchmark flawed? Were we missing something?</p>
+<p>When it comes to benchmarking, it can be <strong>almost impossible</strong> to capture all latent variables of how your code will run in production. Our benchmark showed none of the difficulties we would see in our actual Kubernetes cluster, especially because it was run in isolation and not fully representative of the rest of the runtime which has significant contention with the database, could run into unexpected behavior that is hard to deterministically capture, and was also, of course, running on weaker VMs. In most cases, benchmarks are directionally representative of how you can expect your code to perform. However, creating an intricate representation of the details of database access in an isolated benchmark is non-trivial and error-prone. As such, we were clearly missing something. We even made a <em>simulator</em> <a href="https://github.com/prysmaticlabs/prysm/compare/quickbenchcli#diff-e462e1da63943c35e331244acc12d3c838a2023e4f37244f09c911733a6f92d3R1">here</a> that tries to emulate our runtime as much as possible, but it fell short as it is impossible to capture all latent variables.</p>
+<p>We decided to go back to principles of software design. My teammate, <a href="https://github.com/prestonvanloon">Preston Van Loon</a> asked the question: &quot;what if we just change our database schema?&quot;. First of all, we have a precondition that the keys in the database bucket are monotonically increasing unsigned integers, that is, they are ordered from 0 to worst-case, 54000. Moreover, each key value pair is cheap to store, only 16 bytes total. If we notice above in our pseudocode, we have two conditions we care about:</p>
+<pre data-lang="python" style="background-color:#0f1419;color:#bfbab0;" class="language-python "><code class="language-python" data-lang="python"><span>surrounding </span><span style="color:#f29668;">= </span><span>x </span><span style="color:#f29668;">&lt; </span><span>key </span><span style="color:#f29668;">and </span><span>y </span><span style="color:#f29668;">&gt; </span><span>value
+</span><span>surrounded </span><span style="color:#f29668;">= </span><span>x </span><span style="color:#f29668;">&gt; </span><span>key </span><span style="color:#f29668;">and </span><span>y </span><span style="color:#f29668;">&lt; </span><span>value
+</span></code></pre>
+<p>Instead of iterating over all keys in the bucket, let's handle each of these conditions separately.</p>
+<p>For <code>surrounding</code>:</p>
+<pre data-lang="python" style="background-color:#0f1419;color:#bfbab0;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#f07178;">input </span><span style="color:#f29668;">= </span><span>(x uint64</span><span style="color:#bfbab0cc;">, </span><span>y uint64)
+</span><span style="color:#ff7733;">for </span><span>key</span><span style="color:#bfbab0cc;">, </span><span>value </span><span style="color:#ff7733;">in </span><span>bucket:
+</span><span>  </span><span style="color:#ff7733;">if </span><span>x </span><span style="color:#f29668;">&lt; </span><span>key </span><span style="color:#f29668;">and </span><span>y </span><span style="color:#f29668;">&gt; </span><span>value:
+</span><span>    </span><span style="color:#ff7733;">return </span><span>NOT_OK
+</span></code></pre>
+<p>Notice that we can actually exit early here if we find a key that is less than or equal to <code>x</code>. Why? Since the keys are guaranteed to be monotonically increasing and ordered, if we ever find a key &lt;= x, it if impossible we'll ever meet the conditional. Since this bucket in the database only grows via appending to it greater values than before, we can actually iterate over this bucket in reverse. So we can rewrite as:</p>
+<pre data-lang="python" style="background-color:#0f1419;color:#bfbab0;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#f07178;">input </span><span style="color:#f29668;">= </span><span>(x uint64</span><span style="color:#bfbab0cc;">, </span><span>y uint64)
+</span><span style="color:#ff7733;">for </span><span>(key</span><span style="color:#bfbab0cc;">, </span><span>value) = bucket.last() to bucket.first()</span><span style="color:#ff3333;">:
+</span><span>  </span><span style="color:#ff7733;">if </span><span>key </span><span style="color:#f29668;">&lt;= </span><span>x:
+</span><span>    </span><span style="color:#ff7733;">return </span><span>OK </span><span style="font-style:italic;color:#5c6773;"># Exit early!
+</span><span>  </span><span style="color:#ff7733;">if </span><span>x </span><span style="color:#f29668;">&lt; </span><span>key </span><span style="color:#f29668;">and </span><span>y </span><span style="color:#f29668;">&gt; </span><span>value:
+</span><span>    </span><span style="color:#ff7733;">return </span><span>NOT_OK
+</span></code></pre>
+<p>In ideal conditions, we will exit early <em>very quickly</em> in this loop, giving us a &quot;best-case&quot; performance of Ω(1), which is amazing! but how can we perform our other check, for <code>surrounded</code>? Well, we can actually duplicate the same bucket, but in reverse. Instead of key=&gt;value, we store value=&gt;key, and perform the same check. Mathematically, it allows us to achieve the same results. Since data storage is cheap but performance is non-negotiable, this approach seemed like the optimal trade-off we had been looking for since the beginning.</p>
+<p>We were itching to try it. We built new docker images, pushed them out to our cluster, and boom:</p>
+<p><img src="https://i.imgur.com/AhBV1YW.png" alt="Image" /></p>
+<p>Stable, linear growth rate for transaction write seconds in our database, exactly what we wanted to see. Success! At the end, it looks like our application was backlogged in terms of transactions upon startup, taking so long to recover and go back to being fully operational due to our inefficient code.</p>
+<p>It had been a crazy week starting with staring at charts of mmap usage, looking deep into the internals of boltDB, banging our head against the wall with all sorts of explanations of what could go wrong, and at the end of the day all it took was some old-fashioned software engineering and critical thinking.</p>
+<p>When you are neck deep into a problem, thinking the solution lies deep in some freak behavior of your operating system, maybe it's time to take a step back and just look at the code you wrote. </p>
+<p>The key takeaway of this post is that <em>never take a benchmark as absolute truth</em>. We were so hung up on the idea that our benchmark was law and that there is no way the code is actually inefficient at runtime. The truth, was far more nuanced.</p>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://github.com/boltdb/bolt/issues/392">BoltDB Read/Write Concurrency</a></li>
+<li><a href="https://brunocalza.me/but-how-exactly-databases-use-mmap/">How Databases Use Mmap</a></li>
+<li><a href="https://youjiali1995.github.io/storage/boltdb/">BoltDB source code analysis (Chinese)</a></li>
+</ul>
+
+        </div>
+
+        
+        <div class="pagination">
+            <div class="pagination__title">
+                <span class="pagination__title-h">More posts</span>
+                <hr />
+            </div>
+            <div class="pagination__buttons">
+                    <span class="button previous">
+                        <a href="https://rauljordan.com/reuse-expensive-computation-with-in-progress-caches/">
+                            <span class="button__icon">←</span>&nbsp;
+                            <span class="button__text">Reuse Expensive Computation With In-Progress Caches in Go</span>
+                        </a>
+                    </span>
+                
+                
+                    <span class="button next">
+                        <a href="https://rauljordan.com/using-interface-composition-in-go-as-guardrails/">
+                            <span class="button__text">Using Interface Composition in Go As Guardrails</span>&nbsp;
+                            <span class="button__icon">→</span>
+                        </a>
+                    </span>
+                </div>
+        </div>
+    
+    </div>
+
+    </div>
+
+    
+    <footer class="footer">
+        <div class="footer__inner">
+                <div class="copyright">
+                        <span>© 
+    2023
+ Raul Jordan</span>
+                    <span class="copyright-theme">
+                        <span class="copyright-theme-sep">:: </span>
+                        Theme: <a href="https://github.com/pawroman/zola-theme-terminimal/">Terminimal</a> by pawroman
+                    </span>
+                </div>
+            </div>
+    </footer>
+    
+
+</div>
+</body>
+
+</html>

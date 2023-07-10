@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>rauljordan::blog</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="robots" content="noodp"/>
+
+    <link rel="stylesheet" href="https://rauljordan.com/style.css">
+    <link rel="stylesheet" href="https://rauljordan.com/color/orange.css">
+
+        <link rel="stylesheet" href="https://rauljordan.com/color/background_pink.css">
+    
+    <link rel="stylesheet" href="https://rauljordan.com/font-hack-subset.css">
+
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://rauljordan.com/rss.xml">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@rauljordaneth">
+    <meta name="twitter:creator" content="@rauljordaneth">
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://rauljordan.com" />
+    <meta property="og:site_name" content="rauljordan::blog" />
+
+    
+<meta property="og:title" content="Using Interface Composition in Go As Guardrails" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="rauljordan::blog" />
+<meta property="og:image" content="" />
+<meta property="og:type" content="article" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="Using Interface Composition in Go As Guardrails" />
+<meta property="twitter:image" content="" />
+<meta property="twitter:description" content="" />
+<meta name="twitter:site" content="@rauljordaneth" />
+<meta name="twitter:creator" content="@rauljordaneth" />
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-53062950-12"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-53062950-12');
+    </script>
+</head>
+
+<body class="">
+<div class="container">
+    
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__logo">
+                    
+                <a href="https://rauljordan.com" style="text-decoration: none;">
+                    <div class="logo">
+                      
+                            rauljordan::blog
+                        
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        
+        <nav class="menu">
+            <ul class="menu__inner">
+                <li><a href="https://rauljordan.com/tags">tags</a></li>
+            
+                <li><a href="https://rauljordan.com/archive">archive</a></li>
+            
+                <li><a href="https://rauljordan.com/about-me">about me</a></li>
+            
+                <li><a href="https://twitter.com/rauljordaneth" target="_blank" rel="noopener noreferrer">twitter</a></li>
+            
+                <li><a href="https://github.com/rauljordan" target="_blank" rel="noopener noreferrer">github</a></li>
+            </ul>
+        </nav>
+    
+    
+        
+    </header>
+    
+
+    <div class="content">
+        
+    <div class="post">
+        
+    <h1 class="post-title"><a href="https://rauljordan.com/using-interface-composition-in-go-as-guardrails/">Using Interface Composition in Go As Guardrails</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2021-06-10
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/golang/">#golang</a></span>
+    
+
+        
+        <div class="post-content">
+            <p><img src="/gopher.jpg" alt="Image" /></p>
+<blockquote>
+<p>Composition over inheritance</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Composition_over_inheritance">Someone, somewhere</a></li>
+</ul>
+</blockquote>
+<p>Go, as a programming language, favors simplicity. When writing abstractions in Go, interfaces are some of the most powerful tools available to developers, providing a whole suite of useful functionality for your applications and expressive packages.</p>
+<span id="continue-reading"></span>
+<p>One underappreciated pattern of using interfaces in Go is the ability to <em>compose</em> them to build up more complex abstractions. Interface composition allows developers to create small building blocks which only expose necessary methods. This pattern is a powerful way of restricting access to dangerous methods and helping to protect developers from biting their own tongue.</p>
+<h2 id="brief-detour-into-interface-composition">Brief detour into interface composition</h2>
+<p><em>Skip ahead if you are already familiar with interface composition</em></p>
+<p>Interfaces are built-in types meant to define <em>behavior</em> of a potential set of types, such as structs. How that behavior is implemented is up to the specific struct that meets the requirements of the interface. The great thing about interfaces in Go is they are <em>composable</em>. This means you can build up pretty sophisticated interfaces using basic building blocks. For example, let's say we want to define some interface for a <code>File</code> type.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">File </span><span style="color:#ff7733;">interface </span><span>{
+</span><span>  </span><span style="color:#ffb454;">Read</span><span>(</span><span style="color:#f29718;">p </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>) (</span><span style="color:#f29718;">n </span><span style="font-style:italic;color:#39bae6;">int</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">err </span><span style="font-style:italic;color:#39bae6;">error</span><span>)
+</span><span>  </span><span style="color:#ffb454;">Write</span><span>(</span><span style="color:#f29718;">p </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>) (</span><span style="color:#f29718;">n </span><span style="font-style:italic;color:#39bae6;">int</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">err </span><span style="font-style:italic;color:#39bae6;">error</span><span>)
+</span><span>  </span><span style="color:#ffb454;">Close</span><span>() </span><span style="font-style:italic;color:#39bae6;">error
+</span><span>  </span><span style="color:#ffb454;">Name</span><span>() </span><span style="font-style:italic;color:#39bae6;">string
+</span><span>}
+</span></code></pre>
+<p>Reading and writing bytes somewhere is such a common occurence in Go programs that the <a href="https://golang.org/pkg/io/#Reader">standard library</a> provides very minimal, yet powerful interfaces to meet these exact needs. Namely: <code>io.Reader</code> and <code>io.Writer</code>.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Reader </span><span style="color:#ff7733;">interface </span><span>{
+</span><span>  </span><span style="color:#ffb454;">Read</span><span>(</span><span style="color:#f29718;">p </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>) (</span><span style="color:#f29718;">n </span><span style="font-style:italic;color:#39bae6;">int</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">err </span><span style="font-style:italic;color:#39bae6;">error</span><span>)
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Writer </span><span style="color:#ff7733;">interface </span><span>{
+</span><span>  </span><span style="color:#ffb454;">Write</span><span>(</span><span style="color:#f29718;">p </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>) (</span><span style="color:#f29718;">n </span><span style="font-style:italic;color:#39bae6;">int</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">err </span><span style="font-style:italic;color:#39bae6;">error</span><span>)
+</span><span>}
+</span></code></pre>
+<p>Sometimes, objects that read also like to write, so we can combine them as follows and reduce the amount of code we have to duplicate:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">ReadWriter </span><span style="color:#ff7733;">interface </span><span>{
+</span><span>  </span><span style="text-decoration:underline;color:#59c2ff;">Reader
+</span><span>  </span><span style="text-decoration:underline;color:#59c2ff;">Writer
+</span><span>}
+</span></code></pre>
+<p>There's even a <code>ReadWriteCloser</code> interface that composes the primitive <code>io.Closer</code> type as well. We can rewrite our file interface by composing basic interfaces as follows:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">import </span><span style="color:#c2d94c;">&quot;io&quot;
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">File </span><span style="color:#ff7733;">interface </span><span>{
+</span><span>  io</span><span style="color:#f29668;">.</span><span style="text-decoration:underline;color:#59c2ff;">ReadWriteCloser
+</span><span>  </span><span style="color:#ffb454;">Name</span><span>() </span><span style="font-style:italic;color:#39bae6;">string
+</span><span>}
+</span></code></pre>
+<p>Because a file is an <code>io.ReadWriteCloser</code>, it can be used by _any Go functions that accept that interface as an argument. This makes it trivial to write tests, integrate into third-party packages, and provides what is close enough to a <strong>standard</strong> for Go projects, especially using the built-in <code>io</code> package for code reuse. Interface composition is a powerful tool, especially when working with small interfaces you can combine into more expressive abstractions.</p>
+<p>Composition of this flavor is quite different from traditional, object-oriented inheritance. Because our file interface is an <code>io.ReadWriteCloser</code>, it is also a <code>io.Closer</code>, an <code>io.Reader</code>, and <code>io.Writer</code>, so there is no shortage of useful places it can be used and immediately integrated with. This is the power of composition over traditional inheritance in other programming languages. Other examples of popular types that implement the <code>io.Reader</code> interface are HTTP requests, websocket connections, streams, and more.</p>
+<h2 id="real-life-use-case-code-guardrails-using-incremental-interface-composition">Real-life use case: code guardrails using incremental interface composition</h2>
+<p>At my company, we maintain an open source implementation of an Ethereum consensus node called <a href="https://github.com/prysmaticlabs/prysm">Prysm</a>. The current Ethereum proof of stake chain secures many billions of dollars, and a large percentage of nodes in the network choose to run our software, meaning we must have the highest quality guarantees and a low margin-of-error.</p>
+<p>One particular problem that hurt us several times over the years was allowing unrestricted database access. For example, we had a single <code>Database</code> interface that would be define getters and setters for the data we care about at runtime.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Database </span><span style="color:#ff7733;">interface </span><span>{
+</span><span>  </span><span style="color:#ffb454;">SaveBlock</span><span>(</span><span style="color:#f29718;">block </span><span style="color:#f29668;">*</span><span>pb</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">BeaconBlock</span><span>) </span><span style="font-style:italic;color:#39bae6;">error
+</span><span>  </span><span style="color:#ffb454;">BlockByRoot</span><span>(</span><span style="color:#f29718;">root </span><span>[</span><span style="color:#f29718;">32</span><span>]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>) (</span><span style="color:#f29668;">*</span><span>pb</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">BeaconBlock</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>)
+</span><span>  </span><span style="color:#ffb454;">SaveState</span><span>(</span><span style="color:#f29718;">state </span><span style="color:#f29668;">*</span><span>pb</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">BeaconState</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">blockRoot </span><span>[</span><span style="color:#f29718;">32</span><span>]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>) </span><span style="font-style:italic;color:#39bae6;">error
+</span><span>  </span><span style="color:#ffb454;">StateByRoot</span><span>(</span><span style="color:#f29718;">blockRoot </span><span>[</span><span style="color:#f29718;">32</span><span>]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>) (</span><span style="color:#f29668;">*</span><span>pb</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">BeaconState</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>)
+</span><span>  </span><span style="color:#f29668;">... </span><span style="font-style:italic;color:#5c6773;">// A few other critical methods.
+</span><span>}
+</span></code></pre>
+<p>The problem in a large codebase is, although we trust all our teammates to not misuse code, having public APIs such as this interface can be extremely risky. We would pass in this <code>Database</code> interface to all services that wanted it, and anyone could call dangerous access methods such as <code>SaveBlock</code>. Even accessing methods such as <code>StateByRoot</code> excessively would lead to bottlenecks at runtime in memory use. In fact, one consensus failure we had in a local test network was due to us saving states in multiple places, leading to catastrophe.</p>
+<h3 id="incremental-access-restrictions-use-only-what-you-need">Incremental access restrictions: use only what you need</h3>
+<p>Even though you may trust yourself to use your own code responsibly, new developers and contributors will join your project and will assume any public method is free to use if it helps them solve a real problem. Instead of informally enforcing some arbitrary rules on teammates, we redesigned how we use our <code>Database</code> interface for greater safety. We noticed the vast majority of cases only needed <strong>read-access</strong> to certain data types. On top of that, it was rare that we needed <strong>state read-access</strong> as well. We used interface composition to restructure our code below:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">NoStateAccessReadOnlyDB </span><span style="color:#ff7733;">interface </span><span>{
+</span><span>  </span><span style="color:#ffb454;">BlockByRoot</span><span>(</span><span style="color:#f29718;">root </span><span>[</span><span style="color:#f29718;">32</span><span>]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>) (</span><span style="color:#f29668;">*</span><span>pb</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">BeaconBlock</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>)
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">ReadOnlyDB </span><span style="color:#ff7733;">interface </span><span>{
+</span><span>  </span><span style="text-decoration:underline;color:#59c2ff;">NoStateAccessReadOnlyDB
+</span><span>  </span><span style="color:#ffb454;">StateByRoot</span><span>(</span><span style="color:#f29718;">blockRoot </span><span>[</span><span style="color:#f29718;">32</span><span>]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>) (</span><span style="color:#f29668;">*</span><span>pb</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">BeaconState</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>)
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">ReadWriteDB </span><span style="color:#ff7733;">interface </span><span>{
+</span><span>  </span><span style="text-decoration:underline;color:#59c2ff;">ReadOnlyDB  
+</span><span>  </span><span style="color:#ffb454;">SaveState</span><span>(</span><span style="color:#f29718;">state </span><span style="color:#f29668;">*</span><span>pb</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">BeaconState</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">blockRoot </span><span>[</span><span style="color:#f29718;">32</span><span>]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>) </span><span style="font-style:italic;color:#39bae6;">error
+</span><span>  </span><span style="color:#ffb454;">StateByRoot</span><span>(</span><span style="color:#f29718;">blockRoot </span><span>[</span><span style="color:#f29718;">32</span><span>]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>) (</span><span style="color:#f29668;">*</span><span>pb</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">BeaconState</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>)
+</span><span>}
+</span></code></pre>
+<p>This is powerful, because then we only pass in <em>what we need</em> to the services that require database access. This becomes easy to audit and ensures that even if someone tries to use dangerous <code>Save</code> methods, they will not even have that as an option. They are free to code as they please. We never had any further issues with unrestricted access to database writes after this improvement.</p>
+<p>Thanks for reading!</p>
+
+        </div>
+
+        
+        <div class="pagination">
+            <div class="pagination__title">
+                <span class="pagination__title-h">More posts</span>
+                <hr />
+            </div>
+            <div class="pagination__buttons">
+                    <span class="button previous">
+                        <a href="https://rauljordan.com/when-a-solution-is-right-in-front-of-your-eyes/">
+                            <span class="button__icon">←</span>&nbsp;
+                            <span class="button__text">When a Solution Is Right In Front of You</span>
+                        </a>
+                    </span>
+                
+                
+                    <span class="button next">
+                        <a href="https://rauljordan.com/when-years-of-work-materialize/">
+                            <span class="button__text">When Years of Work Finally Materialize</span>&nbsp;
+                            <span class="button__icon">→</span>
+                        </a>
+                    </span>
+                </div>
+        </div>
+    
+    </div>
+
+    </div>
+
+    
+    <footer class="footer">
+        <div class="footer__inner">
+                <div class="copyright">
+                        <span>© 
+    2023
+ Raul Jordan</span>
+                    <span class="copyright-theme">
+                        <span class="copyright-theme-sep">:: </span>
+                        Theme: <a href="https://github.com/pawroman/zola-theme-terminimal/">Terminimal</a> by pawroman
+                    </span>
+                </div>
+            </div>
+    </footer>
+    
+
+</div>
+</body>
+
+</html>

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>rauljordan::blog</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="robots" content="noodp"/>
+
+    <link rel="stylesheet" href="https://rauljordan.com/style.css">
+    <link rel="stylesheet" href="https://rauljordan.com/color/orange.css">
+
+        <link rel="stylesheet" href="https://rauljordan.com/color/background_pink.css">
+    
+    <link rel="stylesheet" href="https://rauljordan.com/font-hack-subset.css">
+
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://rauljordan.com/rss.xml">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@rauljordaneth">
+    <meta name="twitter:creator" content="@rauljordaneth">
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://rauljordan.com" />
+    <meta property="og:site_name" content="rauljordan::blog" />
+
+    
+<meta property="og:title" content="Custom Static Analysis in Go, Part I" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="rauljordan::blog" />
+<meta property="og:image" content="" />
+<meta property="og:type" content="article" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="Custom Static Analysis in Go, Part I" />
+<meta property="twitter:image" content="" />
+<meta property="twitter:description" content="" />
+<meta name="twitter:site" content="@rauljordaneth" />
+<meta name="twitter:creator" content="@rauljordaneth" />
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-53062950-12"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-53062950-12');
+    </script>
+</head>
+
+<body class="">
+<div class="container">
+    
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__logo">
+                    
+                <a href="https://rauljordan.com" style="text-decoration: none;">
+                    <div class="logo">
+                      
+                            rauljordan::blog
+                        
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        
+        <nav class="menu">
+            <ul class="menu__inner">
+                <li><a href="https://rauljordan.com/tags">tags</a></li>
+            
+                <li><a href="https://rauljordan.com/archive">archive</a></li>
+            
+                <li><a href="https://rauljordan.com/about-me">about me</a></li>
+            
+                <li><a href="https://twitter.com/rauljordaneth" target="_blank" rel="noopener noreferrer">twitter</a></li>
+            
+                <li><a href="https://github.com/rauljordan" target="_blank" rel="noopener noreferrer">github</a></li>
+            </ul>
+        </nav>
+    
+    
+        
+    </header>
+    
+
+    <div class="content">
+        
+    <div class="post">
+        
+    <h1 class="post-title"><a href="https://rauljordan.com/custom-static-analysis-in-go-part-1/">Custom Static Analysis in Go, Part I</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2020-11-01
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/golang/">#golang</a></span>
+    
+
+        
+        <div class="post-content">
+            <p><img src="https://www.scylladb.com/wp-content/uploads/1200x628-fb-golang-scylla-gocqlx-package.png" alt="Image" /></p>
+<p>(Credits to ScyllaDB)</p>
+<p>Static analysis is the practice of examining source code in an automated way before code is run, typically to find bugs before they can even manifest. As a powerful programming language used in mission critical applications, <a href="https://golang.org/">Go</a> also adds a lot of responsibility to its developers to write safe code. The risk of nil pointer panics, variable shadowing, and otherwise ignoring important errors can make an otherwise good looking program become an easy target for attacks or faults you never imagined could happen. </p>
+<span id="continue-reading"></span><h2 id="how-this-is-different-from-using-linters">How this is different from using linters</h2>
+<p>Linters, by definition, are already a type of static analyzers geared towards finding bad practices in your code among a set of accepted standards. Although linters provide a way to standardize your code according to a series of rules, there are some advanced edge cases that even linters cannot enforce, such as bugs which are specific to your application. For such edge cases, <strong>writing your own</strong> static analysis is your best bet. </p>
+<p>By writing a static analysis tool, you can programmatically look through <em>your own source code</em> and enforce any rules you wish! In fact, Go makes static analysis very easy thanks to the golang.org/x/tools/go/analysis written by the Go team, giving us a ton of flexibility in terms of what we can do. We'll be using the standard library's analysis tools to look at important ways we can prevent our code from compiling with unsafe practices. The code for this blog post is available here on Github <a href="https://github.com/rauljordan/static-analysis">github.com/rauljordan/static-analysis</a>.</p>
+<p>Let's first look at some prime examples of code which would benefit from static analysis, and are already caught by most major linters and tools such as <code>go vet</code>.</p>
+<h3 id="checking-places-in-our-code-where-we-are-not-handling-returned-errors">Checking places in our code where we are not handling returned errors</h3>
+<p>Sometimes we forget to properly handle or propagate errors in our Go code:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span>users</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">_ </span><span style="color:#f29668;">:= </span><span>db</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">GetUsers</span><span>()
+</span><span style="color:#ff7733;">for </span><span style="font-style:italic;color:#39bae6;">_</span><span style="color:#bfbab0cc;">, </span><span>user </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>users {
+</span><span>	fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Println</span><span>(user</span><span style="color:#f29668;">.</span><span>Name)
+</span><span>}
+</span></code></pre>
+<p>We aren't handling the error above, and if <code>users</code> is nil due to an error from a call to <code>db.GetUsers()</code>, we'll have a nil pointer panic in the code above at runtime. This is a common candidate for static analysis, and is actually already a popular one included in the <code>go vet</code> tool known as <code>errcheck</code>.</p>
+<h3 id="accidental-variable-shadowing">Accidental variable shadowing</h3>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">package </span><span>main
+</span><span>
+</span><span style="color:#ff7733;">import </span><span>(
+</span><span>	</span><span style="color:#c2d94c;">&quot;fmt&quot;
+</span><span>)
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">test </span><span>() (</span><span style="color:#f29718;">x </span><span style="font-style:italic;color:#39bae6;">int64</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">y </span><span style="font-style:italic;color:#39bae6;">int64</span><span>) {
+</span><span>	x </span><span style="color:#f29668;">= </span><span style="color:#f29718;">3
+</span><span>	y </span><span style="color:#f29668;">= </span><span style="color:#f29718;">6
+</span><span>	</span><span style="color:#ff7733;">return
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">main</span><span>() {
+</span><span>	</span><span style="color:#ff7733;">var </span><span>x </span><span style="font-style:italic;color:#39bae6;">int64 </span><span style="color:#f29668;">= </span><span style="color:#f29718;">2
+</span><span>	fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Printf</span><span>(</span><span style="color:#c2d94c;">&quot;x </span><span style="color:#f29718;">%v </span><span style="color:#95e6cb;">\n</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>x)
+</span><span>	x</span><span style="color:#bfbab0cc;">, </span><span>y </span><span style="color:#f29668;">:= </span><span style="color:#ffb454;">test</span><span>()
+</span><span> 	fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Printf</span><span>(</span><span style="color:#c2d94c;">&quot;x </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;"> y </span><span style="color:#f29718;">%v </span><span style="color:#95e6cb;">\n</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>x</span><span style="color:#bfbab0cc;">, </span><span>y)
+</span><span>}
+</span></code></pre>
+<p>Output</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>x 2 
+</span><span>x 3 y 6 
+</span></code></pre>
+<p>Even though we initialized a new variable <code>y</code>, there was no new <code>x</code> variable declared, but rather the original value was <em>shadowed</em>, which is a big bug risk and source of many problems in Go codebases. Checking for accidental variable shadowing is another common use case for static analysis.</p>
+<h2 id="our-use-case-enforcing-file-permission-best-practices-in-our-application">Our use case: enforcing file permission best practices in our application</h2>
+<p>At my company, we maintain an open source project called <a href="https://rauljordan.com/custom-static-analysis-in-go-part-1/github.com/prysmaticlabs/prysm">Prysm</a> written in Go which is built to handle hundreds of millions of dollars, making it a prime target for attackers to steal from less tech savvy users, or users which may have unsafe configurations. In our particular application, we are writing sensitive files to a directory owned by the user. For this, we want to leverage unix file permissions to ensure any files only have read/write access from the user, and not from the group nor from other users on the same system.</p>
+<p>What we want to accomplish for our application is ensure we have read/write access to files for the <em>current user</em> only. As a sanity check, we can use the following useful tool <a href="http://permissions-calculator.org/">permissions-calculator</a>:</p>
+<p><img src="https://i.imgur.com/qvqSsVn.png" alt="Image" /></p>
+<p>UNIX Permissions use Octal notation, which you can read more about <a href="https://doane-ccla.gitbook.io/docs/learning-linux/file-permissions">here</a>. Based on the results of the calculator, permissions 0600 will accomplish our desired end-goal.</p>
+<h3 id="major-problem-the-standard-library-makes-dangerous-assumptions">Major problem: the standard library makes dangerous assumptions</h3>
+<p>The Go standard library is great and packed with features. However, some of its useful ones such as <code>os.MkdirAll</code> and <code>ioutil.WriteFile</code> are dangerous if misused. Say we want to create a directory, such as <code>myapplication/secrets/</code>, we can write the following code to aid us:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">package </span><span>main
+</span><span>
+</span><span style="color:#ff7733;">import </span><span>(
+</span><span>	</span><span style="color:#c2d94c;">&quot;os&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;log&quot;
+</span><span>)
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">main</span><span>() {
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Write with user only read/write/execute permissions.
+</span><span>	</span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">:= </span><span>os</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">MkdirAll</span><span>(</span><span style="color:#c2d94c;">&quot;myapplication/secrets&quot;</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0700</span><span>)</span><span style="color:#bfbab0cc;">; </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>		log</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Fatalf</span><span>(</span><span style="color:#c2d94c;">&quot;Could not write directory: </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>err)
+</span><span>	}
+</span><span>}
+</span></code></pre>
+<p>However, turns out the code above will complete <em>without error</em> if the directory already exists, <strong>even if it has different permissions</strong>. Let's write a test:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">package </span><span>main
+</span><span>
+</span><span style="color:#ff7733;">import </span><span>(
+</span><span>	</span><span style="color:#c2d94c;">&quot;os&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;testing&quot;
+</span><span>)
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">TestMkdirAll_SilentFailure</span><span>(</span><span style="color:#f29718;">t </span><span style="color:#f29668;">*</span><span>testing</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">T</span><span>) {
+</span><span>	dirPath </span><span style="color:#f29668;">:= </span><span style="color:#c2d94c;">&quot;myapplication/secrets&quot;
+</span><span>	t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Cleanup</span><span>(</span><span style="color:#ff7733;">func</span><span>() {
+</span><span>		</span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">:= </span><span>os</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">RemoveAll</span><span>(dirPath)</span><span style="color:#bfbab0cc;">; </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>			t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Error</span><span>(</span><span style="color:#c2d94c;">&quot;Could not remove directory&quot;</span><span>)
+</span><span>		}
+</span><span>	})
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Evil attacker creates the directory ahead of time
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// with full 777 permissions.
+</span><span>	</span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">:= </span><span>os</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">MkdirAll</span><span>(dirPath</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0777</span><span>)</span><span style="color:#bfbab0cc;">; </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>		t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Fatalf</span><span>(</span><span style="color:#c2d94c;">&quot;Could not write directory: </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>err)
+</span><span>	}
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Now our application attempts to write to the directory
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// with 700 permissions to only allow current user read/write/exec.
+</span><span>	</span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">:= </span><span>os</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">MkdirAll</span><span>(dirPath</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0700</span><span>)</span><span style="color:#bfbab0cc;">; </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>		t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Fatalf</span><span>(</span><span style="color:#c2d94c;">&quot;Could not write directory: </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>err)
+</span><span>	}
+</span><span>	info</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">:= </span><span>os</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Stat</span><span>(dirPath)
+</span><span>	</span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>		t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Fatal</span><span>(err)
+</span><span>	}
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Check if other users have read permission.
+</span><span>	</span><span style="color:#ff7733;">if </span><span>info</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Mode</span><span>()</span><span style="color:#f29668;">&amp;</span><span>(</span><span style="color:#f29718;">1</span><span style="color:#f29668;">&lt;&lt;</span><span style="color:#f29718;">2</span><span>) </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">0 </span><span>{
+</span><span>		t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Error</span><span>(</span><span style="color:#c2d94c;">&quot;Expected permissions only for user&quot;</span><span>)
+</span><span>	}
+</span><span>}
+</span></code></pre>
+<p>Let's run the test</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>$ go test .
+</span><span>--- FAIL: TestMkdirAll_SilentFailure (0.00s)
+</span><span>    main_test.go:61: Expected permissions only for user
+</span><span>FAIL
+</span></code></pre>
+<p>Yikes! No error here in the second call to <code>os.MkdirAll</code>, and even worse, the attacker was able to create a directory with the most open permissions possible, compromising the security assumptions of our application. What gives? For one, the standard library needs to make as few assumptions about desired default behavior, and turns out this assumption was the simplest they could make. Second, the same behavior is also found in the popular <code>ioutil</code> package's <code>WriteFile</code> function. Let's see:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">package </span><span>main
+</span><span>
+</span><span style="color:#ff7733;">import </span><span>(
+</span><span>	</span><span style="color:#c2d94c;">&quot;io/ioutil&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;os&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;path/filepath&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;testing&quot;
+</span><span>)
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">TestWriteFile_SilentFailure</span><span>(</span><span style="color:#f29718;">t </span><span style="color:#f29668;">*</span><span>testing</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">T</span><span>) {
+</span><span>	dirPath </span><span style="color:#f29668;">:= </span><span style="color:#c2d94c;">&quot;myapplication/secrets&quot;
+</span><span>	t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Cleanup</span><span>(</span><span style="color:#ff7733;">func</span><span>() {
+</span><span>		</span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">:= </span><span>os</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">RemoveAll</span><span>(dirPath)</span><span style="color:#bfbab0cc;">; </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>			t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Error</span><span>(</span><span style="color:#c2d94c;">&quot;Could not remove directory&quot;</span><span>)
+</span><span>		}
+</span><span>	})
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// We create a directory with 777 permissions.
+</span><span>	</span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">:= </span><span>os</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">MkdirAll</span><span>(dirPath</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0777</span><span>)</span><span style="color:#bfbab0cc;">; </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>		t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Fatalf</span><span>(</span><span style="color:#c2d94c;">&quot;Could not write directory: </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>err)
+</span><span>	}
+</span><span>	secretFile </span><span style="color:#f29668;">:= </span><span>filepath</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Join</span><span>(dirPath</span><span style="color:#bfbab0cc;">, </span><span style="color:#c2d94c;">&quot;credentials.txt&quot;</span><span>)
+</span><span>	</span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">:= </span><span>ioutil</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">WriteFile</span><span>(secretFile</span><span style="color:#bfbab0cc;">, </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>(</span><span style="color:#c2d94c;">&quot;password&quot;</span><span>)</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0777</span><span>)</span><span style="color:#bfbab0cc;">; </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>		t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Fatalf</span><span>(</span><span style="color:#c2d94c;">&quot;Could not write file: </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>err)
+</span><span>	}
+</span><span>	</span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">:= </span><span>ioutil</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">WriteFile</span><span>(secretFile</span><span style="color:#bfbab0cc;">, </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>(</span><span style="color:#c2d94c;">&quot;password&quot;</span><span>)</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">0600</span><span>)</span><span style="color:#bfbab0cc;">; </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>		t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Fatalf</span><span>(</span><span style="color:#c2d94c;">&quot;Could not write file: </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>err)
+</span><span>	}
+</span><span>	info</span><span style="color:#bfbab0cc;">, </span><span>err </span><span style="color:#f29668;">:= </span><span>os</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Stat</span><span>(secretFile)
+</span><span>	</span><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>		t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Fatal</span><span>(err)
+</span><span>	}
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Check if other users have read permission.
+</span><span>	</span><span style="color:#ff7733;">if </span><span>info</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Mode</span><span>()</span><span style="color:#f29668;">&amp;</span><span>(</span><span style="color:#f29718;">1</span><span style="color:#f29668;">&lt;&lt;</span><span style="color:#f29718;">2</span><span>) </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">0 </span><span>{
+</span><span>		t</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Error</span><span>(</span><span style="color:#c2d94c;">&quot;Expected permissions only for user&quot;</span><span>)
+</span><span>	}
+</span><span>}
+</span></code></pre>
+<p>Let's run the test</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>$ go test .
+</span><span>--- FAIL: TestWriteFile_SilentFailure (0.00s)
+</span><span>    main_test.go:61: Expected permissions only for user
+</span><span>FAIL
+</span></code></pre>
+<p>Same thing! We don't even get an error if we try to write to a file that was already compromised by an attacker with different permissions. It's clear these file writing utilities from the standard library are risky if you are writing a critical application, and we should instead use our own specific functions that properly check against this issue. For example, we can create our little package in our application called <code>fileutil</code>, where we create our own <code>WriteFile</code> and <code>MkdirAll</code>.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">package </span><span>fileutil
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">WriteFile</span><span>(</span><span style="color:#f29718;">filename </span><span style="font-style:italic;color:#39bae6;">string</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">data </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>) </span><span style="font-style:italic;color:#39bae6;">error </span><span>{
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Make sure the file does not already exist with different permissions.
+</span><span>	</span><span style="color:#f29668;">...
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Write a file with strict, 600 permissions (read/write for user only).
+</span><span>	</span><span style="color:#f29668;">...
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">MkdirAll</span><span>(</span><span style="color:#f29718;">dir </span><span style="font-style:italic;color:#39bae6;">string</span><span>) </span><span style="font-style:italic;color:#39bae6;">error </span><span>{
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Make sure the directory does not already exist with different permissions.
+</span><span>	</span><span style="color:#f29668;">...
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Write a directory with strict, 700 permissions (read/write/execute for user only).
+</span><span>	</span><span style="color:#f29668;">...
+</span><span>}
+</span></code></pre>
+<p>Great, now we can just tell every developer in the company or contributors to our open source project to <em>not</em> use <code>os</code> nor <code>ioutil</code> but instead our own <code>fileutil</code> package, right? With a rapidly moving codebase, especially in open source code, this becomes next to impossible. We should instead make that part of our continuous integration suite by adding it into an existing static check tool such as <a href="https://golang.org/cmd/vet/">go vet</a> for the project to build at all if using the standard library's file writing utilities. This is where static analysis happens, making sure our program errors out before it even runs.</p>
+<h3 id="approach-static-analysis-to-ensure-safe-file-and-dir-writing">Approach: static analysis to ensure safe file and dir writing</h3>
+<p>The goal or our static analyzer will be as follows:</p>
+<ol>
+<li>Check if we are importing the <code>os</code> or <code>io/ioutil</code> package normally or as an alias</li>
+<li>Check if function calls in our program use <code>ioutil.WriteFile</code> or <code>os.MkdirAll</code>, and raise issues</li>
+</ol>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="font-style:italic;color:#5c6773;">// Package writefile implements a static analyzer to ensure that our project does not
+</span><span style="font-style:italic;color:#5c6773;">// use ioutil.MkdirAll or os.WriteFile as they are unsafe when it comes to guaranteeing
+</span><span style="font-style:italic;color:#5c6773;">// file permissions and not overriding existing permissions.
+</span><span style="color:#ff7733;">package </span><span>writefile
+</span><span>
+</span><span style="color:#ff7733;">import </span><span>(
+</span><span>	</span><span style="color:#c2d94c;">&quot;errors&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;fmt&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;go/ast&quot;
+</span><span>
+</span><span>	</span><span style="color:#c2d94c;">&quot;golang.org/x/tools/go/analysis&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;golang.org/x/tools/go/analysis/passes/inspect&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;golang.org/x/tools/go/ast/inspector&quot;
+</span><span>)
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// Doc explaining the tool.
+</span><span style="color:#ff7733;">const </span><span>Doc </span><span style="color:#f29668;">= </span><span style="color:#c2d94c;">&quot;Tool to enforce usage of our own internal file-writing utils instead of os.MkdirAll or ioutil.WriteFile&quot;
+</span><span>
+</span><span style="color:#ff7733;">var </span><span>errUnsafePackage </span><span style="color:#f29668;">= </span><span>errors</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">New</span><span>(
+</span><span>	</span><span style="color:#c2d94c;">&quot;os and ioutil dir and file writing functions are not permissions-safe, use shared/fileutil&quot;</span><span style="color:#bfbab0cc;">,
+</span><span>)
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// Analyzer runs static analysis.
+</span><span style="color:#ff7733;">var </span><span>Analyzer </span><span style="color:#f29668;">= &amp;</span><span>analysis</span><span style="color:#f29668;">.</span><span>Analyzer{
+</span><span>	Name</span><span style="color:#bfbab0cc;">:     </span><span style="color:#c2d94c;">&quot;writefile&quot;</span><span style="color:#bfbab0cc;">,
+</span><span>	Doc</span><span style="color:#bfbab0cc;">:      </span><span>Doc</span><span style="color:#bfbab0cc;">,
+</span><span>	Requires</span><span style="color:#bfbab0cc;">: </span><span>[]</span><span style="color:#f29668;">*</span><span>analysis</span><span style="color:#f29668;">.</span><span>Analyzer{inspect</span><span style="color:#f29668;">.</span><span>Analyzer}</span><span style="color:#bfbab0cc;">,
+</span><span>	Run</span><span style="color:#bfbab0cc;">:      </span><span>run</span><span style="color:#bfbab0cc;">,
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">run</span><span>(</span><span style="color:#f29718;">pass </span><span style="color:#f29668;">*</span><span>analysis</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Pass</span><span>) (</span><span style="color:#ff7733;">interface</span><span>{}</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span></code></pre>
+<p>Above, we define our imports, using the <code>golang.org/x/tools/go/analysis</code> package created by the language authors, and defining some important globals such as info about the analyzer and the error message we want to print out upon discovering the pattern searched for by the analyzer. To run the analyzer, we need a special syntax for our package, which will tell tools such as go vet how we should run this. Our package needs to expose an <code>Analyzer</code> struct, and a <code>run(pass *analysis.Pass) (interface{}, error)</code> function. Let's now use this to parse the AST (Abstract Syntax Tree) of our program.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">func </span><span style="color:#ffb454;">run</span><span>(</span><span style="color:#f29718;">pass </span><span style="color:#f29668;">*</span><span>analysis</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Pass</span><span>) (</span><span style="color:#ff7733;">interface</span><span>{}</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>	inspect</span><span style="color:#bfbab0cc;">, </span><span>ok </span><span style="color:#f29668;">:= </span><span>pass</span><span style="color:#f29668;">.</span><span>ResultOf[inspect</span><span style="color:#f29668;">.</span><span>Analyzer]</span><span style="color:#f29668;">.</span><span>(</span><span style="color:#f29668;">*</span><span>inspector</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Inspector</span><span>)
+</span><span>	</span><span style="color:#ff7733;">if </span><span style="color:#f29668;">!</span><span>ok {
+</span><span>		</span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil</span><span style="color:#bfbab0cc;">, </span><span>errors</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">New</span><span>(</span><span style="color:#c2d94c;">&quot;analyzer is not type *inspector.Inspector&quot;</span><span>)
+</span><span>	}
+</span><span>
+</span><span>	nodeFilter </span><span style="color:#f29668;">:= </span><span>[]ast</span><span style="color:#f29668;">.</span><span>Node{
+</span><span>		(</span><span style="color:#f29668;">*</span><span>ast</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">File</span><span>)(</span><span style="color:#f29718;">nil</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>		(</span><span style="color:#f29668;">*</span><span>ast</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">ImportSpec</span><span>)(</span><span style="color:#f29718;">nil</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>		(</span><span style="color:#f29668;">*</span><span>ast</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">CallExpr</span><span>)(</span><span style="color:#f29718;">nil</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>	}
+</span><span>
+</span><span>	aliases </span><span style="color:#f29668;">:= </span><span style="color:#f07178;">make</span><span>(</span><span style="color:#ff7733;">map</span><span>[</span><span style="font-style:italic;color:#39bae6;">string</span><span>]</span><span style="font-style:italic;color:#39bae6;">string</span><span>)
+</span><span>	disallowedFns </span><span style="color:#f29668;">:= </span><span>[]</span><span style="font-style:italic;color:#39bae6;">string</span><span>{</span><span style="color:#c2d94c;">&quot;MkdirAll&quot;</span><span style="color:#bfbab0cc;">, </span><span style="color:#c2d94c;">&quot;WriteFile&quot;</span><span>}
+</span></code></pre>
+<p>Using the <code>&quot;go/ast&quot;</code> package, we can tell our inspector to filter out certain Go keywords, function calls, or imports. In this case, we want to retrieve either new go file definitions, go imports, and call expressions (fancy name for function calls). Additionally, we keep track of a map of aliases for imports and the disallowed functions our linter is checking for <code>MkdirAll</code> and <code>WriteFile</code>.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">func </span><span style="color:#ffb454;">run</span><span>(</span><span style="color:#f29718;">pass </span><span style="color:#f29668;">*</span><span>analysis</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Pass</span><span>) (</span><span style="color:#ff7733;">interface</span><span>{}</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>	</span><span style="color:#f29668;">...
+</span><span>	inspect</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Preorder</span><span>(nodeFilter</span><span style="color:#bfbab0cc;">, </span><span style="color:#ff7733;">func</span><span>(</span><span style="color:#f29718;">node </span><span>ast</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Node</span><span>) {
+</span><span>		</span><span style="color:#ff7733;">switch </span><span>stmt </span><span style="color:#f29668;">:= </span><span>node</span><span style="color:#f29668;">.</span><span>(</span><span style="color:#ff7733;">type</span><span>) {
+</span><span>		</span><span style="color:#ff7733;">case </span><span style="color:#f29668;">*</span><span>ast</span><span style="color:#f29668;">.</span><span>ImportSpec</span><span style="color:#bfbab0cc;">:
+</span><span>			</span><span style="color:#f29668;">...
+</span><span>		</span><span style="color:#ff7733;">case </span><span style="color:#f29668;">*</span><span>ast</span><span style="color:#f29668;">.</span><span>CallExpr</span><span style="color:#bfbab0cc;">:
+</span><span>			</span><span style="color:#f29668;">...
+</span><span>		</span><span style="color:#ff7733;">case </span><span style="color:#f29668;">*</span><span>ast</span><span style="color:#f29668;">.</span><span>File</span><span style="color:#bfbab0cc;">:
+</span><span>			</span><span style="color:#f29668;">...
+</span><span>		}
+</span><span>	})
+</span><span>	</span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>}
+</span></code></pre>
+<p>Next up, we actualy inspect our program and filter out nodes in the AST using our defined filters via the <code>inspect.Preorder</code> function, which gives us the ability to switch over the node types based on the filters we defined.</p>
+<p>First, if we see a Go import, we want to check if it is is &quot;os&quot; or &quot;io/ioutil&quot; and keep track of it by its defined name or just by their regular import name if aliased into an <code>aliases</code> map we defined.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="font-style:italic;color:#5c6773;">// Collect aliases.
+</span><span>pkg </span><span style="color:#f29668;">:= </span><span>stmt</span><span style="color:#f29668;">.</span><span>Path</span><span style="color:#f29668;">.</span><span>Value
+</span><span style="color:#ff7733;">if </span><span>pkg </span><span style="color:#f29668;">== </span><span style="color:#c2d94c;">&quot;</span><span style="color:#95e6cb;">\&quot;</span><span style="color:#c2d94c;">os</span><span style="color:#95e6cb;">\&quot;</span><span style="color:#c2d94c;">&quot; </span><span>{
+</span><span>	</span><span style="color:#ff7733;">if </span><span>stmt</span><span style="color:#f29668;">.</span><span>Name </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>		aliases[stmt</span><span style="color:#f29668;">.</span><span>Name</span><span style="color:#f29668;">.</span><span>Name] </span><span style="color:#f29668;">= </span><span>stmt</span><span style="color:#f29668;">.</span><span>Path</span><span style="color:#f29668;">.</span><span>Value
+</span><span>	} </span><span style="color:#ff7733;">else </span><span>{
+</span><span>		aliases[</span><span style="color:#c2d94c;">&quot;os&quot;</span><span>] </span><span style="color:#f29668;">= </span><span>stmt</span><span style="color:#f29668;">.</span><span>Path</span><span style="color:#f29668;">.</span><span>Value
+</span><span>	}
+</span><span>}
+</span><span style="color:#ff7733;">if </span><span>pkg </span><span style="color:#f29668;">== </span><span style="color:#c2d94c;">&quot;</span><span style="color:#95e6cb;">\&quot;</span><span style="color:#c2d94c;">io/ioutil</span><span style="color:#95e6cb;">\&quot;</span><span style="color:#c2d94c;">&quot; </span><span>{
+</span><span>	</span><span style="color:#ff7733;">if </span><span>stmt</span><span style="color:#f29668;">.</span><span>Name </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>		aliases[stmt</span><span style="color:#f29668;">.</span><span>Name</span><span style="color:#f29668;">.</span><span>Name] </span><span style="color:#f29668;">= </span><span>stmt</span><span style="color:#f29668;">.</span><span>Path</span><span style="color:#f29668;">.</span><span>Value
+</span><span>	} </span><span style="color:#ff7733;">else </span><span>{
+</span><span>		aliases[</span><span style="color:#c2d94c;">&quot;ioutil&quot;</span><span>] </span><span style="color:#f29668;">= </span><span>stmt</span><span style="color:#f29668;">.</span><span>Path</span><span style="color:#f29668;">.</span><span>Value
+</span><span>	}
+</span><span>}
+</span></code></pre>
+<p>Next, if we see a call expression, which is just a function call, we check if it is part of the aliases map
+and if it is one of our disallowed functions:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">for </span><span>pkg</span><span style="color:#bfbab0cc;">, </span><span>path </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>aliases {
+</span><span>	</span><span style="color:#ff7733;">for </span><span style="font-style:italic;color:#39bae6;">_</span><span style="color:#bfbab0cc;">, </span><span>fn </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>disallowedFns {
+</span><span>		</span><span style="font-style:italic;color:#5c6773;">// Check if it is a dot imported package.
+</span><span>		</span><span style="color:#ff7733;">if </span><span style="color:#ffb454;">isPkgDot</span><span>(stmt</span><span style="color:#f29668;">.</span><span>Fun</span><span style="color:#bfbab0cc;">, </span><span>pkg</span><span style="color:#bfbab0cc;">, </span><span>fn) {
+</span><span>			pass</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Reportf</span><span>(
+</span><span>				node</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Pos</span><span>()</span><span style="color:#bfbab0cc;">,
+</span><span>				fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Sprintf</span><span>(
+</span><span>					</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">: </span><span style="color:#f29718;">%s</span><span style="color:#c2d94c;">.</span><span style="color:#f29718;">%s</span><span style="color:#c2d94c;">() (from </span><span style="color:#f29718;">%s</span><span style="color:#c2d94c;">)&quot;</span><span style="color:#bfbab0cc;">,
+</span><span>					errUnsafePackage</span><span style="color:#bfbab0cc;">,
+</span><span>					pkg</span><span style="color:#bfbab0cc;">,
+</span><span>					fn</span><span style="color:#bfbab0cc;">,
+</span><span>					path</span><span style="color:#bfbab0cc;">,
+</span><span>				)</span><span style="color:#bfbab0cc;">,
+</span><span>			)
+</span><span>		}
+</span><span>	}
+</span><span>}
+</span></code></pre>
+<p>If this is the case, then we report on the analysis with our package defined error variable, letting the user know they should not be using those functions but instead, our own <code>fileutil</code> package. Here's the final result:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="font-style:italic;color:#5c6773;">// Package writefile implements a static analyzer to ensure our project does not
+</span><span style="font-style:italic;color:#5c6773;">// use ioutil.MkdirAll or os.WriteFile as they are unsafe when it comes to guaranteeing
+</span><span style="font-style:italic;color:#5c6773;">// file permissions and not overriding existing permissions.
+</span><span style="color:#ff7733;">package </span><span>writefile
+</span><span>
+</span><span style="color:#ff7733;">import </span><span>(
+</span><span>	</span><span style="color:#c2d94c;">&quot;errors&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;fmt&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;go/ast&quot;
+</span><span>
+</span><span>	</span><span style="color:#c2d94c;">&quot;golang.org/x/tools/go/analysis&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;golang.org/x/tools/go/analysis/passes/inspect&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;golang.org/x/tools/go/ast/inspector&quot;
+</span><span>)
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// Doc explaining the tool.
+</span><span style="color:#ff7733;">const </span><span>Doc </span><span style="color:#f29668;">= </span><span style="color:#c2d94c;">&quot;Tool to enforce usage of our own file-writing utils instead of os.MkdirAll or ioutil.WriteFile&quot;
+</span><span>
+</span><span style="color:#ff7733;">var </span><span>errUnsafePackage </span><span style="color:#f29668;">= </span><span>errors</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">New</span><span>(
+</span><span>	</span><span style="color:#c2d94c;">&quot;os and ioutil dir and file writing functions are not permissions-safe, use shared/fileutil&quot;</span><span style="color:#bfbab0cc;">,
+</span><span>)
+</span><span>
+</span><span style="font-style:italic;color:#5c6773;">// Analyzer runs static analysis.
+</span><span style="color:#ff7733;">var </span><span>Analyzer </span><span style="color:#f29668;">= &amp;</span><span>analysis</span><span style="color:#f29668;">.</span><span>Analyzer{
+</span><span>	Name</span><span style="color:#bfbab0cc;">:     </span><span style="color:#c2d94c;">&quot;writefile&quot;</span><span style="color:#bfbab0cc;">,
+</span><span>	Doc</span><span style="color:#bfbab0cc;">:      </span><span>Doc</span><span style="color:#bfbab0cc;">,
+</span><span>	Requires</span><span style="color:#bfbab0cc;">: </span><span>[]</span><span style="color:#f29668;">*</span><span>analysis</span><span style="color:#f29668;">.</span><span>Analyzer{inspect</span><span style="color:#f29668;">.</span><span>Analyzer}</span><span style="color:#bfbab0cc;">,
+</span><span>	Run</span><span style="color:#bfbab0cc;">:      </span><span>run</span><span style="color:#bfbab0cc;">,
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">run</span><span>(</span><span style="color:#f29718;">pass </span><span style="color:#f29668;">*</span><span>analysis</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Pass</span><span>) (</span><span style="color:#ff7733;">interface</span><span>{}</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">error</span><span>) {
+</span><span>	inspect</span><span style="color:#bfbab0cc;">, </span><span>ok </span><span style="color:#f29668;">:= </span><span>pass</span><span style="color:#f29668;">.</span><span>ResultOf[inspect</span><span style="color:#f29668;">.</span><span>Analyzer]</span><span style="color:#f29668;">.</span><span>(</span><span style="color:#f29668;">*</span><span>inspector</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Inspector</span><span>)
+</span><span>	</span><span style="color:#ff7733;">if </span><span style="color:#f29668;">!</span><span>ok {
+</span><span>		</span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil</span><span style="color:#bfbab0cc;">, </span><span>errors</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">New</span><span>(</span><span style="color:#c2d94c;">&quot;analyzer is not type *inspector.Inspector&quot;</span><span>)
+</span><span>	}
+</span><span>
+</span><span>	nodeFilter </span><span style="color:#f29668;">:= </span><span>[]ast</span><span style="color:#f29668;">.</span><span>Node{
+</span><span>		(</span><span style="color:#f29668;">*</span><span>ast</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">File</span><span>)(</span><span style="color:#f29718;">nil</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>		(</span><span style="color:#f29668;">*</span><span>ast</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">ImportSpec</span><span>)(</span><span style="color:#f29718;">nil</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>		(</span><span style="color:#f29668;">*</span><span>ast</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">CallExpr</span><span>)(</span><span style="color:#f29718;">nil</span><span>)</span><span style="color:#bfbab0cc;">,
+</span><span>	}
+</span><span>
+</span><span>	aliases </span><span style="color:#f29668;">:= </span><span style="color:#f07178;">make</span><span>(</span><span style="color:#ff7733;">map</span><span>[</span><span style="font-style:italic;color:#39bae6;">string</span><span>]</span><span style="font-style:italic;color:#39bae6;">string</span><span>)
+</span><span>	disallowedFns </span><span style="color:#f29668;">:= </span><span>[]</span><span style="font-style:italic;color:#39bae6;">string</span><span>{</span><span style="color:#c2d94c;">&quot;MkdirAll&quot;</span><span style="color:#bfbab0cc;">, </span><span style="color:#c2d94c;">&quot;WriteFile&quot;</span><span>}
+</span><span>
+</span><span>	inspect</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Preorder</span><span>(nodeFilter</span><span style="color:#bfbab0cc;">, </span><span style="color:#ff7733;">func</span><span>(</span><span style="color:#f29718;">node </span><span>ast</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Node</span><span>) {
+</span><span>		</span><span style="color:#ff7733;">switch </span><span>stmt </span><span style="color:#f29668;">:= </span><span>node</span><span style="color:#f29668;">.</span><span>(</span><span style="color:#ff7733;">type</span><span>) {
+</span><span>		</span><span style="color:#ff7733;">case </span><span style="color:#f29668;">*</span><span>ast</span><span style="color:#f29668;">.</span><span>File</span><span style="color:#bfbab0cc;">:
+</span><span>			</span><span style="font-style:italic;color:#5c6773;">// Reset aliases (per file).
+</span><span>			aliases </span><span style="color:#f29668;">= </span><span style="color:#f07178;">make</span><span>(</span><span style="color:#ff7733;">map</span><span>[</span><span style="font-style:italic;color:#39bae6;">string</span><span>]</span><span style="font-style:italic;color:#39bae6;">string</span><span>)
+</span><span>		</span><span style="color:#ff7733;">case </span><span style="color:#f29668;">*</span><span>ast</span><span style="color:#f29668;">.</span><span>ImportSpec</span><span style="color:#bfbab0cc;">:
+</span><span>			</span><span style="font-style:italic;color:#5c6773;">// Collect aliases.
+</span><span>			pkg </span><span style="color:#f29668;">:= </span><span>stmt</span><span style="color:#f29668;">.</span><span>Path</span><span style="color:#f29668;">.</span><span>Value
+</span><span>			</span><span style="color:#ff7733;">if </span><span>pkg </span><span style="color:#f29668;">== </span><span style="color:#c2d94c;">&quot;</span><span style="color:#95e6cb;">\&quot;</span><span style="color:#c2d94c;">os</span><span style="color:#95e6cb;">\&quot;</span><span style="color:#c2d94c;">&quot; </span><span>{
+</span><span>				</span><span style="color:#ff7733;">if </span><span>stmt</span><span style="color:#f29668;">.</span><span>Name </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>					aliases[stmt</span><span style="color:#f29668;">.</span><span>Name</span><span style="color:#f29668;">.</span><span>Name] </span><span style="color:#f29668;">= </span><span>stmt</span><span style="color:#f29668;">.</span><span>Path</span><span style="color:#f29668;">.</span><span>Value
+</span><span>				} </span><span style="color:#ff7733;">else </span><span>{
+</span><span>					aliases[</span><span style="color:#c2d94c;">&quot;os&quot;</span><span>] </span><span style="color:#f29668;">= </span><span>stmt</span><span style="color:#f29668;">.</span><span>Path</span><span style="color:#f29668;">.</span><span>Value
+</span><span>				}
+</span><span>			}
+</span><span>			</span><span style="color:#ff7733;">if </span><span>pkg </span><span style="color:#f29668;">== </span><span style="color:#c2d94c;">&quot;</span><span style="color:#95e6cb;">\&quot;</span><span style="color:#c2d94c;">io/ioutil</span><span style="color:#95e6cb;">\&quot;</span><span style="color:#c2d94c;">&quot; </span><span>{
+</span><span>				</span><span style="color:#ff7733;">if </span><span>stmt</span><span style="color:#f29668;">.</span><span>Name </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>					aliases[stmt</span><span style="color:#f29668;">.</span><span>Name</span><span style="color:#f29668;">.</span><span>Name] </span><span style="color:#f29668;">= </span><span>stmt</span><span style="color:#f29668;">.</span><span>Path</span><span style="color:#f29668;">.</span><span>Value
+</span><span>				} </span><span style="color:#ff7733;">else </span><span>{
+</span><span>					aliases[</span><span style="color:#c2d94c;">&quot;ioutil&quot;</span><span>] </span><span style="color:#f29668;">= </span><span>stmt</span><span style="color:#f29668;">.</span><span>Path</span><span style="color:#f29668;">.</span><span>Value
+</span><span>				}
+</span><span>			}
+</span><span>		</span><span style="color:#ff7733;">case </span><span style="color:#f29668;">*</span><span>ast</span><span style="color:#f29668;">.</span><span>CallExpr</span><span style="color:#bfbab0cc;">:
+</span><span>			</span><span style="font-style:italic;color:#5c6773;">// Check if any of disallowed functions have been used.
+</span><span>			</span><span style="color:#ff7733;">for </span><span>pkg</span><span style="color:#bfbab0cc;">, </span><span>path </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>aliases {
+</span><span>				</span><span style="color:#ff7733;">for </span><span style="font-style:italic;color:#39bae6;">_</span><span style="color:#bfbab0cc;">, </span><span>fn </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>disallowedFns {
+</span><span>					</span><span style="color:#ff7733;">if </span><span style="color:#ffb454;">isPkgDot</span><span>(stmt</span><span style="color:#f29668;">.</span><span>Fun</span><span style="color:#bfbab0cc;">, </span><span>pkg</span><span style="color:#bfbab0cc;">, </span><span>fn) {
+</span><span>						pass</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Reportf</span><span>(
+</span><span>							node</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Pos</span><span>()</span><span style="color:#bfbab0cc;">,
+</span><span>							fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Sprintf</span><span>(
+</span><span>								</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">: </span><span style="color:#f29718;">%s</span><span style="color:#c2d94c;">.</span><span style="color:#f29718;">%s</span><span style="color:#c2d94c;">() (from </span><span style="color:#f29718;">%s</span><span style="color:#c2d94c;">)&quot;</span><span style="color:#bfbab0cc;">,
+</span><span>								errUnsafePackage</span><span style="color:#bfbab0cc;">,
+</span><span>								pkg</span><span style="color:#bfbab0cc;">,
+</span><span>								fn</span><span style="color:#bfbab0cc;">,
+</span><span>								path</span><span style="color:#bfbab0cc;">,
+</span><span>							)</span><span style="color:#bfbab0cc;">,
+</span><span>						)
+</span><span>					}
+</span><span>				}
+</span><span>			}
+</span><span>		}
+</span><span>	})
+</span><span>
+</span><span>	</span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">nil
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">isPkgDot</span><span>(</span><span style="color:#f29718;">expr </span><span>ast</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Expr</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">pkg</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">name </span><span style="font-style:italic;color:#39bae6;">string</span><span>) </span><span style="font-style:italic;color:#39bae6;">bool </span><span>{
+</span><span>	sel</span><span style="color:#bfbab0cc;">, </span><span>ok </span><span style="color:#f29668;">:= </span><span>expr</span><span style="color:#f29668;">.</span><span>(</span><span style="color:#f29668;">*</span><span>ast</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">SelectorExpr</span><span>)
+</span><span>	res </span><span style="color:#f29668;">:= </span><span>ok </span><span style="color:#f29668;">&amp;&amp; </span><span style="color:#ffb454;">isIdent</span><span>(sel</span><span style="color:#f29668;">.</span><span>X</span><span style="color:#bfbab0cc;">, </span><span>pkg) </span><span style="color:#f29668;">&amp;&amp; </span><span style="color:#ffb454;">isIdent</span><span>(sel</span><span style="color:#f29668;">.</span><span>Sel</span><span style="color:#bfbab0cc;">, </span><span>name)
+</span><span>	</span><span style="color:#ff7733;">return </span><span>res
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">isIdent</span><span>(</span><span style="color:#f29718;">expr </span><span>ast</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Expr</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">ident </span><span style="font-style:italic;color:#39bae6;">string</span><span>) </span><span style="font-style:italic;color:#39bae6;">bool </span><span>{
+</span><span>	id</span><span style="color:#bfbab0cc;">, </span><span>ok </span><span style="color:#f29668;">:= </span><span>expr</span><span style="color:#f29668;">.</span><span>(</span><span style="color:#f29668;">*</span><span>ast</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Ident</span><span>)
+</span><span>	</span><span style="color:#ff7733;">return </span><span>ok </span><span style="color:#f29668;">&amp;&amp; </span><span>id</span><span style="color:#f29668;">.</span><span>Name </span><span style="color:#f29668;">== </span><span>ident
+</span><span>}
+</span></code></pre>
+<h3 id="tests-for-our-analyzer">Tests for our analyzer</h3>
+<p>Fortunately, the standard library contains a very easy way to test out your analyzer, but it also comes with a few quirks and a specific syntax needed to get it to work. First, let's define a <code>testdata/</code> directory within our analyzer package. Then, create an <code>analyzer_test.go</code> file:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">package </span><span>writefile
+</span><span>
+</span><span style="color:#ff7733;">import </span><span>(
+</span><span>	</span><span style="color:#c2d94c;">&quot;testing&quot;
+</span><span>
+</span><span>	</span><span style="color:#c2d94c;">&quot;golang.org/x/tools/go/analysis/analysistest&quot;
+</span><span>)
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">TestAnalyzer</span><span>(</span><span style="color:#f29718;">t </span><span style="color:#f29668;">*</span><span>testing</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">T</span><span>) {
+</span><span>	analysistest</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Run</span><span>(t</span><span style="color:#bfbab0cc;">, </span><span>analysistest</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">TestData</span><span>()</span><span style="color:#bfbab0cc;">, </span><span>Analyzer)
+</span><span>}
+</span></code></pre>
+<p>We can use the <code>analysistest</code> package to run a bunch of cases within a <code>testdata/</code> directory for the analyzer, which we'll look into next. At this point, our folder structure looks as follows:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>static-analysis/
+</span><span>	main.go
+</span><span>	writefile/
+</span><span>		analyzer.go
+</span><span>		analyzer_test.go
+</span><span>		testdata/
+</span><span>			imports.go
+</span></code></pre>
+<p>In terms of test data, these aren't typical Go test files, but instead follow a specific syntax you can read about <a href="https://godoc.org/golang.org/x/tools/go/analysis/analysistest">here</a>.</p>
+<blockquote>
+<p>An expectation of a Diagnostic is specified by a string literal containing a regular expression that must match the diagnostic message. For example:</p>
+</blockquote>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span>fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Printf</span><span>(</span><span style="color:#c2d94c;">&quot;</span><span style="color:#f29718;">%s</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span style="color:#f29718;">1</span><span>) </span><span style="font-style:italic;color:#5c6773;">// want `cannot provide int 1 to %s`
+</span></code></pre>
+<p>So your tests must be comprised of function calls or expressions, followed by a comment next to them expecting what error you want the analyzer to report. In our case, we can write a few examples:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">package </span><span>testdata
+</span><span>
+</span><span style="color:#ff7733;">import </span><span>(
+</span><span>	</span><span style="color:#c2d94c;">&quot;crypto/rand&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;fmt&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;io/ioutil&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;math/big&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;os&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;path/filepath&quot;
+</span><span>)
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">UseOsMkdirAllAndWriteFile</span><span>() {
+</span><span>	randPath</span><span style="color:#bfbab0cc;">, </span><span style="font-style:italic;color:#39bae6;">_ </span><span style="color:#f29668;">:= </span><span>rand</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Int</span><span>(rand</span><span style="color:#f29668;">.</span><span>Reader</span><span style="color:#bfbab0cc;">, </span><span>big</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">NewInt</span><span>(</span><span style="color:#f29718;">1000000</span><span>))
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Create a random file path in our tmp dir.
+</span><span>	p </span><span style="color:#f29668;">:= </span><span>filepath</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Join</span><span>(os</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">TempDir</span><span>()</span><span style="color:#bfbab0cc;">, </span><span>fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Sprintf</span><span>(</span><span style="color:#c2d94c;">&quot;/</span><span style="color:#f29718;">%d</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>randPath))
+</span><span>	</span><span style="font-style:italic;color:#39bae6;">_ </span><span style="color:#f29668;">= </span><span>os</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">MkdirAll</span><span>(p</span><span style="color:#bfbab0cc;">, </span><span>os</span><span style="color:#f29668;">.</span><span>ModePerm) </span><span style="font-style:italic;color:#5c6773;">// want &quot;os and ioutil dir and file writing functions are not permissions-safe, use shared/fileutil&quot;
+</span><span>	someFile </span><span style="color:#f29668;">:= </span><span>filepath</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Join</span><span>(p</span><span style="color:#bfbab0cc;">, </span><span style="color:#c2d94c;">&quot;some.txt&quot;</span><span>)
+</span><span>	</span><span style="font-style:italic;color:#39bae6;">_ </span><span style="color:#f29668;">= </span><span>ioutil</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">WriteFile</span><span>(someFile</span><span style="color:#bfbab0cc;">, </span><span>[]</span><span style="font-style:italic;color:#39bae6;">byte</span><span>(</span><span style="color:#c2d94c;">&quot;hello&quot;</span><span>)</span><span style="color:#bfbab0cc;">, </span><span>os</span><span style="color:#f29668;">.</span><span>ModePerm) </span><span style="font-style:italic;color:#5c6773;">// want &quot;os and ioutil dir and file writing functions are not permissions-safe, use shared/fileutil&quot;
+</span><span>}
+</span></code></pre>
+<p>Next up, we can run go test to check if our analyzer indeed reports on those functions being used when they shouldn't:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>$ go test ./writefile
+</span><span>ok  	github.com/rauljordan/static-analysis/writefile	0.845s
+</span></code></pre>
+<h3 id="applying-the-analyzer-using-go-vet">Applying the analyzer using Go vet</h3>
+<p>To run our analyzer as a standalone command, the standard library also provides some utility. All we have to do is define the following main.go file</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">package </span><span>main
+</span><span>
+</span><span style="color:#ff7733;">import </span><span>(
+</span><span>	</span><span style="color:#c2d94c;">&quot;github.com/rauljordan/static-analysis/writefile&quot;
+</span><span>	</span><span style="color:#c2d94c;">&quot;golang.org/x/tools/go/analysis/singlechecker&quot;
+</span><span>)
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">main</span><span>() {
+</span><span>	singlechecker</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Main</span><span>(writefile</span><span style="color:#f29668;">.</span><span>Analyzer)
+</span><span>}
+</span></code></pre>
+<p>Then, you can install it into your system $GOBIN with:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>go install github.com/rauljordan/static-analysis
+</span></code></pre>
+<p>Next, you can run it as a standalone Go binary passing in a path to a Go package you want to analyze:</p>
+<pre style="background-color:#0f1419;color:#bfbab0;"><code><span>static-analysis ./mybadpackage
+</span></code></pre>
+<p>and see the analyzer in action. You can also integrate it into go vet with <code>go vet -vettool=$(which static-analysis) ./mybadpackage</code> as a custom analyzer. The code for this blog post is available here on Github <a href="https://github.com/rauljordan/static-analysis">github.com/rauljordan/static-analysis</a>.</p>
+<h2 id="next-post-advanced-static-analysis-for-go-channels">Next post: advanced static analysis for Go channels</h2>
+<p>Although parsing the basic AST of a program as well as comparing identifiers to some string are easy operations, the high-level analysis package does not offer much tooling to dive in deeper into actually <em>understanding</em> a program. Let's say we want to prevent our Go code from ever sending over an unbuffered channel where there is no receiver ready. For those unfamiliar, the following Go program will block the main thread of the function we care about, which is not the expected behavior at runtime.</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">package </span><span>main
+</span><span>
+</span><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">Email </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>	Subject </span><span style="font-style:italic;color:#39bae6;">string
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">main</span><span>() {
+</span><span>	ch </span><span style="color:#f29668;">:= </span><span style="color:#f07178;">make</span><span>(</span><span style="color:#ff7733;">chan </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">Email</span><span>)
+</span><span>	</span><span style="color:#ff7733;">defer </span><span style="color:#f07178;">close</span><span>(ch)
+</span><span>	</span><span style="color:#ffb454;">handleEmailSignup</span><span>(ch)
+</span><span>}
+</span><span>
+</span><span style="color:#ff7733;">func </span><span style="color:#ffb454;">handleEmailSignup</span><span>(</span><span style="color:#f29718;">ch </span><span style="color:#ff7733;">chan </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">Email</span><span>) {
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Some logic regarding handling a signup event.
+</span><span>	</span><span style="color:#f29668;">...
+</span><span>
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// We send over the channel, which we deliberately did not prepare
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// a receiver for in another function, thereby blocking the thread.
+</span><span>	ch </span><span style="color:#f29668;">&lt;- &amp;</span><span>Email{
+</span><span>		Subject</span><span style="color:#bfbab0cc;">: </span><span style="color:#c2d94c;">&quot;New user signup&quot;</span><span style="color:#bfbab0cc;">,
+</span><span>	}
+</span><span>	</span><span style="font-style:italic;color:#5c6773;">// Warning: we&#39;ll never hit this line if there is no channel receiver!
+</span><span>	log</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Println</span><span>(</span><span style="color:#c2d94c;">&quot;New user has just signed up!&quot;</span><span>)
+</span><span>}
+</span></code></pre>
+<p>Because there is no channel receiver set up, we'll never reach the log <code>New user has just signed up</code>, and we will actually block the main thread. This is very dangerous in production applications, where they may not be a channel receiver ready in time before we attempt sending over the channel.</p>
+<p>To enforce this invariant via static analysis seems daunting, as we not only need to understand where channel operations are called, but also understand whether or not (a) the channel is unbuffered, and (b) we are writing to the same channel pointer in different parts of our program, perhaps in different packages! In a future blog post, we'll look at some advanced tools available in the Go standard library for deeper static analysis. Thanks for reading!</p>
+
+        </div>
+
+        
+        <div class="pagination">
+            <div class="pagination__title">
+                <span class="pagination__title-h">More posts</span>
+                <hr />
+            </div>
+            <div class="pagination__buttons">
+                    <span class="button previous">
+                        <a href="https://rauljordan.com/why-go-error-handling-is-awesome/">
+                            <span class="button__icon">←</span>&nbsp;
+                            <span class="button__text">Why Go&#x27;s Error Handling is Awesome</span>
+                        </a>
+                    </span>
+                
+                
+                    <span class="button next">
+                        <a href="https://rauljordan.com/reuse-expensive-computation-with-in-progress-caches/">
+                            <span class="button__text">Reuse Expensive Computation With In-Progress Caches in Go</span>&nbsp;
+                            <span class="button__icon">→</span>
+                        </a>
+                    </span>
+                </div>
+        </div>
+    
+    </div>
+
+    </div>
+
+    
+    <footer class="footer">
+        <div class="footer__inner">
+                <div class="copyright">
+                        <span>© 
+    2023
+ Raul Jordan</span>
+                    <span class="copyright-theme">
+                        <span class="copyright-theme-sep">:: </span>
+                        Theme: <a href="https://github.com/pawroman/zola-theme-terminimal/">Terminimal</a> by pawroman
+                    </span>
+                </div>
+            </div>
+    </footer>
+    
+
+</div>
+</body>
+
+</html>

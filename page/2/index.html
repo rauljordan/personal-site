@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>rauljordan::blog</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="robots" content="noodp"/>
+
+    <link rel="stylesheet" href="https://rauljordan.com/style.css">
+    <link rel="stylesheet" href="https://rauljordan.com/color/orange.css">
+
+        <link rel="stylesheet" href="https://rauljordan.com/color/background_pink.css">
+    
+    <link rel="stylesheet" href="https://rauljordan.com/font-hack-subset.css">
+
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://rauljordan.com/rss.xml">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@rauljordaneth">
+    <meta name="twitter:creator" content="@rauljordaneth">
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://rauljordan.com" />
+    <meta property="og:site_name" content="rauljordan::blog" />
+
+    
+    <meta name="twitter:title" content="rauljordan::blog">
+    <meta name="og:title" content="rauljordan::blog">
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-53062950-12"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-53062950-12');
+    </script>
+</head>
+
+<body class="">
+<div class="container">
+    
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__logo">
+                    
+                <a href="https://rauljordan.com" style="text-decoration: none;">
+                    <div class="logo">
+                      
+                            rauljordan::blog
+                        
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        
+        <nav class="menu">
+            <ul class="menu__inner">
+                <li><a href="https://rauljordan.com/tags">tags</a></li>
+            
+                <li><a href="https://rauljordan.com/archive">archive</a></li>
+            
+                <li><a href="https://rauljordan.com/about-me">about me</a></li>
+            
+                <li><a href="https://twitter.com/rauljordaneth" target="_blank" rel="noopener noreferrer">twitter</a></li>
+            
+                <li><a href="https://github.com/rauljordan" target="_blank" rel="noopener noreferrer">github</a></li>
+            </ul>
+        </nav>
+    
+    
+        
+    </header>
+    
+
+    <div class="content">
+        
+        <div class="posts">
+            <div>
+                <div class="intro-index">
+                    <div class="img-index">
+                        <img src="https://ca.slack-edge.com/TEZ6KRBFF-U045S5V4J6N-f082fbc6757b-512"/>
+                    </div>
+                    <div class="text-index">
+                        Hi, my name is Raul Jordan. I am a software engineer and one of the maintainers of the Ethereum
+                        blockchain protocol. I believe technology can help us build a less zero-sum world.
+                    </div>
+                </div>
+                I like to write code in <a href="https://go.dev/">Go</a> and <a href="https://www.rust-lang.org/">Rust</a>, and maintain a large open source project called <a href="https://github.com/prysmaticlabs/prysm">Prysm</a>.
+                I currently work as a senior software engineer at <a href="https://offchainlabs.com">Offchain Labs</a>, the company behind the leading scalability solution for Ethereum,
+                <a href="https://github.com/offchainlabs/nitro">Arbitrum</a>
+                <br/>
+                <br/>
+                Some of my blog's highlights are:
+                <ul class="listy">
+                    <li>
+                        <a href="/rust-concepts-i-wish-i-learned-earlier">Rust Concepts I Wish I Learned Earlier</a>
+                    </li>
+                    <li>
+                        <a href="/key-takeaways-from-a-harvard-education">10 Takeaways from a Harvard Education</a>
+                    </li>
+                    <li>
+                        <a href="/why-i-speak-cantonese">Why I Speak Cantonese</a>
+                    </li>
+                </ul>
+                Check out my <a href="https://github.com/rauljordan">Github</a> or <a href="mailto:rauljordan@alumni.harvard.edu">email me</a> to get in touch
+            </div>
+                <div class="post on-list">
+                    
+    <h1 class="post-title"><a href="https://rauljordan.com/custom-static-analysis-in-go-part-1/">Custom Static Analysis in Go, Part I</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2020-11-01
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/golang/">#golang</a></span>
+    
+
+                    
+        <div class="post-content">
+            <p><img src="https://www.scylladb.com/wp-content/uploads/1200x628-fb-golang-scylla-gocqlx-package.png" alt="Image" /></p>
+<p>(Credits to ScyllaDB)</p>
+<p>Static analysis is the practice of examining source code in an automated way before code is run, typically to find bugs before they can even manifest. As a powerful programming language used in mission critical applications, <a href="https://golang.org/">Go</a> also adds a lot of responsibility to its developers to write safe code. The risk of nil pointer panics, variable shadowing, and otherwise ignoring important errors can make an otherwise good looking program become an easy target for attacks or faults you never imagined could happen. </p>
+
+        </div>
+        <div>
+            <!-- &#xFE0E; -- force text style - some devices render this as emoji -->
+            <a class="read-more button" href="https://rauljordan.com/custom-static-analysis-in-go-part-1/">
+                <span class="button__text">Read more</span>&nbsp;
+                <span class="button__icon">&#8617;&#xFE0E;</span>
+            </a>
+        </div>
+    
+
+                </div>
+            
+                <div class="post on-list">
+                    
+    <h1 class="post-title"><a href="https://rauljordan.com/why-go-error-handling-is-awesome/">Why Go&#x27;s Error Handling is Awesome</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2020-07-06
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/golang/">#golang</a></span>
+    
+
+                    
+        <div class="post-content">
+            <p>Go's <a href="https://github.com/golang/go/issues/32825">infamous error handling</a> has caught quite the attention from outsiders to the programming language, often touted as one of the language's most questionable design decisions. If you look into any project on Github written in Go, it's almost a guarantee you'll see the lines more frequently than anything else in the codebase:</p>
+<pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">if </span><span>err </span><span style="color:#f29668;">!= </span><span style="color:#f29718;">nil </span><span>{
+</span><span>    </span><span style="color:#ff7733;">return </span><span>err
+</span><span>}
+</span></code></pre>
+<p>Although it may seem redundant and unnecessary for those new to the language, the reason errors in Go are treated as first-class citizens (values) has a deeply-rooted history in programming language theory and the main goal of Go as a language itself. Numerous efforts have been made to change or improve how Go deals with errors, but so far, one proposal is winning above all others:</p>
+<p><a href="https://github.com/golang/go/issues/32825">Leave if err != nil alone!</a></p>
+
+        </div>
+        <div>
+            <!-- &#xFE0E; -- force text style - some devices render this as emoji -->
+            <a class="read-more button" href="https://rauljordan.com/why-go-error-handling-is-awesome/">
+                <span class="button__text">Read more</span>&nbsp;
+                <span class="button__icon">&#8617;&#xFE0E;</span>
+            </a>
+        </div>
+    
+
+                </div>
+            
+                <div class="post on-list">
+                    
+    <h1 class="post-title"><a href="https://rauljordan.com/why-i-speak-cantonese/">Why I Speak Cantonese</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2020-07-01
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/personal/">#personal</a></span>
+    
+
+                    
+        <div class="post-content">
+            <p><img src="/cantonese.jpg" alt="image" /></p>
+<p>Many folks that know me personally know how much time I dedicate each day towards becoming proficient at speaking, reading, and writing Cantonese, making it my favorite language and one I have developed a major personal goal of becoming proficient in. Cantonese, known as jyut6 jyuh5 (粵話), is one of the major languages of China and the Chinese diaspora abroad, spoken by around 100 million native speakers [1] today along the pearl river delta in the southern Chinese province of Gwongdung (廣東), Macao, Hong Kong, and Southeast Asia as a lingua franca. It is a language rich with tradition and a history spanning over 2000 years, retaining significant elements of Classical Chinese.</p>
+
+        </div>
+        <div>
+            <!-- &#xFE0E; -- force text style - some devices render this as emoji -->
+            <a class="read-more button" href="https://rauljordan.com/why-i-speak-cantonese/">
+                <span class="button__text">Read more</span>&nbsp;
+                <span class="button__icon">&#8617;&#xFE0E;</span>
+            </a>
+        </div>
+    
+
+                </div>
+            
+                <div class="post on-list">
+                    
+    <h1 class="post-title"><a href="https://rauljordan.com/immutability-patterns-in-go/">Immutability Patterns in Go</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2020-05-25
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/golang/">#golang</a></span>
+    
+
+                    
+        <div class="post-content">
+            <pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">for </span><span>field</span><span style="color:#bfbab0cc;">, </span><span>ref </span><span style="color:#f29668;">:= </span><span style="color:#ff7733;">range </span><span>s</span><span style="color:#f29668;">.</span><span>sharedFieldReferences {
+</span><span>    ref</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">AddRef</span><span>()
+</span><span>    dst</span><span style="color:#f29668;">.</span><span>sharedFieldReferences[field] </span><span style="color:#f29668;">= </span><span>ref
+</span><span>}
+</span></code></pre>
+<p>One of cons of Go as a modern programming language is the lack of native options for making certain data structures immutable. That is, we often have to make key software design decisions in our application just to ensure certain data is immutable throughout the code's runtime, and it may not look pretty. At my company, <a href="https://prysmaticlabs.com">Prysmatic Labs</a>, we often encounter the problem where we need to maintain certain large data structures in-memory for performance reasons and we also need to perform one-off, local computations on such data. That is, we have very intensive <em>read-heavy</em> workloads in our application where we do not want to compromise data safety.</p>
+
+        </div>
+        <div>
+            <!-- &#xFE0E; -- force text style - some devices render this as emoji -->
+            <a class="read-more button" href="https://rauljordan.com/immutability-patterns-in-go/">
+                <span class="button__text">Read more</span>&nbsp;
+                <span class="button__icon">&#8617;&#xFE0E;</span>
+            </a>
+        </div>
+    
+
+                </div>
+            
+                <div class="post on-list">
+                    
+    <h1 class="post-title"><a href="https://rauljordan.com/building-a-service-registry-in-go/">Building a Service Registry in Go</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2020-03-10
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/golang/">#golang</a></span>
+    
+
+                    
+        <div class="post-content">
+            <pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">func </span><span>(</span><span style="color:#f29718;">s </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">ServiceRegistry</span><span>) </span><span style="color:#ffb454;">RegisterService</span><span>(
+</span><span>  </span><span style="color:#f29718;">service </span><span style="color:#ff7733;">Service</span><span style="color:#bfbab0cc;">,
+</span><span>) </span><span style="font-style:italic;color:#39bae6;">error </span><span>{
+</span><span>	kind </span><span style="color:#f29668;">:= </span><span>reflect</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">TypeOf</span><span>(service)
+</span><span>	</span><span style="color:#ff7733;">if </span><span style="font-style:italic;color:#39bae6;">_</span><span style="color:#bfbab0cc;">, </span><span>exists </span><span style="color:#f29668;">:= </span><span>s</span><span style="color:#f29668;">.</span><span>services[kind]</span><span style="color:#bfbab0cc;">; </span><span>exists {
+</span><span>		</span><span style="color:#ff7733;">return </span><span>fmt</span><span style="color:#f29668;">.</span><span style="color:#ffb454;">Errorf</span><span>(</span><span style="color:#c2d94c;">&quot;exists: </span><span style="color:#f29718;">%v</span><span style="color:#c2d94c;">&quot;</span><span style="color:#bfbab0cc;">, </span><span>kind)
+</span><span>	}
+</span><span>	s</span><span style="color:#f29668;">.</span><span>services[kind] </span><span style="color:#f29668;">= </span><span>service
+</span><span>	s</span><span style="color:#f29668;">.</span><span>serviceTypes </span><span style="color:#f29668;">= </span><span style="color:#f07178;">append</span><span>(s</span><span style="color:#f29668;">.</span><span>serviceTypes</span><span style="color:#bfbab0cc;">, </span><span>kind)
+</span><span>	</span><span style="color:#ff7733;">return </span><span style="color:#f29718;">nil
+</span><span>}
+</span></code></pre>
+<p>Thinking of building an application in Go that has multiple running parts? Say you have some server that needs to do a bunch of different things while it runs, such as perform some backround jobs, update caches, handle several requests, expose a REST API, perform outbound requests to other APIs, all without blocking the main thread - what do you do? Typically, this is a good task for creating a microservices architecture where you have multiple applications talking to each other over some network service mesh, each containerized in some nice docker environment, orchestrated through something like Kubernetes or docker-compose.</p>
+
+        </div>
+        <div>
+            <!-- &#xFE0E; -- force text style - some devices render this as emoji -->
+            <a class="read-more button" href="https://rauljordan.com/building-a-service-registry-in-go/">
+                <span class="button__text">Read more</span>&nbsp;
+                <span class="button__icon">&#8617;&#xFE0E;</span>
+            </a>
+        </div>
+    
+
+                </div>
+            
+                <div class="post on-list">
+                    
+    <h1 class="post-title"><a href="https://rauljordan.com/how-to-write-an-event-feed-library/">Writing an One-to-Many Event Feed Library in Go</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2019-09-23
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/golang/">#golang</a></span>
+    
+
+                    
+        <div class="post-content">
+            <pre data-lang="go" style="background-color:#0f1419;color:#bfbab0;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#ff7733;">type </span><span style="color:#59c2ff;">sub </span><span style="color:#ff7733;">struct </span><span>{
+</span><span>    feed         </span><span style="color:#f29668;">*</span><span style="color:#ff7733;">BoolFeed
+</span><span>    channelIndex </span><span style="font-style:italic;color:#39bae6;">int
+</span><span>    channel      </span><span style="color:#ff7733;">chan </span><span style="font-style:italic;color:#39bae6;">bool
+</span><span>    once         sync</span><span style="color:#f29668;">.</span><span style="color:#ff7733;">Once
+</span><span>    err          </span><span style="color:#ff7733;">chan </span><span style="font-style:italic;color:#39bae6;">error
+</span><span>}
+</span></code></pre>
+<p>This blog post explores the design rationale behind building a performant, simple, one-to-many event feed library in Go. We'll be recreating the event library from the <a href="https://github.com/ethereum/go-ethereum/blob/master/event/feed.go">go-ethereum</a> project step by step, even explaining some of the tricky design decisions behind its robust concurrency approach. </p>
+
+        </div>
+        <div>
+            <!-- &#xFE0E; -- force text style - some devices render this as emoji -->
+            <a class="read-more button" href="https://rauljordan.com/how-to-write-an-event-feed-library/">
+                <span class="button__text">Read more</span>&nbsp;
+                <span class="button__icon">&#8617;&#xFE0E;</span>
+            </a>
+        </div>
+    
+
+                </div>
+            
+                <div class="post on-list">
+                    
+    <h1 class="post-title"><a href="https://rauljordan.com/key-takeaways-from-a-harvard-education/">10 Key Takeaways from a Harvard Education</a></h1>
+    <div class="post-meta-inline">
+        
+    <span class="post-date">
+            2019-07-05
+        </span>
+
+    </div>
+
+    
+        <span class="post-tags-inline">
+                :: tags:&nbsp;
+                <a class="post-tag" href="https://rauljordan.com/tags/personal/">#personal</a></span>
+    
+
+                    
+        <div class="post-content">
+            <p><img src="/harvard1.jpg" alt="image" /></p>
+<p>Coming from Honduras, attending college in the U.S. felt an unattainable dream during my high school years. Emblazoned upon one of the entrances to Harvard University one can find the words:</p>
+<blockquote>
+<p>&quot;Enter to Grow in Wisdom, Depart to Serve Thy Country and Thy Kind&quot;</p>
+</blockquote>
+<p>This adage, although seemingly cliché, had its words weigh heavily on me as the years went on. I promised myself when starting my first year that I would not leave its walls an unchanged man. Despite its highs and lows, here is a final list of my major takeaways from my 4 years as an undergraduate at Harvard University.</p>
+
+        </div>
+        <div>
+            <!-- &#xFE0E; -- force text style - some devices render this as emoji -->
+            <a class="read-more button" href="https://rauljordan.com/key-takeaways-from-a-harvard-education/">
+                <span class="button__text">Read more</span>&nbsp;
+                <span class="button__icon">&#8617;&#xFE0E;</span>
+            </a>
+        </div>
+    
+
+                </div>
+            <div class="pagination">
+                <div class="pagination__buttons">
+                    <span class="button previous">
+                        <a href="https://rauljordan.com/">
+                            <span class="button__icon">←</span>&nbsp;
+                            <span class="button__text">Newer posts</span>
+                        </a>
+                    </span>
+                
+                    <span class="button next">
+                        <a href="https://rauljordan.com/page/3/">
+                            <span class="button__text">Older posts</span>&nbsp;
+                            <span class="button__icon">→</span>
+                        </a>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    
+    <footer class="footer">
+        <div class="footer__inner">
+                <div class="copyright">
+                        <span>© 
+    2023
+ Raul Jordan</span>
+                    <span class="copyright-theme">
+                        <span class="copyright-theme-sep">:: </span>
+                        Theme: <a href="https://github.com/pawroman/zola-theme-terminimal/">Terminimal</a> by pawroman
+                    </span>
+                </div>
+            </div>
+    </footer>
+    
+
+</div>
+</body>
+
+</html>
