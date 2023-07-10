@@ -6,7 +6,7 @@ date = 2023-07-09
 tags = ["personal", "software"]
 
 [extra]
-photo = ""
+photo = "https://i.kym-cdn.com/entries/icons/facebook/000/008/342/ihave.jpg"
 +++
 
 The beginner's curse of not knowing when to ask "why"
